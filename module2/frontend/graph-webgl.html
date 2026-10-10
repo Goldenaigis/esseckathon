@@ -32,7 +32,13 @@
 
   <main>
     <div id="sigma"></div>
-    <div id="loading"><div class="spinner"></div><span id="loading-txt">Chargement du réseau…</span></div>
+    <div id="loading">
+      <div class="load-box">
+        <div class="load-head"><div class="spinner"></div><span id="loading-txt">Initialisation…</span></div>
+        <div id="load-bar"><div id="load-bar-fill"></div></div>
+        <pre id="load-log" aria-live="polite"></pre>
+      </div>
+    </div>
 
     <aside id="panel" hidden>
       <button id="panel-close">×</button>

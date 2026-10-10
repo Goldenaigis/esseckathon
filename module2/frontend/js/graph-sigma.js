@@ -31,45 +31,124 @@ const fmtAmount = a => a == null ? "—" :
 const fmtDate = ts => { const d = new Date(ts); return isNaN(d) ? "—" :
   d.toLocaleString("fr-FR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit" }); };
 
-/* ---------- Chargement + construction du graphe ---------- */
+/* ---------- Journal de chargement (verbeux) ---------- */
+const nextFrame = () => new Promise(r => requestAnimationFrame(() => r()));
+const t0 = () => performance.now();
+const ms = s => `${(performance.now() - s).toFixed(0)} ms`;
+
+function logLine(html, cls) {
+  const log = el("load-log");
+  const span = cls ? `<span class="${cls}">${html}</span>` : html;
+  log.insertAdjacentHTML("beforeend", span + "\n");
+  log.scrollTop = log.scrollHeight;
+}
+function setHead(txt) { el("loading-txt").textContent = txt; }
+function setBar(pct) { el("load-bar-fill").style.width = Math.max(0, Math.min(100, pct)) + "%"; }
+const nf = n => n.toLocaleString("fr-FR");
+
+/* ---------- Chargement + construction du graphe (verbeux) ---------- */
 async function load() {
-  const data = await fetch("/api/graph/webgl").then(r => r.json());
-  el("loading-txt").textContent = `Disposition de ${data.meta.n_nodes} comptes…`;
+  const started = t0();
+  logLine(">> Démarrage de la cartographie WebGL (façon Obsidian)", "dim");
+  await nextFrame();
+
+  // 1) Métadonnées serveur
+  setHead("Connexion au serveur...");
+  logLine(">  Requête <span class='dim'>/api/meta</span>...");
+  await nextFrame();
+  let meta;
+  try {
+    meta = await fetch("/api/meta").then(r => r.json());
+    logLine(`[OK] Source de données : <span class="num">${meta.source}</span> · `
+      + `<span class="num">${nf(meta.n_accounts)}</span> comptes · `
+      + `<span class="num">${nf(meta.n_transactions)}</span> transactions · `
+      + `<span class="num">${nf(meta.n_fraud_transactions)}</span> frauduleuses (vérité terrain)`, "ok");
+  } catch (e) { logLine("[X] Échec de /api/meta : " + e, "warn"); }
+  setBar(8); await nextFrame();
+
+  // 2) Téléchargement du graphe
+  setHead("Téléchargement du réseau...");
+  logLine(">  Requête <span class='dim'>/api/graph/webgl</span> (positions précalculées côté serveur)...");
+  await nextFrame();
+  const tDl = t0();
+  const resp = await fetch("/api/graph/webgl");
+  const sizeMo = (+(resp.headers.get("content-length") || 0)) / 1e6;
+  const data = await resp.json();
+  logLine(`[OK] Payload reçu en ${ms(tDl)}${sizeMo ? ` · <span class="num">${sizeMo.toFixed(1)} Mo</span>` : ""}`, "ok");
+  logLine(`  <span class="dim">nœuds=${nf(data.meta.n_nodes)} · liens agrégés=${nf(data.meta.n_edges)} `
+    + `(sur ${nf(data.meta.n_edges_raw)} transactions brutes)</span>`);
+  logLine(`  <span class="dim">période : ${fmtDate(data.meta.t_min)} -> ${fmtDate(data.meta.t_max)}</span>`);
+  setBar(25); await nextFrame();
 
   const g = new graphology.Graph({ multi: false, type: "directed" });
 
-  // nœuds : positions PRECALCULEES cote serveur (figees) -> aucun layout navigateur
-  data.nodes.forEach(n => {
+  // 3) Construction des nœuds — PAR LOTS, avec compteur (preuve que ça tourne)
+  setHead("Construction des comptes...");
+  logLine(`>  Ajout de ${nf(data.nodes.length)} comptes (positions figées)...`);
+  const NB = data.nodes.length;
+  const CHUNK = 1000;
+  let risky = 0;
+  const tNodes = t0();
+  for (let i = 0; i < NB; i++) {
+    const n = data.nodes[i];
     const base = 1.5 + Math.sqrt(Math.min((n.fi || 0) + (n.fo || 0), 80)) * 0.7;
     g.addNode(n.id, {
-      x: n.x, y: n.y,
-      size: base, baseSize: base,
-      color: riskColor(n.s),
-      label: n.id,
+      x: n.x, y: n.y, size: base, baseSize: base,
+      color: riskColor(n.s), label: n.id,
       score: n.s, role: n.r, country: n.ci, ctype: n.ct, fi: n.fi, fo: n.fo,
     });
-  });
+    if (n.s >= 50) risky++;
+    if ((i + 1) % CHUNK === 0 || i === NB - 1) {
+      setBar(25 + 35 * (i + 1) / NB);
+      logLine(`     ${nf(i + 1)} / ${nf(NB)} comptes  <span class="dim">(dernier : ${n.id})</span>`);
+      await nextFrame();   // rend la main au navigateur -> le log s'affiche vraiment
+    }
+  }
+  logLine(`[OK] ${nf(NB)} comptes ajoutés en ${ms(tNodes)} · `
+    + `<span class="num">${nf(risky)}</span> à risque ≥ 50`, "ok");
+  await nextFrame();
 
-  // liens agrégés ; on garde ts/amount/fraude ; on prépare la timeline
+  // 4) Construction des liens — PAR LOTS
+  setHead("Construction des flux...");
+  logLine(`>  Ajout des liens + préparation de la frise temporelle...`);
   const tl = [];
-  data.edges.forEach(e => {
-    if (e.s === e.t || !g.hasNode(e.s) || !g.hasNode(e.t)) return;
-    if (g.hasEdge(e.s, e.t)) return; // agrégé côté serveur, mais sécurité
-    const key = g.addEdge(e.s, e.t, {
-      size: 0.3 + Math.log10((e.m || 1) + 1) * 0.35,
-      color: e.f ? "rgba(255,90,90,0.35)" : "rgba(130,150,180,0.07)",
-      ts: e.ts, amount: e.m, count: e.c, fraud: e.f,
-      hidden: false,
-    });
-    if (e.ts) tl.push({ key, ts: e.ts });
-  });
+  const NE = data.edges.length;
+  let added = 0, frauds = 0, skipped = 0;
+  const tEdges = t0();
+  for (let i = 0; i < NE; i++) {
+    const e = data.edges[i];
+    if (e.s === e.t || !g.hasNode(e.s) || !g.hasNode(e.t) || g.hasEdge(e.s, e.t)) { skipped++; }
+    else {
+      const key = g.addEdge(e.s, e.t, {
+        size: 0.3 + Math.log10((e.m || 1) + 1) * 0.35,
+        color: e.f ? "rgba(255,90,90,0.35)" : "rgba(130,150,180,0.07)",
+        ts: e.ts, amount: e.m, count: e.c, fraud: e.f, hidden: false,
+      });
+      added++; if (e.f) frauds++;
+      if (e.ts) tl.push({ key, ts: e.ts });
+    }
+    if ((i + 1) % 5000 === 0 || i === NE - 1) {
+      setBar(60 + 25 * (i + 1) / NE);
+      logLine(`     ${nf(i + 1)} / ${nf(NE)} liens traités  <span class="dim">(${nf(added)} ajoutés)</span>`);
+      await nextFrame();
+    }
+  }
+  logLine(`[OK] ${nf(added)} liens ajoutés en ${ms(tEdges)} · `
+    + `<span class="num">${nf(frauds)}</span> frauduleux` + (skipped ? ` · ${nf(skipped)} ignorés (doublons/boucles)` : ""), "ok");
+
+  // 5) Frise temporelle
+  setHead("Tri de la frise temporelle...");
+  const tSort = t0();
   tl.sort((a, b) => a.ts < b.ts ? -1 : a.ts > b.ts ? 1 : 0);
+  logLine(`[OK] ${nf(tl.length)} liens horodatés triés en ${ms(tSort)}`, "ok");
+  setBar(90); await nextFrame();
 
   state.graph = g;
   state.edgesByTime = tl;
   state.tMin = data.meta.t_min;
   state.tMax = data.meta.t_max;
-  state.cutoffIdx = tl.length; // tout affiché au départ
+  state.cutoffIdx = tl.length;
+  logLine(`[OK] Graphe prêt — temps total ${ms(started)}`, "ok");
 }
 
 /* Plus de layout navigateur : positions figees cote serveur.
@@ -309,13 +388,28 @@ function initControls() {
 
 async function main() {
   await load();
+
+  setHead("Initialisation du rendu WebGL...");
+  logLine(">  Création du moteur Sigma (WebGL)...");
+  await nextFrame();
+  const tR = t0();
   initSigma();
   initControls();
   state.lodThreshold = lodRiskThreshold();
   updateLodBadge();
+  logLine(`[OK] Rendu WebGL initialisé en ${ms(tR)} · affichage : risque ≥ ${state.lodThreshold}`, "ok");
+  logLine("<span class='dim'>Astuce : molette = zoom (révèle le voisinage) · clic = focus · slider = frise temporelle</span>");
   state.renderer.getCamera().animatedReset();
   state.renderer.refresh();
-  el("loading").style.display = "none";   // positions figées -> aucun temps de calcul
+  setBar(100);
+  await nextFrame();
+  // petite pause pour laisser lire la dernière ligne, puis fondu
+  setTimeout(() => {
+    const o = el("loading");
+    o.style.transition = "opacity 0.4s ease";
+    o.style.opacity = "0";
+    setTimeout(() => { o.style.display = "none"; }, 420);
+  }, 500);
 }
 
 document.addEventListener("DOMContentLoaded", main);
