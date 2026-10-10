@@ -149,8 +149,25 @@ constater. Le registre fait passer le signal de l'une à l'autre. Il publie un
 **score**, pas un comptage d'émetteurs : une règle de seuil partagée bloquerait plus
 de 2 virements légitimes (cagnottes, associations) par fraude.
 
-Sur les 49 scénarios de convergence : 112 → 1 059 virements frauduleux bloqués sur
-1 321, montant préservé 8,7 % → 81,2 % (analyse du Module 1).
+Sur les 49 scénarios de convergence (analyse du Module 1,
+`python -m fraudnet.analysis.consortium --data fraudnet/data`) :
+
+| Configuration | Victimes protégées | Montant préservé | Virements légitimes bloqués |
+|---|---|---|---|
+| Sans partage | 10,2 % | 8,7 % | 0 |
+| Partage d'un comptage brut (≥ 5 émetteurs) | 83,8 % | 81,2 % | **2 346** |
+| **Partage du score ≥ 80 (ce registre)** | **41,5 %** | **40,0 %** | **0** |
+
+Le résultat à annoncer est la **troisième ligne** : 41,5 % des victimes protégées et
+1 316 715 EUR préservés sans bloquer un seul virement légitime, soit 4,1 fois mieux
+que sans partage. La deuxième ligne est le repoussoir : elle montre pourquoi on
+partage un score et pas une règle de seuil. Ne jamais citer 83,8 % avec « zéro faux
+positif » : ce sont deux configurations différentes.
+
+Seuls 22 des 49 hubs atteignent 80 ; les 27 autres sont des comptes anciens avec
+historique (mules recrutées parmi des clients existants). Un indicateur de rupture
+de comportement au Module 2 est le levier pour remonter ces chiffres. Abaisser le
+seuil à 75 augmente la couverture mais fait apparaître des faux positifs.
 
 ### Les scores : `fraudnet/data/hub_scores.csv`
 
