@@ -563,10 +563,10 @@ function initControls() {
   el("reset-view-btn").addEventListener("click", () => state.renderer.getCamera().animatedReset());
   el("panel-close").addEventListener("click", () => selectNode(null));
 
-  // Touche "\" = seul moyen de revenir à la vue générale (depuis une vue isolée).
-  // On ignore si l'utilisateur est en train de taper dans un champ (recherche, dates).
+  // Touche "Backspace" = seul moyen de revenir à la vue générale (depuis une vue
+  // isolée). On ignore si l'utilisateur tape dans un champ (recherche, dates).
   document.addEventListener("keydown", (e) => {
-    if (e.key !== "\\") return;
+    if (e.key !== "Backspace") return;
     const tag = (e.target && e.target.tagName) || "";
     if (tag === "INPUT" || tag === "TEXTAREA") return;
     if (state.selected) { e.preventDefault(); selectNode(null); }
