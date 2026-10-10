@@ -253,8 +253,12 @@ async function initSigma() {
     // on garde toujours visibles le focus et ses voisins, même sous le seuil
     // CLIC (selected) : on ne montre QUE le nœud et ses partenaires de la fenêtre.
     if (state.selected) {
+      // le compte focalisé reste TOUJOURS visible (on ne perd pas sa sélection)
       if (node === state.selected) { res.size = data.baseSize * 1.7; res.zIndex = 2; res.forceLabel = true; return res; }
-      if (state.neighbors.has(node)) { res.zIndex = 1; res.forceLabel = true; return res; }
+      // les partenaires sont filtrés par le curseur "Risque min" (même en vue isolée)
+      if (state.neighbors.has(node) && data.score >= state.riskMin) {
+        res.zIndex = 1; res.forceLabel = true; return res;
+      }
       res.hidden = true; return res;      // tout le reste est masqué
     }
     // SURVOL (hovered) ou vue normale : LOD + estompage doux
@@ -280,6 +284,10 @@ async function initSigma() {
     // on ne garde que les arêtes incidentes au nœud focalisé
     const [s, t] = g.extremities(edge);
     if (s !== focus && t !== focus) { res.hidden = true; return res; }
+    // filtre "Risque min" en vue isolée : masquer les liens vers un partenaire
+    // dont le score est sous le seuil (cohérent avec le nodeReducer)
+    const other = s === focus ? t : s;
+    if (g.getNodeAttribute(other, "score") < state.riskMin) { res.hidden = true; return res; }
     // PRIX : le montant s'affiche sur TOUTES les arêtes du nœud focalisé
     res.label = data.amountLabel;
     if (edge === state.hoveredEdge) {        // survol = mise en évidence
@@ -319,6 +327,41 @@ async function initSigma() {
   state.renderer.refresh();
   logLine(`[OK] Premier rendu effectué en ${ms(tDraw)}`, "ok");
   await nextFrame();
+}
+
+/* ---------- Liste des comptes à risque ---------- */
+function renderRiskList() {
+  const thr = parseInt(el("rl-threshold").value, 10);
+  const items = state.searchIndex
+    .filter(e => e.score >= thr)
+    .sort((a, b) => b.score - a.score);
+  el("rl-count").textContent = `${items.length.toLocaleString("fr-FR")} comptes`;
+  const ul = el("rl-items");
+  ul.innerHTML = items.slice(0, 500).map(m => {
+    const col = m.score >= 50 ? "#ff5a5a" : m.score >= 25 ? "#ffb020" : "#35d07f";
+    const name = m.name || "(sans nom)";
+    return `<li data-id="${m.id}">
+      <span class="rl-dot" style="background:${col}"></span>
+      <span>
+        <span class="rl-name">${name}</span><br/>
+        <span class="rl-sub">${m.id} · ${m.ct ?? ""}</span>
+      </span>
+      <span class="rl-score" style="color:${col}">${m.score}</span></li>`;
+  }).join("");
+  if (items.length > 500) {
+    ul.insertAdjacentHTML("beforeend",
+      `<li class="rl-sub" style="justify-content:center">… ${(items.length - 500).toLocaleString("fr-FR")} de plus (affinez le seuil)</li>`);
+  }
+  ul.querySelectorAll("li[data-id]").forEach(li => {
+    li.onclick = () => selectNode(li.dataset.id);
+  });
+}
+
+function toggleRiskList(show) {
+  const panel = el("risklist");
+  const open = show === undefined ? panel.hidden : show;
+  panel.hidden = !open;
+  if (open) renderRiskList();
 }
 
 /* ---------- Recherche par nom / prénom / ID ---------- */
@@ -560,6 +603,11 @@ function initControls() {
     updateLodBadge();
     state.renderer.refresh();
   });
+
+  // liste des comptes à risque
+  el("risklist-btn").addEventListener("click", () => toggleRiskList());
+  el("risklist-close").addEventListener("click", () => toggleRiskList(false));
+  el("rl-threshold").addEventListener("change", renderRiskList);
   el("reset-view-btn").addEventListener("click", () => state.renderer.getCamera().animatedReset());
   el("panel-close").addEventListener("click", () => selectNode(null));
 

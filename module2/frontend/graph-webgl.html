@@ -29,6 +29,7 @@
         <ul id="search-results" hidden></ul>
       </div>
       <span id="lod-badge" class="lod-badge">Affichage : risque ≥ 50</span>
+      <button id="risklist-btn" title="Liste des comptes à risque">⚠ Comptes à risque</button>
       <button id="reset-view-btn" title="Recadrer">⤢ Recadrer</button>
     </div>
   </header>
@@ -59,6 +60,24 @@
       <span><i class="dot mid"></i> moyen</span>
       <span><i class="dot low"></i> faible</span>
     </div>
+
+    <!-- Liste des comptes à risque (panneau latéral gauche) -->
+    <aside id="risklist" hidden>
+      <div class="rl-head">
+        <strong>Comptes à risque</strong>
+        <button id="risklist-close" title="Fermer">×</button>
+      </div>
+      <div class="rl-filter">
+        <label>Seuil
+          <select id="rl-threshold">
+            <option value="50">élevé (≥ 50)</option>
+            <option value="25">moyen (≥ 25)</option>
+          </select>
+        </label>
+        <span id="rl-count"></span>
+      </div>
+      <ul id="rl-items"></ul>
+    </aside>
   </main>
 
   <footer>
