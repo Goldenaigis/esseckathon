@@ -41,6 +41,22 @@ header p { margin: 0; font-size: 11px; color: #7d8eac; }
 .lod-badge { font-size: 11px; color: #a9b6cf; background: var(--panel-2);
   border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; }
 
+/* Recherche par nom / prénom / ID */
+#search-wrap { position: relative; }
+#search-input { width: 230px; background: var(--panel-2); color: var(--text);
+  border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 12px; }
+#search-input:focus { outline: none; border-color: var(--accent); }
+#search-results { position: absolute; top: 36px; left: 0; width: 300px; max-height: 320px;
+  overflow-y: auto; margin: 0; padding: 4px; list-style: none; z-index: 30;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+#search-results li { padding: 7px 9px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+#search-results li:hover, #search-results li.active { background: var(--panel-2); }
+#search-results .sr-name { color: var(--text); font-weight: 600; }
+#search-results .sr-meta { color: #7d8eac; font-size: 11px; }
+#search-results .sr-empty { color: #7d8eac; font-style: italic; cursor: default; }
+#search-results .sr-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+
 /* Main / Sigma canvas */
 main { flex: 1; position: relative; min-height: 0; }
 #sigma { position: absolute; inset: 0;

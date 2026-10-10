@@ -25,6 +25,7 @@ const state = {
   hoveredEdge: null,
   selected: null,
   neighbors: new Set(),
+  searchIndex: [],   // [{id, name, score, ct, hay}] pour la recherche nom/prénom
 };
 
 const el = id => document.getElementById(id);
@@ -116,6 +117,12 @@ async function load() {
       color: riskColor(n.s), label: n.id,   // le libellé reste l'ID unique
       score: n.s, role: n.r, country: n.ci, ctype: n.ct, fi: n.fi, fo: n.fo,
       ownerName: n.nm, firstName: n.fn, lastName: n.ln,   // identité -> panneau infos
+    });
+    // index de recherche : nom/prénom (ou raison sociale) + ID, normalisé
+    const displayName = (n.fn || n.ln) ? `${n.fn || ""} ${n.ln || ""}`.trim() : (n.nm || "");
+    state.searchIndex.push({
+      id: n.id, name: displayName, score: n.s, ct: n.ct,
+      hay: `${displayName} ${n.id}`.toLowerCase(),
     });
     if (n.s >= 50) risky++;
     if ((i + 1) % CHUNK === 0 || i === NB - 1) {
@@ -224,6 +231,7 @@ async function initSigma() {
     edgeLabelSize: 11,
     defaultEdgeType: "line",
     zIndex: true,
+    hideEdgesOnMove: true,   // ne pas dessiner les arêtes pendant pan/zoom (fluidité)
     minCameraRatio: 0.03,
     maxCameraRatio: 1.4,
   });
@@ -259,24 +267,23 @@ async function initSigma() {
   state.renderer.setSetting("edgeReducer", (edge, data) => {
     const res = { ...data };
     const g = state.graph;
+    const focus = state.selected || state.hovered;
+    // OPTIMISATION : aucune arête tant qu'aucun nœud n'est sélectionné/survolé.
+    // (les 77k liens ne sont dessinés qu'au focus -> rendu bien plus léger)
+    if (!focus) { res.hidden = true; return res; }
     // fenêtre temporelle : masquer les liens hors période
     if (data._tlHidden) { res.hidden = true; return res; }
-    // montant affiché uniquement sur l'arête survolée
-    res.label = (edge === state.hoveredEdge) ? data.amountLabel : "";
-    if (edge === state.hoveredEdge) { res.color = "rgba(255,224,138,0.9)"; res.size = Math.max(data.size, 1.4); res.zIndex = 3; }
-    const focus = state.selected || state.hovered;
-    if (focus) {
-      const [s, t] = g.extremities(edge);
-      if (s === focus || t === focus) {
-        if (edge !== state.hoveredEdge) { res.color = "rgba(110,168,254,0.75)"; res.size = Math.max(data.size, 1.2); res.zIndex = 2; }
-      }
-      else if (edge !== state.hoveredEdge) { res.hidden = true; }  // hors focus : masqué
-      return res;
+    // on ne garde que les arêtes incidentes au nœud focalisé
+    const [s, t] = g.extremities(edge);
+    if (s !== focus && t !== focus) { res.hidden = true; return res; }
+    // mise en évidence + montant au survol de l'arête
+    if (edge === state.hoveredEdge) {
+      res.label = data.amountLabel; res.color = "rgba(255,224,138,0.95)";
+      res.size = Math.max(data.size, 1.4); res.zIndex = 3;
+    } else {
+      res.label = ""; res.color = "rgba(110,168,254,0.75)";
+      res.size = Math.max(data.size, 1.2); res.zIndex = 2;
     }
-    // sans focus : LOD. Dézoomé, on masque les liens légitimes (bruit),
-    // on ne garde que les liens de fraude ; on révèle le reste en zoomant.
-    const ratio = state.renderer.getCamera().ratio;
-    if (ratio >= 0.5 && !data.fraud && edge !== state.hoveredEdge) { res.hidden = true; }
     return res;
   });
 
@@ -306,6 +313,38 @@ async function initSigma() {
   state.renderer.refresh();
   logLine(`[OK] Premier rendu effectué en ${ms(tDraw)}`, "ok");
   await nextFrame();
+}
+
+/* ---------- Recherche par nom / prénom / ID ---------- */
+function runSearch(q) {
+  const box = el("search-results");
+  const query = q.trim().toLowerCase();
+  if (query.length < 2) { box.hidden = true; box.innerHTML = ""; return; }
+  const terms = query.split(/\s+/);
+  // un compte correspond s'il contient TOUS les termes (nom ET prénom)
+  const matches = state.searchIndex
+    .filter(e => terms.every(t => e.hay.includes(t)))
+    .slice(0, 50);
+  if (!matches.length) {
+    box.innerHTML = `<li class="sr-empty">Aucun compte ne correspond.</li>`;
+    box.hidden = false; return;
+  }
+  box.innerHTML = matches.map(m => {
+    const col = m.score >= 60 ? "#ff5a5a" : m.score >= 30 ? "#ffb020" : "#35d07f";
+    const name = m.name || "(sans nom)";
+    return `<li data-id="${m.id}">
+      <span class="sr-dot" style="background:${col}"></span>
+      <span class="sr-name">${name}</span>
+      <span class="sr-meta"> · ${m.id} · ${m.ct ?? ""} · risque ${m.score}</span></li>`;
+  }).join("");
+  box.hidden = false;
+  box.querySelectorAll("li[data-id]").forEach(li => {
+    li.onclick = () => {
+      el("search-input").value = "";
+      box.hidden = true;
+      selectNode(li.dataset.id);
+    };
+  });
 }
 
 function updateLodBadge() {
@@ -508,6 +547,19 @@ function initControls() {
   });
   el("reset-view-btn").addEventListener("click", () => state.renderer.getCamera().animatedReset());
   el("panel-close").addEventListener("click", () => selectNode(null));
+
+  // recherche par nom / prénom / ID (debounce léger)
+  let searchTimer = null;
+  const si = el("search-input");
+  si.addEventListener("input", () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => runSearch(si.value), 120);
+  });
+  si.addEventListener("focus", () => { if (si.value.trim().length >= 2) runSearch(si.value); });
+  // fermer la liste si on clique ailleurs
+  document.addEventListener("click", e => {
+    if (!el("search-wrap").contains(e.target)) el("search-results").hidden = true;
+  });
 }
 
 async function main() {
