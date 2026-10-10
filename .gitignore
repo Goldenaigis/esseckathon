@@ -1,0 +1,11 @@
+# Données générées
+data/*.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Artefacts de capture
+.kiro/artifacts/
