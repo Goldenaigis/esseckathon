@@ -138,7 +138,7 @@ def _classify_role(feats: dict) -> str:
     return "normal"
 
 
-def compute_account_features(g: nx.MultiDiGraph) -> dict[str, dict]:
+def compute_account_features(g: nx.MultiDiGraph, fast: bool = False) -> dict[str, dict]:
     """
     Renvoie { account_id : { feature: valeur, ... } }.
 
@@ -147,6 +147,10 @@ def compute_account_features(g: nx.MultiDiGraph) -> dict[str, dict]:
       in_out_ratio, total_in, total_out,
       degree_centrality, betweenness, in_cycle,
       redistribution_speed_min, role
+
+    `fast=True` : mode gros graphe (~7000 noeuds). On saute la betweenness
+    (couteuse meme echantillonnee) et on borne fort la detection de cycles,
+    pour garder un calcul de l'ordre de la seconde.
     """
     simple = _simple_digraph(g)
     n = simple.number_of_nodes()
@@ -154,10 +158,10 @@ def compute_account_features(g: nx.MultiDiGraph) -> dict[str, dict]:
     # centralite de degre : rapide, toujours exacte.
     deg_c = nx.degree_centrality(simple) if n else {}
 
-    # betweenness : exacte sur petits graphes, APPROXIMEE (echantillon) au-dela
-    # pour rester rapide (le calcul exact est O(V*E) et explose vers ~1000 noeuds).
+    # betweenness : exacte sur petits graphes, APPROXIMEE (echantillon) au-dela ;
+    # ignoree en mode fast (trop couteuse a l'echelle 7000 noeuds / 77k liens).
     try:
-        if n == 0:
+        if n == 0 or fast:
             betw = {}
         elif n <= 400:
             betw = nx.betweenness_centrality(simple)
@@ -168,18 +172,21 @@ def compute_account_features(g: nx.MultiDiGraph) -> dict[str, dict]:
         betw = {node: 0.0 for node in simple.nodes()}
 
     # cycles de blanchiment : on borne la recherche aux cycles COURTS (3..6) via
-    # `length_bound` pour eviter l'explosion combinatoire sur un gros graphe.
+    # `length_bound`. En mode fast (gros graphe), on SAUTE cette etape :
+    # simple_cycles explose en combinatoire sur un graphe dense (~77k liens).
+    # La detection de cycles se fera a la demande sur un sous-graphe (ego/zoom).
     in_cycle: set[str] = set()
-    try:
+    if not fast:
         try:
-            cycle_iter = nx.simple_cycles(simple, length_bound=6)
-        except TypeError:  # networkx plus ancien : pas de length_bound
-            cycle_iter = nx.simple_cycles(simple)
-        for cyc in cycle_iter:
-            if 3 <= len(cyc) <= 6 and _is_laundering_cycle(simple, cyc):
-                in_cycle.update(cyc)
-    except Exception:
-        pass
+            try:
+                cycle_iter = nx.simple_cycles(simple, length_bound=6)
+            except TypeError:  # networkx plus ancien : pas de length_bound
+                cycle_iter = nx.simple_cycles(simple)
+            for cyc in cycle_iter:
+                if 3 <= len(cyc) <= 6 and _is_laundering_cycle(simple, cyc):
+                    in_cycle.update(cyc)
+        except Exception:
+            pass
 
     feats: dict[str, dict] = {}
     for node in g.nodes():

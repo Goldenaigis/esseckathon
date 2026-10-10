@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FraudGraph — Cartographie WebGL (Obsidian)</title>
+  <!-- graphology (core) + graphology-library (batteries incluses : FA2Layout,
+       layoutForceAtlas2.inferSettings...) + Sigma (WebGL) -->
+  <script src="https://cdn.jsdelivr.net/npm/graphology@0.25.4/dist/graphology.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/graphology-library@0.8.0/dist/graphology-library.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sigma@3.0.0/dist/sigma.min.js"></script>
+  <link rel="stylesheet" href="css/webgl.css" />
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="logo">◉</span>
+      <div>
+        <h1>FraudGraph <span class="tag">WebGL</span></h1>
+        <p>Module 2 — Cartographie façon Obsidian</p>
+      </div>
+    </div>
+    <div class="controls">
+      <label>Risque min
+        <input type="range" id="risk-filter" min="0" max="100" value="0" />
+        <span id="risk-filter-val">0</span>
+      </label>
+      <button id="layout-btn" title="Relancer la disposition">⟳ Disposer</button>
+      <button id="reset-view-btn" title="Recadrer">⤢ Recadrer</button>
+      <a href="/" class="link-alt" title="Revenir à la vue classique">Vue classique</a>
+    </div>
+  </header>
+
+  <main>
+    <div id="sigma"></div>
+    <div id="loading"><div class="spinner"></div><span id="loading-txt">Chargement du réseau…</span></div>
+
+    <aside id="panel" hidden>
+      <button id="panel-close">×</button>
+      <h2 id="p-id"></h2>
+      <span id="p-role" class="badge"></span>
+      <div class="score-ring-wrap">
+        <div class="score-ring"><span id="p-score"></span><small>/100</small></div>
+        <span class="score-label">Score de risque</span>
+      </div>
+      <dl id="p-attrs"></dl>
+    </aside>
+
+    <div id="legend">
+      <span><i class="dot high"></i> risque élevé</span>
+      <span><i class="dot mid"></i> moyen</span>
+      <span><i class="dot low"></i> faible</span>
+    </div>
+  </main>
+
+  <footer>
+    <!-- Timeline temporelle -->
+    <div id="timeline">
+      <div class="tl-row">
+        <label>Début <input type="date" id="date-start" /></label>
+        <div class="tl-slider-wrap">
+          <input type="range" id="time-slider" min="0" max="1000" value="1000" />
+          <div id="time-current">—</div>
+        </div>
+        <label>Fin <input type="date" id="date-end" /></label>
+        <button id="play-btn" title="Lecture animée">▶</button>
+      </div>
+      <div class="tl-stats">
+        <span id="tl-count">—</span>
+        <span class="disclaimer">Mode cumulatif · données synthétiques · une alerte n'est pas une preuve de fraude.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/graph-sigma.js"></script>
+</body>
+</html>

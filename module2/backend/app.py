@@ -24,26 +24,41 @@ from backend.module2_graph.graph_features import compute_account_features
 from backend.module2_graph.risk import heuristic_account_scores
 from backend.module2_graph.subgraph import ego_network, top_risk_subgraph
 from backend.module2_graph.to_cytoscape import to_cytoscape, detect_structures
+from backend.module2_graph.to_webgl import to_webgl
+from backend.module2_graph.load_m1_csv import build_graph_from_m1, m1_available
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(ROOT, "data", "bank.db")
 FRONTEND = os.path.join(ROOT, "frontend")
 
+# Source de donnees : "sqlite" (fixtures jouet) ou "m1" (vraies donnees CSV).
+# Par defaut on prend M1 s'il est disponible, sinon les fixtures.
+DATA_SOURCE = os.environ.get("DATA_SOURCE", "auto")
+
 app = FastAPI(title="FraudGraph - Module 2 (Cartographie)")
 
 
 class _State:
-    """Charge le graphe + features une fois, en cache (recharge via /api/reload)."""
+    """Charge le graphe + features une fois, en cache (recharge via /api/reload).
+    Le gros graphe (M1, ~7000 noeuds) utilise les features en mode `fast`."""
     def __init__(self):
         self.reload()
 
     def reload(self):
-        if not os.path.exists(DB_PATH):
-            raise RuntimeError(
-                f"Base introuvable : {DB_PATH}. "
-                f"Lancez d'abord : python -m backend.module1_data.fixtures")
-        self.graph = build_graph(DB_PATH)
-        self.features = compute_account_features(self.graph)
+        use_m1 = DATA_SOURCE == "m1" or (DATA_SOURCE == "auto" and m1_available())
+        if use_m1:
+            self.source = "m1"
+            self.graph = build_graph_from_m1()
+            self.fast = True
+        else:
+            if not os.path.exists(DB_PATH):
+                raise RuntimeError(
+                    f"Base introuvable : {DB_PATH}. "
+                    f"Lancez d'abord : python -m backend.module1_data.fixtures")
+            self.source = "sqlite"
+            self.graph = build_graph(DB_PATH)
+            self.fast = self.graph.number_of_nodes() > 1500
+        self.features = compute_account_features(self.graph, fast=self.fast)
         # >>> ICI on branchera M3 : remplacer par les scores reels <<<
         self.scores = heuristic_account_scores(self.features)
 
@@ -93,7 +108,22 @@ def api_account_graph(account_id: str, radius: int = 1):
 
 @app.get("/api/graph/suspicious")
 def api_suspicious():
+    # couteux a l'echelle M1 : on ne le calcule que sur petit graphe
+    if state.graph.number_of_nodes() > 1500:
+        return {"structures": [], "note": "desactive sur gros graphe (voir ego-network)"}
     return {"structures": detect_structures(state.graph, state.features)}
+
+
+@app.get("/api/graph/webgl")
+def api_graph_webgl():
+    """Graphe COMPLET en payload compact pour le rendu WebGL (Sigma.js).
+    Positions calculees cote navigateur ; timeline par timestamp des liens."""
+    return to_webgl(state.graph, state.features, state.scores)
+
+
+@app.get("/api/meta")
+def api_meta():
+    return {"source": state.source, "fast": state.fast, **summary(state.graph)}
 
 
 # --- Fichiers statiques (front) : monte en DERNIER pour ne pas masquer /api ---
@@ -101,5 +131,9 @@ if os.path.isdir(FRONTEND):
     @app.get("/")
     def index():
         return FileResponse(os.path.join(FRONTEND, "graph.html"))
+
+    @app.get("/webgl")
+    def index_webgl():
+        return FileResponse(os.path.join(FRONTEND, "graph-webgl.html"))
 
     app.mount("/", StaticFiles(directory=FRONTEND), name="static")
