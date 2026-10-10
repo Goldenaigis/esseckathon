@@ -1,0 +1,501 @@
+account_id,score,pattern,evidence
+ACC_006858,88,fan_in_only,compte beneficiaire ouvert depuis 28 jours ; 0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques
+ACC_006830,88,fan_in_only,compte beneficiaire ouvert depuis 12 jours ; 0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques
+ACC_006815,88,fan_in_only,compte beneficiaire ouvert depuis 40 jours ; 0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques
+ACC_006864,88,fan_in_only,compte beneficiaire ouvert depuis 17 jours ; 0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques
+ACC_006787,88,fan_in_only,compte beneficiaire ouvert depuis 34 jours ; 0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques
+ACC_007028,88,fan_in_only,compte beneficiaire ouvert depuis 38 jours ; 0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques
+ACC_006919,86,fan_in_only,compte beneficiaire ouvert depuis 30 jours ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006920,86,fan_in_only,compte beneficiaire ouvert depuis 14 jours ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006841,86,fan_in_only,compte beneficiaire ouvert depuis 26 jours ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006927,86,fan_in_only,compte beneficiaire ouvert depuis 2 jours ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006771,86,fan_in_only,compte beneficiaire ouvert depuis 4 jours ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006783,86,fan_in_only,compte beneficiaire ouvert depuis 32 jours ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006908,86,fan_in_only,compte beneficiaire ouvert depuis 42 jours ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006811,86,fan_in_only,compte beneficiaire ouvert depuis 68 jours ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006780,86,fan_in_only,compte beneficiaire ouvert depuis 24 jours ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_007032,86,fan_in_only,compte beneficiaire ouvert depuis 28 jours ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006845,86,fan_in_only,compte beneficiaire ouvert depuis 28 jours ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006950,86,fan_in_only,compte beneficiaire ouvert depuis 2 jours ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006941,86,fan_in_only,compte beneficiaire ouvert depuis 28 jours ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006987,82,fan_in_only,compte beneficiaire ouvert depuis 5 jours ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006901,82,fan_in_only,compte beneficiaire ouvert depuis 84 jours ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006835,82,fan_in_only,compte beneficiaire ouvert depuis 23 jours ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006775,82,fan_in_only,compte beneficiaire ouvert depuis 28 jours ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006963,82,fan_in_only,compte beneficiaire ouvert depuis 8 jours ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006973,82,fan_in_only,compte beneficiaire ouvert depuis 9 jours ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000392,78,fan_in_redistribution,3282 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques
+ACC_000099,78,fan_in_redistribution,5597 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques
+ACC_000394,78,fan_in_redistribution,1572 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques
+ACC_000010,78,fan_in_redistribution,862 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques
+ACC_000361,78,fan_in_redistribution,1744 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques
+ACC_000150,78,fan_in_redistribution,192 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques
+ACC_000055,78,fan_in_redistribution,889 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques
+ACC_000085,74,fan_in_redistribution,249253 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000234,74,fan_in_redistribution,184 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000087,74,fan_in_redistribution,1390 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000332,74,fan_in_redistribution,5783 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000266,74,fan_in_redistribution,460 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000165,74,fan_in_redistribution,11470 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000293,74,fan_in_redistribution,585 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000198,74,fan_in_redistribution,812 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000368,74,fan_in_redistribution,155 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000268,74,fan_in_redistribution,466 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000385,74,fan_in_redistribution,2910 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000357,74,fan_in_redistribution,517 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006909,74,fan_in_only,compte beneficiaire ouvert depuis 89 jours ; 1 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000237,72,fan_in_redistribution,223 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000159,72,fan_in_redistribution,4520 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000181,72,fan_in_redistribution,217 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000022,72,fan_in_redistribution,10263 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000058,72,fan_in_redistribution,1068 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000057,72,fan_in_redistribution,434 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006900,70,fan_in_only,compte beneficiaire ouvert depuis 20 jours ; 1 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006913,69,fan_in_only,compte beneficiaire ouvert depuis 64 jours ; 9 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 4 banques
+ACC_006979,69,fan_in_only,compte beneficiaire ouvert depuis 25 jours ; 3 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 4 banques
+ACC_000381,68,fan_in_redistribution,2888 % des fonds deja ressortis ; 0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006893,66,fan_in_only,compte beneficiaire ouvert depuis 78 jours ; 6 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 4 banques
+ACC_006978,66,fan_in_only,compte beneficiaire ouvert depuis 27 jours ; 5 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 4 banques
+ACC_000149,65,fan_in_redistribution,0 operation(s) sur ce compte avant la rafale ; 60 % des fonds deja ressortis ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000410,62,fan_in_redistribution,17799 % des fonds deja ressortis ; 4 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000235,62,fan_in_redistribution,8789 % des fonds deja ressortis ; 5 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000073,62,fan_in_redistribution,2259 % des fonds deja ressortis ; 7 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000329,62,fan_in_redistribution,0 operation(s) sur ce compte avant la rafale ; 51 % des fonds deja ressortis ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000270,62,fan_in_redistribution,445 % des fonds deja ressortis ; 2 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000060,62,fan_in_redistribution,194 % des fonds deja ressortis ; 1 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000343,62,fan_in_redistribution,24036 % des fonds deja ressortis ; 4 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000116,62,fan_in_redistribution,109 % des fonds deja ressortis ; 4 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000242,62,fan_in_redistribution,2247 % des fonds deja ressortis ; 4 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000114,62,fan_in_redistribution,72322 % des fonds deja ressortis ; 9 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000040,62,fan_in_redistribution,3767 % des fonds deja ressortis ; 1 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000108,60,fan_in_redistribution,660 % des fonds deja ressortis ; 4 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000146,60,fan_in_redistribution,4309 % des fonds deja ressortis ; 8 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000388,60,fan_in_redistribution,4050 % des fonds deja ressortis ; 1 operation(s) sur ce compte avant la rafale ; 80 % d'emetteurs jamais vus avec ce compte
+ACC_000353,60,fan_in_redistribution,285 % des fonds deja ressortis ; 8 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000090,60,fan_in_redistribution,5493 % des fonds deja ressortis ; 4 operation(s) sur ce compte avant la rafale ; 80 % d'emetteurs jamais vus avec ce compte
+ACC_000382,60,fan_in_redistribution,7642 % des fonds deja ressortis ; 1 operation(s) sur ce compte avant la rafale ; 80 % d'emetteurs jamais vus avec ce compte
+ACC_000411,60,fan_in_redistribution,50504 % des fonds deja ressortis ; 9 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000180,60,fan_in_redistribution,189 % des fonds deja ressortis ; 1 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000179,60,fan_in_redistribution,13166 % des fonds deja ressortis ; 1 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006824,60,fan_in_only,compte beneficiaire ouvert depuis 51 jours ; 9 operation(s) sur ce compte avant la rafale ; 40 % d'emetteurs jamais vus avec ce compte
+ACC_000307,59,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; 38 % des fonds deja ressortis
+ACC_004275,59,fan_in_only,compte beneficiaire ouvert depuis 70 jours ; 80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000245,58,fan_in_redistribution,84 % des fonds deja ressortis ; 2 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006813,58,fan_in_only,compte beneficiaire ouvert depuis 28 jours ; 9 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 3 banques
+ACC_000095,57,fan_in_redistribution,187 % des fonds deja ressortis ; 4 operation(s) sur ce compte avant la rafale ; 80 % d'emetteurs jamais vus avec ce compte
+ACC_006806,57,fan_in_only,compte beneficiaire ouvert depuis 13 jours ; emetteurs repartis sur 4 banques ; 60 % d'emetteurs jamais vus avec ce compte
+ACC_000126,55,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; 35 % des fonds deja ressortis
+ACC_000269,54,fan_in_redistribution,555 % des fonds deja ressortis ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006805,54,fan_in_only,compte beneficiaire ouvert depuis 84 jours ; emetteurs repartis sur 4 banques ; 40 % d'emetteurs jamais vus avec ce compte
+ACC_005413,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000017,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000236,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000110,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000062,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000211,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000404,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000021,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000416,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000094,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000216,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000327,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000078,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000320,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000360,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000223,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_005428,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000027,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_005387,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_005394,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000142,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_005389,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000020,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000197,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000026,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000013,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000395,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005451,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006851,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006792,52,fan_in_only,0 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000025,51,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000101,51,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000274,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000155,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000256,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000043,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000248,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000261,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000024,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000195,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000358,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000140,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000048,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000008,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000283,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000169,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000285,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000217,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000323,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000244,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000003,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000106,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000188,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000387,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000091,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000061,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000225,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000186,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000383,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000113,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000161,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000044,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000104,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000141,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000007,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000326,50,fan_in_redistribution,76291 % des fonds deja ressortis ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000348,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000018,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000344,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000135,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000128,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000414,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000316,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000067,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000160,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000399,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000030,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000275,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000363,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000338,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000059,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000210,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000139,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000354,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000047,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000345,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000418,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000172,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000241,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000143,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000302,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000049,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000308,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000019,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000239,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000413,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000089,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000240,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000174,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000177,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005446,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000364,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000148,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005409,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_007056,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_007014,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_007060,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_006802,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_007057,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_006861,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_007055,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_007059,50,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_001379,49,fan_in_only,compte beneficiaire ouvert depuis 156 jours ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_002066,49,fan_in_redistribution,93 % des fonds deja ressortis ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_002182,48,fan_in_only,compte beneficiaire ouvert depuis 164 jours ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_001390,48,fan_in_only,compte beneficiaire ouvert depuis 161 jours ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_001196,47,fan_in_only,compte beneficiaire ouvert depuis 145 jours ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000171,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000289,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000032,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000037,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000005,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000331,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000232,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000250,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000290,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000281,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000215,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000222,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000138,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000417,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000376,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000068,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000377,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000366,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000001,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000390,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000310,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000118,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000122,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000031,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000380,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000224,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000398,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000065,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000151,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000397,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000185,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000200,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000193,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000098,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000303,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_005399,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000355,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000154,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000109,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000016,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000396,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000158,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000230,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000251,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000367,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000258,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000321,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_002224,46,fan_in_only,compte beneficiaire ouvert depuis 139 jours ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_007054,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_007058,46,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000379,45,fan_in_only,1 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; 42 % des fonds deja ressortis
+ACC_000124,44,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_000319,44,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_000412,44,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_000284,44,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_000221,44,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_000347,44,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_000119,44,fan_in_only,0 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_005045,44,fan_in_only,5 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_001125,41,fan_in_only,4 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_005439,40,fan_in_only,5 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000075,40,fan_in_only,1 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_005392,40,fan_in_only,3 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000278,40,fan_in_only,6 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000255,40,fan_in_only,1 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005410,40,fan_in_only,3 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_005452,40,fan_in_only,7 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_005422,40,fan_in_only,4 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000070,40,fan_in_only,3 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000391,40,fan_in_only,1 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_005411,40,fan_in_only,1 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_005402,40,fan_in_only,5 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_005436,40,fan_in_only,7 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_005403,40,fan_in_only,6 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_005416,40,fan_in_only,1 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000069,40,fan_in_only,1 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000724,40,fan_in_redistribution,56 % des fonds deja ressortis ; emetteurs repartis sur 5 banques ; 80 % d'emetteurs jamais vus avec ce compte
+ACC_003617,40,fan_in_only,6 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_006992,40,fan_in_only,2 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_007053,40,fan_in_only,1 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte
+ACC_000246,38,fan_in_only,4 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000315,38,fan_in_only,3 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000267,38,fan_in_only,6 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005424,38,fan_in_only,8 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 80 % d'emetteurs jamais vus avec ce compte
+ACC_005450,38,fan_in_only,2 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005390,38,fan_in_only,6 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000465,38,fan_in_only,3 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005435,38,fan_in_only,4 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000374,38,fan_in_only,1 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000420,38,fan_in_only,4 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005408,38,fan_in_only,5 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005397,38,fan_in_only,7 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005404,38,fan_in_only,4 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000317,38,fan_in_only,4 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000127,38,fan_in_only,1 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000079,38,fan_in_only,4 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005395,38,fan_in_only,4 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000189,38,fan_in_only,1 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000129,38,fan_in_only,4 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 80 % d'emetteurs jamais vus avec ce compte
+ACC_000184,38,fan_in_only,1 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005415,38,fan_in_only,8 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000400,38,fan_in_only,4 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000219,38,fan_in_only,3 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000209,38,fan_in_only,3 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005391,38,fan_in_only,3 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000389,38,fan_in_only,3 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 80 % d'emetteurs jamais vus avec ce compte
+ACC_005412,38,fan_in_only,5 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005400,38,fan_in_only,4 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 80 % d'emetteurs jamais vus avec ce compte
+ACC_000403,38,fan_in_only,1 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005405,38,fan_in_only,6 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 80 % d'emetteurs jamais vus avec ce compte
+ACC_000035,38,fan_in_only,7 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005388,38,fan_in_only,1 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000071,38,fan_in_only,6 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005423,38,fan_in_only,3 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005429,38,fan_in_only,8 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 5 banques ; 80 % d'emetteurs jamais vus avec ce compte
+ACC_000190,38,fan_in_only,2 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000173,38,fan_in_only,2 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005440,38,fan_in_only,1 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000156,38,fan_in_only,2 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000243,38,fan_in_only,4 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005053,38,fan_in_only,5 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000081,38,fan_in_only,2 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005300,38,fan_in_only,8 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000489,38,fan_in_redistribution,123 % des fonds deja ressortis ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_000947,38,fan_in_redistribution,449 % des fonds deja ressortis ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_000429,38,fan_in_only,9 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_002946,38,fan_in_only,6 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_001124,38,fan_in_only,8 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_006859,38,fan_in_only,compte beneficiaire ouvert depuis 103 jours ; emetteurs repartis sur 4 banques ; 40 % d'emetteurs jamais vus avec ce compte
+ACC_001750,37,fan_in_only,5 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000304,37,fan_in_only,4 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000097,37,fan_in_only,1 operation(s) sur ce compte avant la rafale ; 80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_004160,36,fan_in_redistribution,325 % des fonds deja ressortis ; emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h
+ACC_002548,36,fan_in_redistribution,78 % des fonds deja ressortis ; emetteurs repartis sur 5 banques ; 5 emetteurs distincts en 24 h
+ACC_001747,36,fan_in_only,compte beneficiaire ouvert depuis 176 jours ; emetteurs repartis sur 5 banques ; 5 emetteurs distincts en 24 h
+ACC_000102,35,fan_in_only,5 operation(s) sur ce compte avant la rafale ; 80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000328,35,fan_in_only,5 operation(s) sur ce compte avant la rafale ; 80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005445,35,fan_in_only,6 operation(s) sur ce compte avant la rafale ; 80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005447,35,fan_in_only,7 operation(s) sur ce compte avant la rafale ; 80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005434,35,fan_in_only,7 operation(s) sur ce compte avant la rafale ; 80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000349,35,fan_in_only,6 operation(s) sur ce compte avant la rafale ; 80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005448,35,fan_in_only,9 operation(s) sur ce compte avant la rafale ; 80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005407,35,fan_in_only,4 operation(s) sur ce compte avant la rafale ; 80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000247,35,fan_in_only,4 operation(s) sur ce compte avant la rafale ; 80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005427,35,fan_in_only,5 operation(s) sur ce compte avant la rafale ; 80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005406,35,fan_in_only,7 operation(s) sur ce compte avant la rafale ; 80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005418,35,fan_in_only,4 operation(s) sur ce compte avant la rafale ; 80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005421,35,fan_in_only,3 operation(s) sur ce compte avant la rafale ; 80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_005268,35,fan_in_only,1 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_001386,35,fan_in_only,48 % des fonds deja ressortis ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_003533,35,fan_in_only,2 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_002333,35,fan_in_only,8 operation(s) sur ce compte avant la rafale ; 80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques
+ACC_000203,34,fan_in_only,2 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000164,34,fan_in_only,4 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000301,34,fan_in_only,4 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_005414,34,fan_in_only,1 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_005386,34,fan_in_only,3 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000409,34,fan_in_only,5 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_005396,34,fan_in_only,9 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000295,34,fan_in_only,3 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000201,34,fan_in_only,3 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000408,34,fan_in_only,1 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000309,34,fan_in_only,6 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000103,34,fan_in_only,2 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000153,34,fan_in_only,2 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_002100,34,fan_in_redistribution,68 % des fonds deja ressortis ; emetteurs repartis sur 5 banques ; 5 emetteurs distincts en 24 h
+ACC_000168,34,fan_in_only,5 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000453,34,fan_in_only,3 operation(s) sur ce compte avant la rafale ; 100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_004601,34,fan_in_only,compte beneficiaire ouvert depuis 161 jours ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_000034,33,fan_in_only,4 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 4 banques ; 60 % d'emetteurs jamais vus avec ce compte
+ACC_005426,33,fan_in_only,6 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 4 banques ; 60 % d'emetteurs jamais vus avec ce compte
+ACC_000080,33,fan_in_only,3 operation(s) sur ce compte avant la rafale ; emetteurs repartis sur 4 banques ; 60 % d'emetteurs jamais vus avec ce compte
+ACC_002406,33,fan_in_redistribution,78 % des fonds deja ressortis ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_002480,33,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 31 % des fonds deja ressortis
+ACC_000253,32,fan_in_only,1 operation(s) sur ce compte avant la rafale ; 80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_005430,32,fan_in_only,7 operation(s) sur ce compte avant la rafale ; 80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_000339,32,fan_in_only,3 operation(s) sur ce compte avant la rafale ; 80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_005442,30,fan_in_only,7 operation(s) sur ce compte avant la rafale ; 60 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques
+ACC_003352,30,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 18 % des fonds deja ressortis
+ACC_000865,30,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_002904,29,fan_in_only,emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_005431,28,fan_in_only,emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_000238,28,fan_in_only,emetteurs repartis sur 5 banques ; 29 % des fonds deja ressortis ; 40 % d'emetteurs jamais vus avec ce compte
+ACC_005441,28,fan_in_only,emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_001376,28,fan_in_only,emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_004887,28,fan_in_redistribution,71 % des fonds deja ressortis ; emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h
+ACC_000455,28,fan_in_only,emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_001716,28,fan_in_only,emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_003773,28,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_002062,28,fan_in_only,emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_003446,28,fan_in_only,emetteurs repartis sur 5 banques ; 100 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_001533,27,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_004023,27,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_002522,26,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_005398,26,fan_in_only,emetteurs repartis sur 5 banques ; 80 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_000194,26,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_005419,26,fan_in_only,emetteurs repartis sur 5 banques ; 80 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_005432,26,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_001116,26,fan_in_only,emetteurs repartis sur 5 banques ; 80 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_003822,26,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_005401,26,fan_in_only,emetteurs repartis sur 5 banques ; 80 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_005420,26,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_000670,26,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h
+ACC_003600,26,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_000927,26,fan_in_only,48 % des fonds deja ressortis ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_000900,26,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_002092,26,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_002490,26,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_003964,26,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_003543,26,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_001359,26,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_004436,26,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_001746,26,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_002300,26,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_005130,26,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_003095,26,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_003620,26,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_004563,26,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_000096,25,fan_in_only,emetteurs repartis sur 5 banques ; 60 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_001057,25,fan_in_only,emetteurs repartis sur 5 banques ; 25 % des fonds deja ressortis ; 5 emetteurs distincts en 24 h
+ACC_005438,24,fan_in_only,emetteurs repartis sur 5 banques ; 60 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_005385,24,fan_in_only,emetteurs repartis sur 5 banques ; 60 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_002421,24,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h
+ACC_004762,24,fan_in_only,42 % des fonds deja ressortis ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_003156,24,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h
+ACC_005041,24,fan_in_only,41 % des fonds deja ressortis ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_005425,23,fan_in_only,80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_005437,23,fan_in_only,80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_005454,23,fan_in_only,80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_005433,23,fan_in_only,80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_005417,23,fan_in_only,80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_005393,23,fan_in_only,80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_004719,23,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h
+ACC_000480,23,fan_in_only,80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_004546,23,fan_in_only,80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_000793,23,fan_in_only,80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_002583,23,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h
+ACC_002885,23,fan_in_only,80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_002620,23,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h
+ACC_000445,22,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h
+ACC_004788,22,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h
+ACC_005449,22,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h
+ACC_000426,22,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h
+ACC_003790,22,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h
+ACC_005453,21,fan_in_only,emetteurs repartis sur 4 banques ; 60 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_000130,21,fan_in_only,emetteurs repartis sur 4 banques ; 60 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_005444,21,fan_in_only,emetteurs repartis sur 4 banques ; 60 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h
+ACC_000832,21,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h ; emetteurs repartis sur 2 banques
+ACC_000431,20,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h ; emetteurs repartis sur 2 banques
+ACC_004837,20,fan_in_only,100 % d'emetteurs jamais vus avec ce compte ; 5 emetteurs distincts en 24 h ; emetteurs repartis sur 2 banques
+ACC_005307,20,fan_in_only,80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h
+ACC_005350,20,fan_in_only,80 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h
+ACC_004331,19,fan_in_only,emetteurs repartis sur 4 banques ; 20 % des fonds deja ressortis ; 5 emetteurs distincts en 24 h
+ACC_000640,19,fan_in_only,emetteurs repartis sur 5 banques ; 5 emetteurs distincts en 24 h ; 20 % d'emetteurs jamais vus avec ce compte
+ACC_002171,19,fan_in_only,emetteurs repartis sur 5 banques ; 5 emetteurs distincts en 24 h ; 10 % des fonds deja ressortis
+ACC_004433,19,fan_in_only,26 % des fonds deja ressortis ; emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h
+ACC_002788,19,fan_in_only,emetteurs repartis sur 5 banques ; 5 emetteurs distincts en 24 h ; 20 % d'emetteurs jamais vus avec ce compte
+ACC_005443,18,fan_in_only,60 % d'emetteurs jamais vus avec ce compte ; emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h
+ACC_001289,18,fan_in_only,emetteurs repartis sur 4 banques ; 18 % des fonds deja ressortis ; 5 emetteurs distincts en 24 h
+ACC_001029,16,fan_in_only,emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h ; 20 % d'emetteurs jamais vus avec ce compte
+ACC_000595,16,fan_in_only,emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h ; 11 % des fonds deja ressortis
+ACC_001025,16,fan_in_only,emetteurs repartis sur 5 banques ; 5 emetteurs distincts en 24 h
+ACC_002404,16,fan_in_only,emetteurs repartis sur 5 banques ; 5 emetteurs distincts en 24 h
+ACC_000066,16,fan_in_only,emetteurs repartis sur 5 banques ; 5 emetteurs distincts en 24 h
+ACC_000152,16,fan_in_only,emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h ; 20 % d'emetteurs jamais vus avec ce compte
+ACC_001426,16,fan_in_only,emetteurs repartis sur 5 banques ; 5 emetteurs distincts en 24 h
+ACC_002347,16,fan_in_only,emetteurs repartis sur 5 banques ; 5 emetteurs distincts en 24 h
+ACC_004441,16,fan_in_only,emetteurs repartis sur 5 banques ; 5 emetteurs distincts en 24 h
+ACC_001766,16,fan_in_only,emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h ; 20 % d'emetteurs jamais vus avec ce compte
+ACC_004583,15,fan_in_only,emetteurs repartis sur 3 banques ; 19 % des fonds deja ressortis ; 5 emetteurs distincts en 24 h
+ACC_000046,14,fan_in_only,emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_001146,14,fan_in_only,emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_004514,14,fan_in_only,emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_002391,14,fan_in_only,emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_005043,14,fan_in_only,emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_002287,14,fan_in_only,emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_000133,14,fan_in_only,emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_001658,14,fan_in_only,emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_000477,14,fan_in_only,emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_002963,14,fan_in_only,emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_003021,14,fan_in_only,emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_003326,14,fan_in_only,emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_001339,14,fan_in_only,emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_000701,14,fan_in_only,emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_003769,14,fan_in_only,emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_001927,14,fan_in_only,emetteurs repartis sur 4 banques ; 5 emetteurs distincts en 24 h
+ACC_005381,13,fan_in_only,emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h ; 11 % des fonds deja ressortis
+ACC_004906,12,fan_in_only,emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h ; 7 % des fonds deja ressortis
+ACC_001915,11,fan_in_only,emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h
+ACC_001527,11,fan_in_only,emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h
+ACC_004750,11,fan_in_only,emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h
+ACC_002601,11,fan_in_only,emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h
+ACC_001312,10,fan_in_only,5 emetteurs distincts en 24 h ; emetteurs repartis sur 2 banques ; 8 % des fonds deja ressortis
+ACC_003146,10,fan_in_only,emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h
+ACC_005311,10,fan_in_only,emetteurs repartis sur 3 banques ; 5 emetteurs distincts en 24 h

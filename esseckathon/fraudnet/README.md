@@ -124,6 +124,74 @@ demo = [s for s in scenarios
         and json.loads(s["params_json"]).get("amount_regime") == "discret"]
 ```
 
+## Outils d'analyse (dossier `analysis/`)
+
+```bash
+python -m fraudnet.analysis.consortium --data fraudnet/data
+python -m fraudnet.analysis.hub_scores  --data fraudnet/data
+```
+
+**`consortium.py`** — chiffre l'apport d'un registre d'alertes partagé entre
+banques, sur les 49 scénarios de convergence. Sort `consortium_analysis.csv`.
+
+L'asymétrie à retenir : **la banque qui peut bloquer est aveugle, celle qui
+voit ne peut que constater.** La banque du bénéficiaire reçoit tous les
+virements entrants et voit donc la convergence — mais après l'arrivée des
+fonds, et le compte se vide en 2 à 6 h. Les banques des victimes, seules à
+pouvoir arrêter le virement avant son départ, n'observent qu'un client
+ordinaire : 7,0 banques touchées par scénario, la mieux placée ne voit que
+26,7 % des virements.
+
+**Les trois configurations, et une seule est annonçable :**
+
+| Configuration | Victimes protégées | Montant préservé | Légitimes bloqués |
+|---|---|---|---|
+| Sans partage | 10,2 % | 8,7 % | 0 |
+| Partage, comptage brut à 5 émetteurs | 83,8 % | 81,2 % | **2 346** |
+| Partage, score de modèle ≥ 80 | **41,5 %** | **40,0 %** | **0** |
+
+À annoncer : la troisième ligne. **41,5 % des victimes protégées et 1,32 M€
+préservés sans bloquer un seul virement légitime**, soit 4,1× mieux que sans
+partage.
+
+Ne jamais annoncer les 83,8 % de la deuxième ligne en même temps que
+l'absence de faux positifs : ce sont deux configurations incompatibles. La
+deuxième ligne est le **repoussoir**, pas le résultat — elle montre
+précisément pourquoi un registre doit publier un score de modèle et non un
+comptage d'émetteurs. Présentées ensemble et dans cet ordre, les trois lignes
+sont l'argument le plus solide du projet.
+
+Seuls 22 des 49 scénarios ont un hub atteignant 80. Les 27 autres sont des
+mules recrutées parmi des clients existants, à compte ancien — même limite
+que le rappel de 46 % du scoring.
+
+**`hub_scores.py`** — score heuristique **point-in-time** des comptes en
+convergence. Sort `hub_scores.csv` (publiable, aucune colonne `gt_`) et
+`hub_scores_eval.csv` (avec vérité terrain).
+
+Ce n'est pas le modèle du module 3, c'est une règle experte à cinq
+composantes. Elle existe parce que la règle de graphe à 93,9 % de précision
+utilise le ratio de redistribution, **qui n'a pas encore eu lieu** au moment
+où une banque voudrait bloquer : dans une arnaque au faux conseiller, le
+compte collecteur ne se vide qu'après le dernier virement de victime. S'en
+servir pour décider au 6ᵉ virement serait une fuite de données.
+
+Au seuil de publication 80, sur trois graines différentes :
+
+| Graine | Signalés | Précision | Rappel | Faux amis signalés |
+|---|---|---|---|---|
+| 20261010 | 25 | 100 % | 46,3 % | 0 / 42 |
+| 7 | 23 | 100 % | 45,1 % | 0 / 42 |
+| 424242 | 19 | 100 % | 47,5 % | 0 / 42 |
+
+La séparation est structurelle, pas calibrée : un score ≥ 80 exige un compte
+ouvert depuis moins de 90 jours **et** sans historique, ce qui ne décrit que
+les comptes ouverts pour l'occasion. Revers de la médaille, et il faut le
+dire au jury : une mule **recrutée parmi des clients existants** a un compte
+ancien avec un historique normal et passe sous le seuil. D'où les 46 % de
+rappel. Le score plafonne à 88 à l'instant de décision — ne pas utiliser un
+seuil de 90.
+
 ## Structure
 
 ```
