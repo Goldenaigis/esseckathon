@@ -132,27 +132,48 @@ au même format (`account_id, score, pattern, evidence`).
 ## Démo principale : un scénario vu des banques des victimes
 
 ```bash
-$PY python/fraudnet_chain.py demo-scenario SCN_062      # ou SCN_055 ; --decoy DEC_001 par défaut
+$PY python/fraudnet_chain.py demo-scenario              # SCN_049 par défaut (jeu de test) ; --decoy DEC_001
 ```
 
-Rejoue les 37 virements du compte collecteur `ACC_000480` (8 banques de victimes).
-Avant chaque virement, la banque de la victime interroge `isFlagged` sur la chaîne ;
-la banque du collecteur publie le score du modèle au 6e virement. Résultat on-chain :
-32/37 virements bloqués, 15 093,60 EUR préservés (88 %), identique à
-`fraudnet/data/consortium_analysis.csv`. Puis contraste : la cagnotte `DEC_001`
-(84 participants) n'est pas signalée.
+Rejoue les 38 virements vers le compte collecteur `ACC_006950` (26 victimes, 8
+banques). Avant chaque virement, la banque de la victime interroge `isFlagged` sur
+la chaîne. Au 6e virement, la banque du collecteur calcule le score point-in-time
+(86) et le publie car il dépasse le seuil de 80. Résultat on-chain : 33/38
+virements bloqués, 7 025,92 EUR préservés (88 %), identique à
+`fraudnet/data/consortium_analysis.csv`. Contraste : la cagnotte `DEC_001`
+(84 participants) obtient 26, la banque ne publie rien, les invités passent.
 
 Message : la banque qui **peut** bloquer (celle de la victime) ne voit qu'un virement
 ordinaire ; la banque qui **voit** la convergence (celle du collecteur) ne peut que
-constater. Le registre fait passer le signal de l'une à l'autre. Il publie le
-**score du modèle**, pas un comptage d'émetteurs : une règle de seuil partagée
-bloquerait plus de 2 virements légitimes (cagnottes, associations) par fraude.
+constater. Le registre fait passer le signal de l'une à l'autre. Il publie un
+**score**, pas un comptage d'émetteurs : une règle de seuil partagée bloquerait plus
+de 2 virements légitimes (cagnottes, associations) par fraude.
 
 Sur les 49 scénarios de convergence : 112 → 1 059 virements frauduleux bloqués sur
 1 321, montant préservé 8,7 % → 81,2 % (analyse du Module 1).
 
-La démo choisit le scénario grâce à la vérité terrain ; tant que le Module 2 ne
-publie pas ses propres scores, l'absence d'alerte sur la cagnotte est par construction.
+### Les scores : `fraudnet/data/hub_scores.csv`
+
+**Heuristique point-in-time du Module 1, à remplacer par le modèle du Module 3** (ce
+n'est pas un modèle appris). Calculée à l'instant où le compte atteint 5 émetteurs
+distincts en 24 h, avec uniquement l'information disponible à cet instant :
+convergence, ancienneté du compte, absence d'historique, dispersion des banques
+émettrices, nouveauté des émetteurs, redistribution déjà commencée.
+
+- Le score plafonne à 88 : seuil de publication et de blocage à **80**.
+- Au seuil 80 : 25 comptes signalés, aucun faux positif parmi eux, 0 faux ami sur 42,
+  sur trois tirages différents. Formulation honnête : « sur notre jeu de test,
+  aucun faux positif parmi les comptes signalés » (19 à 25 comptes, données
+  synthétiques), pas « 100 % en production ».
+- Rappel 46 % : une mule recrutée parmi des clients existants (compte ancien, avec
+  historique) reste sous le seuil. C'est la rupture de comportement que le Module 2
+  doit détecter.
+- Exemple : le hub de SCN_062 n'obtient que 23 à l'instant de décision ; il n'est
+  donc pas signalé, d'où le choix de SCN_049 pour la démo.
+
+```bash
+$PY python/fraudnet_chain.py publish-scores --min-score 80   # chaque banque publie pour ses clients
+```
 
 ## Démo du registre d'alertes (retrait d'un faux positif)
 

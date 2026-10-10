@@ -193,13 +193,37 @@ def cmd_demo_alerts(args):
     print(f"{len(rows)} alertes de demo ecrites dans {args.out}")
 
 
+def load_hub_scores():
+    """Scores point-in-time des comptes beneficiaires (heuristique du Module 1, a remplacer
+    par le modele du Module 3). Format : account_id, score, pattern, evidence. Aucune colonne gt_."""
+    path = DATA_DIR / "hub_scores.csv"
+    if not path.exists():
+        sys.exit("hub_scores.csv introuvable (fraudnet/analysis/hub_scores.py)")
+    return {r["account_id"]: r for r in csv.DictReader(open(path, newline=""))}
+
+
+def cmd_publish_scores(args):
+    """Publie les scores >= seuil, chacun au nom de la banque qui tient le compte."""
+    c = Chain()
+    bank_of = {r["account_id"]: r["bank_id"] for r in csv.DictReader(open(DATA_DIR / "accounts.csv", newline=""))}
+    rows = [r for r in load_hub_scores().values() if int(r["score"]) >= args.min_score]
+    for r in rows:
+        bank = bank_of[r["account_id"]]
+        tx = c.send(c.bank_account(bank), c.registry.functions.reportAlert(
+            c.account_hash(r["account_id"]), int(r["score"]), PATTERNS.index(r["pattern"]),
+            hashlib.sha256(r["evidence"].encode()).digest()))
+        print(f"{bank} signale {r['account_id']} (score {r['score']}, {r['pattern']}) tx {tx[:12]}...")
+    print(f"{len(rows)} alertes publiees (score >= {args.min_score})")
+
+
 def cmd_demo_scenario(args):
     """Rejoue un scenario de fraude du point de vue des banques des victimes.
 
     Avant chaque virement vers le compte collecteur, la banque de la victime interroge
     isFlagged sur la chaine. La banque du collecteur publie le score du modele au rang
-    ou l'alerte se declenche (first_alert_leg_rank de consortium_analysis.csv).
-    Puis contraste avec un faux ami (cagnotte...) pour lequel le modele ne publie rien.
+    ou l'alerte se declenche (first_alert_leg_rank de consortium_analysis.csv), avec le
+    score point-in-time de hub_scores.csv, seulement s'il atteint le seuil.
+    Puis contraste avec un faux ami (cagnotte...) et son propre score.
     Demo : s'appuie sur la verite terrain pour choisir le scenario, jamais en production.
     """
     c = Chain()
@@ -215,6 +239,7 @@ def cmd_demo_scenario(args):
          if r["gt_scenario_id"] == args.scenario and r["dst_account"] == hub and r["status"] == "completed"),
         key=lambda r: r["ts"],
     )
+    scores = load_hub_scores()
     hub_hash = c.account_hash(hub)
     collector = c.bank_account(hub_bank)
 
@@ -226,18 +251,23 @@ def cmd_demo_scenario(args):
     print(f"\n=== {args.scenario} : {scn['scenario_type_fr']} ===")
     print(f"Compte collecteur {hub} chez {hub_bank} | {len(legs)} virements entrants de "
           f"{len({l['src_account'] for l in legs})} victimes reparties dans {len(banks)} banques")
-    print(f"Seuil de blocage : score >= {args.threshold}\n")
+    hs = scores.get(hub)
+    print(f"Score point-in-time du hub : {hs['score'] if hs else 'absent'} ({hs['evidence'] if hs else '-'})")
+    print(f"Seuil de publication et de blocage : score >= {args.threshold}\n")
 
     sent = blocked = 0
     saved = 0.0
     for k, leg in enumerate(legs, start=1):
         if k == alert_rank:
-            pattern = SCENARIO_TO_PATTERN[scn["scenario_type"]]
-            tx = c.send(collector, c.registry.functions.reportAlert(
-                hub_hash, args.score, PATTERNS.index(pattern),
-                hashlib.sha256(f"{args.scenario} {scn['description_fr']}".encode()).digest()))
-            print(f"  >>> {hub_bank} (banque du collecteur) publie le score du modele : {args.score}, "
-                  f"{pattern} (tx {tx[:12]}...)")
+            if hs and int(hs["score"]) >= args.threshold:
+                tx = c.send(collector, c.registry.functions.reportAlert(
+                    hub_hash, int(hs["score"]), PATTERNS.index(hs["pattern"]),
+                    hashlib.sha256(hs["evidence"].encode()).digest()))
+                print(f"  >>> {hub_bank} (banque du collecteur) publie le score {hs['score']}, "
+                      f"{hs['pattern']} (tx {tx[:12]}...)")
+            else:
+                print(f"  >>> {hub_bank} calcule le score : {hs['score'] if hs else '?'} < {args.threshold}, "
+                      f"rien n'est publie")
         flagged, count, max_score, _ = c.registry.functions.isFlagged(hub_hash).call()
         bank = bank_of[leg["src_account"]]
         if flagged and max_score >= args.threshold:
@@ -259,9 +289,11 @@ def cmd_demo_scenario(args):
         flagged, count, max_score, _ = c.registry.functions.isFlagged(c.account_hash(d["hub_account"])).call()
         print(f"\n=== Contraste : {args.decoy} {d['decoy_type_fr']} ===")
         print(f"Compte {d['hub_account']} : {d['n_accounts']} participants, {eur(float(d['total_amount']))} EUR")
+        ds = scores.get(d["hub_account"])
         print(f"  Une regle de seuil (>= 5 emetteurs) le bloquerait comme un collecteur.")
-        print(f"  isFlagged -> {'SIGNALE' if flagged else 'aucun signalement'} : le modele n'a pas publie d'alerte, "
-              f"les virements des invites passent.")
+        print(f"  Score point-in-time : {ds['score'] if ds else 'absent'} ({ds['evidence'] if ds else '-'})")
+        print(f"  {ds['score'] if ds else '?'} < {args.threshold} : la banque ne publie rien. isFlagged -> "
+              f"{'SIGNALE' if flagged else 'aucun signalement'}, les virements des invites passent.")
 
 
 def cmd_report(args):
@@ -316,10 +348,13 @@ def main():
     s.add_argument("--alerts", required=True)
     s.set_defaults(func=cmd_report)
 
+    s = sub.add_parser("publish-scores", help="publie les scores de hub_scores.csv au-dessus du seuil")
+    s.add_argument("--min-score", type=int, default=80)
+    s.set_defaults(func=cmd_publish_scores)
+
     s = sub.add_parser("demo-scenario", help="rejoue un scenario vu des banques des victimes")
-    s.add_argument("scenario", nargs="?", default="SCN_062")
+    s.add_argument("scenario", nargs="?", default="SCN_049")
     s.add_argument("--decoy", default="DEC_001", help="faux ami a montrer en contraste ('' pour aucun)")
-    s.add_argument("--score", type=int, default=90)
     s.add_argument("--threshold", type=int, default=80)
     s.set_defaults(func=cmd_demo_scenario)
 
