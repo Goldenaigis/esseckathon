@@ -39,6 +39,30 @@ TX_TYPES = (
 
 ROLES = ("normal", "victim", "mule", "fraudster")
 
+# tx_type decrit la FINALITE economique (loyer, salaire, don). L'instrument de
+# paiement est une dimension distincte, et c'est lui qui definit le perimetre
+# qu'un moteur anti-fraude score: un loyer, un salaire et un don sont tous des
+# virements. Confondre les deux exclut du perimetre des leurres legitimes
+# essentiels et laisse tx_type agir comme un raccourci vers l'etiquette.
+INSTRUMENTS = ("credit_transfer", "card", "direct_debit")
+
+TX_TYPE_INSTRUMENT = {
+    "retail": "card",
+    "large_purchase": "card",
+    "utility": "direct_debit",
+    "salary": "credit_transfer",
+    "rent": "credit_transfer",
+    "p2p": "credit_transfer",
+    "transfer": "credit_transfer",
+    "remittance": "credit_transfer",
+    "savings_transfer": "credit_transfer",
+    "donation": "credit_transfer",
+    "b2b_invoice": "credit_transfer",
+    "refund": "credit_transfer",
+}
+
+SCORABLE_INSTRUMENT = "credit_transfer"
+
 SPLITS = ("train", "test")
 
 SCENARIO_TYPES = {
@@ -157,6 +181,7 @@ TRANSACTIONS_COLUMNS = [
     "dst_country",
     "channel",
     "status",
+    "instrument",
     "tx_type",
     "label",
     "gt_is_fraud",

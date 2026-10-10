@@ -1,25 +1,25 @@
 bank_id,bank_name,bic,country,is_domestic,n_accounts
-BNK_01,Banque du Centre,BDCEFRPP,FR,1,1088
-BNK_02,Credit Atlantique,CRATFRPP,FR,1,911
-BNK_03,Banque Populaire du Nord,BPNOFRPP,FR,1,827
-BNK_04,Societe Meridionale de Banque,SMEBFRPP,FR,1,614
-BNK_05,Caisse Mutuelle de l'Ouest,CMOUFRPP,FR,1,621
-BNK_06,Neobanque Kairos,KAIRFRP2,FR,1,786
-BNK_07,Banque Horizon,BHORFRPP,FR,1,366
-BNK_08,Epargne et Credit Rhodanien,ECRHFRPP,FR,1,350
-EXT_01,Baltic Pay Institution,BALTLT2X,LT,0,144
-EXT_02,Valletta Digital Bank,VALLMT2X,MT,0,146
-EXT_03,Nicosia Finance House,NICOCY2X,CY,0,117
-EXT_04,Riga Transfer Bank,RIGALV2X,LV,0,125
-EXT_05,Sofia Commercial Credit,SOFIBG2X,BG,0,140
-EXT_06,Tallinn Fintech Bank,TALLEE2X,EE,0,157
-EXT_07,Banco do Minho,BANCPT2X,PT,0,43
-EXT_08,Banque Atlas du Maghreb,BANQMA2X,MA,0,68
-EXT_09,Banque de l'Ouest Africain,BANQSN2X,SN,0,62
-EXT_10,Banca Transcarpatica,BANCRO2X,RO,0,61
-EXT_11,Rheinland Sparbank,RHEIDE2X,DE,0,62
-EXT_12,Banco del Levante,BANCES2X,ES,0,65
-EXT_13,Amsterdam Handelsbank,AMSTNL2X,NL,0,50
-EXT_14,Warsaw Credit Union,WARSPL2X,PL,0,56
-EXT_15,London Merchant Bank,LONDGB2X,GB,0,61
-EXT_16,Gulf Transfer Bank,GULFAE2X,AE,0,126
+BNK_01,Banque du Centre,BDCEFRPP,FR,1,1073
+BNK_02,Credit Atlantique,CRATFRPP,FR,1,925
+BNK_03,Banque Populaire du Nord,BPNOFRPP,FR,1,835
+BNK_04,Societe Meridionale de Banque,SMEBFRPP,FR,1,554
+BNK_05,Caisse Mutuelle de l'Ouest,CMOUFRPP,FR,1,610
+BNK_06,Neobanque Kairos,KAIRFRP2,FR,1,827
+BNK_07,Banque Horizon,BHORFRPP,FR,1,373
+BNK_08,Epargne et Credit Rhodanien,ECRHFRPP,FR,1,348
+EXT_01,Baltic Pay Institution,BALTLT2X,LT,0,140
+EXT_02,Valletta Digital Bank,VALLMT2X,MT,0,124
+EXT_03,Nicosia Finance House,NICOCY2X,CY,0,143
+EXT_04,Riga Transfer Bank,RIGALV2X,LV,0,158
+EXT_05,Sofia Commercial Credit,SOFIBG2X,BG,0,143
+EXT_06,Tallinn Fintech Bank,TALLEE2X,EE,0,171
+EXT_07,Banco do Minho,BANCPT2X,PT,0,49
+EXT_08,Banque Atlas du Maghreb,BANQMA2X,MA,0,57
+EXT_09,Banque de l'Ouest Africain,BANQSN2X,SN,0,49
+EXT_10,Banca Transcarpatica,BANCRO2X,RO,0,56
+EXT_11,Rheinland Sparbank,RHEIDE2X,DE,0,60
+EXT_12,Banco del Levante,BANCES2X,ES,0,68
+EXT_13,Amsterdam Handelsbank,AMSTNL2X,NL,0,43
+EXT_14,Warsaw Credit Union,WARSPL2X,PL,0,62
+EXT_15,London Merchant Bank,LONDGB2X,GB,0,68
+EXT_16,Gulf Transfer Bank,GULFAE2X,AE,0,124

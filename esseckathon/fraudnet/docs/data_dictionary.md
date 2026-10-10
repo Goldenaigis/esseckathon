@@ -78,7 +78,8 @@ graphe du module 2 : aucun fichier supplémentaire n'est nécessaire.
 | `dst_country` | str | pays du compte destinataire |
 | `channel` | enum | `mobile`, `web`, `branch` |
 | `status` | enum | `completed` (96,5 %), `pending`, `rejected` |
-| `tx_type` | enum | voir ci-dessous |
+| `instrument` | enum | `credit_transfer`, `card`, `direct_debit` — **définit le périmètre scorable** |
+| `tx_type` | enum | finalité économique, voir ci-dessous |
 | `label` | str | libellé saisi par le client, exploitable dans l'interface |
 | `gt_is_fraud` | 0/1 | **vérité terrain** |
 | `gt_scenario_id` | str | `SCN_nnn` si la transaction appartient à un scénario de fraude |
@@ -87,16 +88,32 @@ graphe du module 2 : aucun fichier supplémentaire n'est nécessaire.
 | `gt_decoy_type` | enum | type du faux ami |
 | `gt_split` | enum | `train` ou `test` |
 
-`tx_type` : `retail`, `utility`, `p2p`, `transfer`, `b2b_invoice`, `salary`,
-`savings_transfer`, `rent`, `donation`, `refund`, `remittance`,
-`large_purchase`.
+### `instrument` et `tx_type` : deux dimensions distinctes
 
-**Périmètre scorable.** Une banque ne score pas un paiement par carte avec le
-même modèle qu'un virement. Le module 3 doit entraîner et évaluer sur
-`tx_type ∈ {transfer, p2p, remittance, savings_transfer}` — environ 32 000
-virements légitimes pour 2 200 frauduleux. Les lignes `retail` et `utility`
-restent indispensables : elles constituent l'**historique comportemental** qui
-permet de dire si un montant est inhabituel pour un émetteur donné.
+`tx_type` décrit la **finalité économique** : `retail`, `utility`, `p2p`,
+`transfer`, `b2b_invoice`, `salary`, `savings_transfer`, `rent`, `donation`,
+`refund`, `remittance`, `large_purchase`.
+
+`instrument` décrit le **moyen de paiement**, et c'est lui qui définit le
+périmètre d'un moteur anti-fraude :
+
+| `instrument` | `tx_type` concernés | Part |
+|---|---|---|
+| `credit_transfer` | `transfer`, `p2p`, `rent`, `salary`, `donation`, `b2b_invoice`, `remittance`, `savings_transfer`, `refund` | ~35 % |
+| `card` | `retail`, `large_purchase` | ~53 % |
+| `direct_debit` | `utility` | ~12 % |
+
+Il est essentiel de ne pas confondre les deux. Un loyer, un salaire et un don
+**sont** des virements : les exclure du périmètre sous prétexte que leur
+finalité n'est pas « virement simple » reviendrait à écarter les leurres
+légitimes les plus utiles.
+
+**Périmètre scorable.** Le module 3 entraîne et évalue sur
+`instrument == "credit_transfer"` — environ 50 500 virements légitimes pour
+2 270 frauduleux, soit un déséquilibre de 1 pour 22. Les lignes `card` et
+`direct_debit` restent indispensables : elles constituent l'**historique
+comportemental** qui permet de dire si un montant est inhabituel pour un
+émetteur donné.
 
 ---
 
@@ -269,6 +286,14 @@ Le module 3 doit mesurer son **taux de faux positifs sur ces instances**
 spécifiquement, et le module 4 doit pouvoir en afficher une dans la démo
 comme cas correctement non signalé.
 
+**Les 7 types sont désormais à 100 % dans le périmètre scorable**, et c'est
+un contrôle bloquant du rapport de qualité. Un leurre dont les transactions
+sortent du périmètre est inopérant : le modèle ne le voit jamais. Trois types
+(collectes d'associations, bailleurs, versements de paie) étaient dans ce cas
+tant que le périmètre était défini par `tx_type` au lieu de `instrument`, ce
+qui neutralisait 71 % de la table des faux amis — dont les deux signatures de
+convergence les plus fortes.
+
 ---
 
 ## 8. Partition train / test et protection anti-fuite
@@ -294,23 +319,26 @@ apercevoir.
 
 ## 9. Ce que le rapport de qualité garantit
 
-`python -m fraudnet.generator.validate` exécute 25 contrôles. Les plus
+`python -m fraudnet.generator.validate` exécute 29 contrôles. Les plus
 importants ne portent pas sur l'intégrité mais sur la **non-trivialité** :
 
-**Aucune règle à une variable ne résout le problème.** Sur le jeu de test,
-plafond des règles de montant : **F1 = 0,35** (seuil choisi avec la vérité
-terrain, donc optimiste). Meilleure règle naïve : « montant ≥ 3 000 € », F1 =
-0,33 avec 25 % de précision. C'est la ligne de base que le module 3 doit
-dépasser nettement.
+**Aucune règle à une variable ne résout le problème.** Sur le jeu de test
+(16 536 virements, 671 fraudes), plafond des règles de montant : **F1 = 0,14**
+(seuil choisi avec la vérité terrain, donc optimiste). Meilleure règle naïve
+toutes variables confondues : « finalité = virement simple », F1 = 0,23 avec
+13,8 % de précision. C'est la ligne de base que le module 3 doit dépasser
+nettement.
 
-**Le signal de graphe est combinatoire.** Sur les 45 comptes collecteurs
+**Le signal de graphe est combinatoire.** Sur les 54 comptes collecteurs
 frauduleux :
 
 | Règle | Précision | Rappel |
 |---|---|---|
-| fan-in 24 h ≥ 5 | 9,1 % | 100 % |
-| + ratio sortant/entrant ≥ 0,60 | 17,8 % | 91,1 % |
-| + compte ouvert depuis ≤ 120 j | 96,0 % | 53,3 % |
+| fan-in 24 h ≥ 5 | 10,8 % | 100 % |
+| + ratio sortant/entrant ≥ 0,60 | 22,2 % | 88,9 % |
+| + compte ouvert depuis ≤ 120 j | **93,9 %** | 57,4 % |
+
+Et zéro faux ami signalé à tort par la règle complète.
 
 Le degré entrant **seul** est inutilisable : les 15 comptes au plus fort
 fan-in du jeu sont tous légitimes (collectes d'associations, cagnottes,
@@ -318,17 +346,28 @@ bailleurs). Il faut le croiser avec la vitesse de redistribution et
 l'ancienneté. C'est exactement la démonstration attendue par la priorité 3 du
 projet.
 
-Les 17 comptes collecteurs restants sont des **mules recrutées parmi des
+Les 18 comptes collecteurs restants sont des **mules recrutées parmi des
 clients existants** : leur compte est ancien, le critère d'ancienneté ne les
 attrape pas. Le module 2 doit ajouter un indicateur de rupture
 comportementale pour les récupérer.
 
-**Les montants et les pays se recouvrent.** 35 % des virements légitimes
-tombent dans l'intervalle interdécile des fraudes. 11,9 % des virements
-légitimes partent à l'étranger contre 28,7 % des frauduleux : un rapport de
-2,4× seulement. 6,7 % des virements légitimes visent un établissement de
+**Les montants et les pays se recouvrent.** 47,5 % des virements légitimes
+tombent dans l'intervalle interdécile des fraudes. 8,8 % des virements
+légitimes partent à l'étranger contre 21,8 % des frauduleux : un rapport de
+2,5× seulement. 5,2 % des virements légitimes visent un établissement de
 paiement, parce que de nombreux clients détiennent légitimement un compte de
 néobanque sous licence lituanienne ou maltaise.
+
+**La finalité n'est pas un raccourci.** Les transactions frauduleuses se
+répartissent sur `transfer`, `p2p`, `remittance` et `b2b_invoice` : le
+fraudeur dicte le libellé et la nature du virement. Tant que toutes les
+fraudes portaient `tx_type = transfer`, cette seule variable catégorielle
+atteignait un rappel de 100 %.
+
+**Cohérence des dates de compte.** Deux contrôles bloquants : aucun compte
+ouvert après la fin de la fenêtre, aucun compte utilisé avant sa propre date
+d'ouverture. Ce second point avait révélé 110 comptes incohérents, dus aux
+dates d'ouverture des comptes d'épargne calculées sans borne.
 
 ---
 

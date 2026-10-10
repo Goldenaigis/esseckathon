@@ -9,7 +9,7 @@ de réseau. **Zéro dépendance** : bibliothèque standard Python 3.9+ uniquemen
 # Générer le jeu de données par défaut (~150 000 transactions, 6 s)
 python -m fraudnet.generator.generate --out fraudnet/data
 
-# Vérifier la qualité (25 contrôles, code de sortie non nul si échec)
+# Vérifier la qualité (29 contrôles, code de sortie non nul si échec)
 python -m fraudnet.generator.validate --data fraudnet/data
 ```
 
@@ -62,30 +62,42 @@ fenêtre est une fuite de données invisible dans les métriques. C'est pour
 cette raison que `accounts.csv` ne contient **aucun** indicateur comportemental
 agrégé.
 
-**3. Entraîner sur le périmètre scorable.**
-`tx_type ∈ {transfer, p2p, remittance, savings_transfer}`, soit ~32 000
-virements légitimes contre ~2 200 frauduleux. Les lignes `retail` et `utility`
-ne sont pas du bruit : elles constituent l'historique comportemental qui
-permet de juger si un montant est inhabituel pour un émetteur donné.
+**3. Entraîner sur le périmètre scorable.** `instrument == "credit_transfer"`,
+soit ~50 500 virements légitimes contre ~2 270 frauduleux (1 pour 22).
+
+Ne jamais définir le périmètre avec `tx_type` : c'est la **finalité
+économique**, pas le moyen de paiement. Un loyer, un salaire et un don sont
+des virements. Filtrer sur `tx_type` écarte 71 % de la table des faux amis,
+dont les deux signatures de convergence les plus fortes, et annule leur
+intérêt.
+
+Les lignes `card` et `direct_debit` ne sont pas du bruit : elles constituent
+l'historique comportemental qui permet de juger si un montant est inhabituel
+pour un émetteur donné.
 
 ## Ligne de base à battre
 
-Le rapport de qualité mesure ce qu'une règle naïve obtient sur le jeu de test.
+Le rapport de qualité (29 contrôles) mesure ce qu'une règle naïve obtient sur le jeu de test.
 C'est l'objectif du module 3 et le tableau comparatif du pitch.
 
 | Approche | Précision | Rappel | F1 |
 |---|---|---|---|
-| montant ≥ 3 000 € | 25,4 % | 46,4 % | 0,328 |
-| destination hors de France | 18,7 % | 27,7 % | 0,223 |
-| meilleur seuil de montant possible | — | — | **0,348** |
+| finalité = virement simple | 13,8 % | 66,5 % | **0,229** |
+| canal mobile ET montant ≥ 800 € | 13,9 % | 27,9 % | 0,185 |
+| montant ≥ 1 000 € ET étranger | 20,0 % | 13,9 % | 0,164 |
+| montant ≥ 3 000 € | 8,2 % | 40,1 % | 0,136 |
+| destination hors de France | 8,3 % | 14,0 % | 0,104 |
+| meilleur seuil de montant possible | — | — | 0,140 |
 
-Et la démonstration de l'intérêt du graphe, sur les comptes collecteurs :
+Et la démonstration de l'intérêt du graphe, sur les 54 comptes collecteurs :
 
 | Règle de réseau | Précision | Rappel |
 |---|---|---|
-| fan-in 24 h ≥ 5 | 9,1 % | 100 % |
-| + ratio sortant/entrant ≥ 0,60 | 17,8 % | 91,1 % |
-| + compte ouvert depuis ≤ 120 j | **96,0 %** | 53,3 % |
+| fan-in 24 h ≥ 5 | 10,8 % | 100 % |
+| + ratio sortant/entrant ≥ 0,60 | 22,2 % | 88,9 % |
+| + compte ouvert depuis ≤ 120 j | **93,9 %** | 57,4 % |
+
+Zéro faux ami signalé à tort par la règle complète.
 
 Les 15 comptes au plus fort degré entrant du jeu sont **tous légitimes** :
 collectes d'associations, cagnottes, bailleurs. Le degré entrant seul ne sert

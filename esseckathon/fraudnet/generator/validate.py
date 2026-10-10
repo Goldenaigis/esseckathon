@@ -13,11 +13,11 @@ import json
 import os
 import statistics as st
 from collections import Counter, defaultdict
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 from ..shared.schema import (
-    ACCOUNTS_COLUMNS, TRANSACTIONS_COLUMNS, assert_no_leakage,
-    feature_safe_columns,
+    ACCOUNTS_COLUMNS, SCORABLE_INSTRUMENT, TRANSACTIONS_COLUMNS,
+    assert_no_leakage, feature_safe_columns,
 )
 
 OK = "  ok   "
@@ -63,11 +63,13 @@ def section(title):
 
 
 _FAILED = []
+_TOTAL = []
 
 
 def check(cond, label, detail=""):
     """Enregistre le resultat. Tout controle en echec est bloquant."""
     print(f"[{OK if cond else FAIL}] {label}" + (f"  -> {detail}" if detail else ""))
+    _TOTAL.append(label)
     if not cond:
         _FAILED.append(label)
     return cond
@@ -92,6 +94,7 @@ def run(data_dir):
     acct_ids = {a["account_id"] for a in accounts}
     role = {a["account_id"]: a["gt_role"] for a in accounts}
     _FAILED.clear()
+    _TOTAL.clear()
 
     # ------------------------------------------------------------ integrite
     section("1. INTEGRITE REFERENTIELLE ET STRUCTURE")
@@ -118,6 +121,25 @@ def run(data_dir):
     out_of_range = [t for t in txs if not (w_start <= t["_ts"] < w_end)]
     check(not out_of_range, "Toutes les transactions sont dans la fenetre",
                           f"{len(out_of_range)} hors bornes" if out_of_range else "")
+
+    opened_after = [a for a in accounts
+                    if date.fromisoformat(a["opened_at"]) > w_end.date()]
+    check(not opened_after, "Aucun compte ouvert apres la fin de la fenetre",
+          f"{len(opened_after)} comptes" if opened_after else "")
+
+    first_use = {}
+    for t in txs:
+        d = t["_ts"].date()
+        for key in ("src_account", "dst_account"):
+            a = t[key]
+            if a not in first_use or d < first_use[a]:
+                first_use[a] = d
+    opened_at = {a["account_id"]: date.fromisoformat(a["opened_at"])
+                 for a in accounts}
+    anachronic = [a for a, d in first_use.items()
+                  if a in opened_at and d < opened_at[a]]
+    check(not anachronic, "Aucun compte utilise avant sa date d'ouverture",
+          f"{len(anachronic)} comptes" if anachronic else "")
 
     ids = [t["tx_id"] for t in txs]
     check(len(set(ids)) == len(ids), "Identifiants de transaction uniques")
@@ -183,9 +205,12 @@ def run(data_dir):
     check(0.005 <= len(fraud) / len(txs) <= hi,
           f"Taux de fraude dans la plage visee (0,5 - {hi * 100:.0f} %)"
           + (" [jeu de developpement reduit]" if dev_sample else ""))
-    check(sum(t["gt_is_fraud"] for t in test) >= 150,
-          "Assez de fraudes en test pour une evaluation stable",
-          f"{sum(t['gt_is_fraud'] for t in test)} transactions")
+    n_test_fraud = sum(t["gt_is_fraud"] for t in test)
+    min_test_fraud = 40 if dev_sample else 150
+    check(n_test_fraud >= min_test_fraud,
+          f"Assez de fraudes en test pour une evaluation stable "
+          f"(>= {min_test_fraud})",
+          f"{n_test_fraud} transactions")
 
     print("\n         Repartition par type de scenario:")
     by_type = Counter(t["gt_scenario_type"] for t in fraud)
@@ -202,10 +227,22 @@ def run(data_dir):
     check(not missing_test, "Chaque type de scenario est present en test",
           f"absents: {missing_test}" if missing_test else "")
 
-    print("\n         Repartition des faux amis:")
+    # Un leurre dont les transactions sortent du perimetre scorable est
+    # inoperant: le modele ne le verra jamais. C'est le piege qui annule
+    # l'interet de la table des faux amis.
+    print("\n         Repartition des faux amis et couverture du perimetre:")
+    outside_total = 0
     for dtype, n in Counter(d["decoy_type"] for d in decoys).most_common():
-        ntx = sum(1 for t in decoy_tx if t["gt_decoy_type"] == dtype)
-        print(f"           {dtype:26s} {n:3d} instances  |  {ntx:5d} tx")
+        group = [t for t in decoy_tx if t["gt_decoy_type"] == dtype]
+        inside = sum(1 for t in group
+                     if t["instrument"] == SCORABLE_INSTRUMENT)
+        outside_total += len(group) - inside
+        print(f"           {dtype:26s} {n:3d} inst. | {len(group):5d} tx | "
+              f"{pct(inside, len(group)):5.1f} % dans le perimetre")
+    check(outside_total == 0,
+          "Tous les faux amis sont dans le perimetre scorable",
+          f"{outside_total} transactions de leurres hors perimetre, donc "
+          f"invisibles pour le modele" if outside_total else "")
 
     # ------------------------------------------------ non-trivialite
     section("4. NON-TRIVIALITE (le jeu n'est pas separable naivement)")
@@ -213,8 +250,7 @@ def run(data_dir):
     # Une banque ne score pas les paiements par carte avec le meme modele que
     # les virements. La comparaison pertinente se fait au sein du perimetre
     # reellement scorable.
-    scorable = {"transfer", "p2p", "remittance", "savings_transfer"}
-    legit_s = [t for t in legit if t["tx_type"] in scorable]
+    legit_s = [t for t in legit if t["instrument"] == SCORABLE_INSTRUMENT]
 
     fa = [t["amount"] for t in fraud]
     la = [t["amount"] for t in legit]
@@ -241,7 +277,8 @@ def run(data_dir):
     # n'ont rien a demontrer. Ces chiffres servent aussi de ligne de base
     # dans la page Performances et dans le pitch.
     bench = [t for t in txs
-             if t["gt_split"] == "test" and t["tx_type"] in scorable]
+             if t["gt_split"] == "test"
+             and t["instrument"] == SCORABLE_INSTRUMENT]
     emi = {"LT", "MT", "CY", "LV", "BG", "EE", "AE"}
     rules = [
         ("montant >= 500 EUR", lambda t: t["amount"] >= 500),
@@ -253,6 +290,7 @@ def run(data_dir):
          lambda t: t["amount"] >= 1000 and t["dst_country"] != "FR"),
         ("canal mobile ET montant >= 800",
          lambda t: t["channel"] == "mobile" and t["amount"] >= 800),
+        ("finalite = virement simple", lambda t: t["tx_type"] == "transfer"),
     ]
     print(f"\n         Regles naives sur le jeu de test ({len(bench)} virements, "
           f"{sum(t['gt_is_fraud'] for t in bench)} fraudes):")
@@ -510,15 +548,25 @@ def run(data_dir):
     check(hours[peak] > 3 * hours[trough], "Cycle jour/nuit present")
 
     wk = sum(1 for t in txs if t["_ts"].weekday() >= 5)
-    virements = [t for t in txs
-                 if t["tx_type"] not in ("retail", "large_purchase")]
-    wk_vir = sum(1 for t in virements if t["_ts"].weekday() >= 5)
-    print(f"         part du week-end, toutes operations : {pct(wk, len(txs)):.1f} % "
-          f"(les paiements par carte sont plus nombreux le week-end)")
-    print(f"         part du week-end, virements seuls  : "
-          f"{pct(wk_vir, len(virements)):.1f} % (attendu nettement < 28,6 %)")
-    check(pct(wk_vir, len(virements)) < 22.0,
-          "Les virements sont concentres sur les jours ouvres")
+    # La contrainte reelle porte sur les flux ordonnances (SEPA par lots):
+    # salaires, loyers, factures et virements professionnels ne reglent pas
+    # le week-end. Les virements instantanes entre particuliers, eux, sont
+    # legitimement plus nombreux le samedi et le dimanche.
+    ordonnances = [t for t in txs
+                   if t["tx_type"] in ("salary", "rent", "b2b_invoice", "utility")]
+    instantanes = [t for t in txs if t["tx_type"] == "p2p"]
+    wk_ord = sum(1 for t in ordonnances if t["_ts"].weekday() >= 5)
+    wk_ins = sum(1 for t in instantanes if t["_ts"].weekday() >= 5)
+    print(f"         part du week-end, toutes operations    : {pct(wk, len(txs)):.1f} %")
+    print(f"         part du week-end, flux ordonnances     : "
+          f"{pct(wk_ord, len(ordonnances)):.1f} % (attendu proche de 0)")
+    print(f"         part du week-end, virements instantanes: "
+          f"{pct(wk_ins, len(instantanes)):.1f} % (attendu > 28,6 %)")
+    check(pct(wk_ord, len(ordonnances)) < 5.0,
+          "Les flux ordonnances ne reglent pas le week-end")
+    check(pct(wk_ins, len(instantanes)) > 28.6,
+          "Les virements instantanes entre particuliers sont plus nombreux "
+          "le week-end")
 
     dom = Counter(t["_ts"].day for t in txs if t["tx_type"] == "salary")
     if dom:
@@ -533,8 +581,8 @@ def run(data_dir):
     # ---------------------------------------- conclusion
     section("CONCLUSION")
     if not _FAILED:
-        print("  Les 25 controles passent. Le jeu de donnees est exploitable")
-        print("  par les modules 2, 3 et 4.")
+        print(f"  Les {len(_TOTAL)} controles passent. Le jeu de donnees est")
+        print("  exploitable par les modules 2, 3 et 4.")
     else:
         print(f"  {len(_FAILED)} controle(s) en echec, a corriger avant de")
         print("  livrer aux autres equipes:")

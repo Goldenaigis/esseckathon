@@ -10,7 +10,7 @@ import json
 from datetime import date, timedelta
 
 from . import names as N
-from ..shared.schema import SCENARIO_TYPES
+from ..shared.schema import SCENARIO_TYPES, TX_TYPE_INSTRUMENT
 from .world import make_tx, pick_status, lognormal_amount, weighted_choice
 
 EMI_COUNTRIES_BIAS = 0.72  # part des destinations finales en etablissement EMI
@@ -123,13 +123,31 @@ def _record(sid, stype, start, end, n_vic, n_mule, txs, redistributed,
     }
 
 
-def _tag(txs, sid, stype, split):
+def _fraud_tx_type(rng, dst_country):
+    """Finalite declaree par la victime ou la mule.
+
+    Le fraudeur dicte le libelle et la nature du virement. Si toutes les
+    fraudes portaient la meme finalite, `tx_type` deviendrait un raccourci
+    vers l'etiquette et rendrait le modele inutile.
+    """
+    t = weighted_choice(
+        rng, [("transfer", 0.58), ("p2p", 0.28), ("remittance", 0.09),
+              ("b2b_invoice", 0.05)]
+    )
+    if t == "remittance" and dst_country == "FR":
+        t = "transfer"
+    return t
+
+
+def _tag(txs, sid, stype, split, rng):
     for t in txs:
         t["gt_is_fraud"] = 1
         t["gt_scenario_id"] = sid
         t["gt_scenario_type"] = stype
         t["gt_split"] = split
         t["status"] = "completed" if t["status"] != "rejected" else "rejected"
+        t["tx_type"] = _fraud_tx_type(rng, t["dst_country"])
+        t["instrument"] = TX_TYPE_INSTRUMENT[t["tx_type"]]
     return txs
 
 
@@ -196,7 +214,7 @@ def _faux_conseiller(world, sid, split, used):
             src_country=collector["country"], dst_country=acct["country"],
         ))
     txs += out_txs
-    _tag(txs, sid, "faux_conseiller", split)
+    _tag(txs, sid, "faux_conseiller", split, rng)
     end = max(t["ts"] for t in txs)
 
     desc = (
@@ -275,7 +293,7 @@ def _faux_investissement(world, sid, split, used):
                 "Consolidation", _fraud_channel(rng, False), "completed",
                 src_country=c["country"], dst_country=final["country"],
             ))
-    _tag(txs, sid, "faux_investissement", split)
+    _tag(txs, sid, "faux_investissement", split, rng)
     end = max(t["ts"] for t in txs)
     total = sum(t["amount"] for t in txs)
     desc = (
@@ -347,7 +365,7 @@ def _compte_collecteur(world, sid, split, used):
             "Transfert", _fraud_channel(rng, False), "completed",
             src_country=collector["country"], dst_country=acct["country"],
         ))
-    _tag(txs, sid, "compte_collecteur", split)
+    _tag(txs, sid, "compte_collecteur", split, rng)
     end = max(t["ts"] for t in txs)
     desc = (
         f"Un compte client existant a recu {len(senders)} virements de comptes "
@@ -397,7 +415,7 @@ def _smurfing(world, sid, split, used):
             _fraud_channel(rng, False), pick_status(rng),
             src_country=source["country"], dst_country=acct["country"],
         ))
-    _tag(txs, sid, "smurfing", split)
+    _tag(txs, sid, "smurfing", split, rng)
     end = max(t["ts"] for t in txs)
     desc = (
         f"{n_tx} virements de montants proches de {threshold} EUR emis par un "
@@ -463,7 +481,7 @@ def _chaine_mules(world, sid, split, used):
             _fraud_channel(rng, False), "completed",
             src_country=hops[i]["country"], dst_country=hops[i + 1]["country"],
         ))
-    _tag(txs, sid, "chaine_mules", split)
+    _tag(txs, sid, "chaine_mules", split, rng)
     end = max(t["ts"] for t in txs)
     desc = (
         f"{amount:,.0f} EUR ont traverse {n_hops} comptes successifs en "
@@ -523,7 +541,7 @@ def _dormant_reactive(world, sid, split, used):
             _fraud_channel(rng, False), "completed",
             src_country=hub["country"], dst_country=acct["country"],
         ))
-    _tag(txs, sid, "dormant_reactive", split)
+    _tag(txs, sid, "dormant_reactive", split, rng)
     end = max(t["ts"] for t in txs)
     age = (start.date() - date.fromisoformat(hub["opened_at"])).days
     desc = (
@@ -567,7 +585,7 @@ def _cycle(world, sid, split, used):
                 _fraud_channel(rng, False), "completed",
                 src_country=a["country"], dst_country=b["country"],
             ))
-    _tag(txs, sid, "cycle", split)
+    _tag(txs, sid, "cycle", split, rng)
     end = max(t["ts"] for t in txs)
     desc = (
         f"{n} comptes se sont transfere des fonds en boucle ({n_laps} tours, "

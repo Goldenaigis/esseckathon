@@ -4,6 +4,7 @@ import math
 from datetime import datetime, timedelta
 
 from . import names as N
+from ..shared.schema import TX_TYPE_INSTRUMENT
 
 # ------------------------------------------------------------ temps
 
@@ -76,6 +77,7 @@ def make_tx(ts, src, dst, amount, tx_type, label, channel, status="completed",
         "dst_country": dst_country,
         "channel": channel,
         "status": status,
+        "instrument": TX_TYPE_INSTRUMENT[tx_type],
         "tx_type": tx_type,
         "label": label,
         "gt_is_fraud": is_fraud,
@@ -348,10 +350,15 @@ class World:
             )
             self.main_account[pid] = main["account_id"]
 
-            if rng.random() < cfg.savings_ratio:
+            # Le compte d'epargne est ouvert apres le compte courant, mais
+            # toujours avant le debut de la fenetre: sinon on obtient des
+            # comptes utilises avant leur propre date d'ouverture.
+            if age_days > 60 and rng.random() < cfg.savings_ratio:
+                offset = rng.randrange(30, min(400, age_days))
                 sav = self._open_account(
                     "person", pid, full, bank, "epargne", "particulier",
-                    (opened + timedelta(days=rng.randrange(30, 400))).date().isoformat(),
+                    (self.window_start
+                     - timedelta(days=age_days - offset)).date().isoformat(),
                     lognormal_amount(rng, income * 6, 1.1, 50),
                 )
                 self.savings_account[pid] = sav["account_id"]
