@@ -26,6 +26,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from eth_account import Account
 from web3 import Web3
+from web3.middleware import ExtraDataToPOAMiddleware
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT.parent / "fraudnet" / "data"
@@ -67,6 +68,8 @@ class Chain:
         self.wallets = self._json(ROOT / "wallets.json", "lance 'npm run wallets'")
         self.deployment = self._json(ROOT / "deployment.json", "lance 'npm run deploy'")
         self.w3 = Web3(Web3.HTTPProvider(rpc, request_kwargs={"timeout": 60}))
+        # les blocs Avalanche (Subnet-EVM) ont un extraData plus long que sur Ethereum
+        self.w3.middleware_onion.inject(ExtraDataToPOAMiddleware, layer=0)
         if not self.w3.is_connected():
             sys.exit(f"Impossible de joindre {rpc} : la L1 est-elle demarree ? (avalanche network start)")
         self.token = self._contract("EURToken")
