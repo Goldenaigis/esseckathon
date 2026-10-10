@@ -21,7 +21,7 @@ from fastapi.staticfiles import StaticFiles
 
 from backend.module2_graph.build_graph import build_graph, summary
 from backend.module2_graph.graph_features import compute_account_features
-from backend.module2_graph.risk import heuristic_account_scores
+from backend.module2_graph.risk import heuristic_account_scores, truth_account_scores
 from backend.module2_graph.subgraph import ego_network, top_risk_subgraph
 from backend.module2_graph.to_cytoscape import to_cytoscape, detect_structures
 from backend.module2_graph.to_webgl import to_webgl
@@ -60,8 +60,14 @@ class _State:
             self.graph = build_graph(DB_PATH)
             self.fast = self.graph.number_of_nodes() > 1500
         self.features = compute_account_features(self.graph, fast=self.fast)
-        # >>> ICI on branchera M3 : remplacer par les scores reels <<<
-        self.scores = heuristic_account_scores(self.features)
+        # Couleur du graphe :
+        #  - sur M1 : VERITE TERRAIN de M1 (transitoire, en attendant M3) ;
+        #  - sur fixtures : score heuristique de graphe.
+        # >>> POINT DE BRANCHEMENT M3 : remplacer par les scores reels du modele <<<
+        if self.source == "m1":
+            self.scores = truth_account_scores(self.graph)
+        else:
+            self.scores = heuristic_account_scores(self.features)
         # layout geometrique precalcule UNE fois (positions figees pour le WebGL)
         self.positions = compute_layout(self.graph, self.scores)
 

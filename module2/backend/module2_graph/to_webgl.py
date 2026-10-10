@@ -45,6 +45,9 @@ def to_webgl(g: nx.MultiDiGraph,
             "nm": attrs.get("owner_name"),
             "fn": attrs.get("first_name"),
             "ln": attrs.get("last_name"),
+            # VERITE TERRAIN M1 (affichage uniquement, jamais une feature)
+            "tr": attrs.get("truth_role"),
+            "td": bool(attrs.get("truth_is_decoy")),
         })
 
     # agregation des liens paralleles (src,dst)

@@ -59,11 +59,27 @@ def _load_person_names(data_dir: str) -> dict:
     return names
 
 
+def _load_decoy_accounts(data_dir: str) -> set:
+    """Comptes impliques dans un LEURRE (decoy) : legitimes mais trompeurs.
+    Reperes via les transactions portant un gt_decoy_id (lecture seule)."""
+    tx_path = os.path.join(data_dir, "transactions.csv")
+    decoy_accounts: set = set()
+    if not os.path.exists(tx_path):
+        return decoy_accounts
+    with open(tx_path, newline="", encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            if r.get("gt_decoy_id"):
+                decoy_accounts.add(r["src_account"])
+                decoy_accounts.add(r["dst_account"])
+    return decoy_accounts
+
+
 def build_graph_from_m1(data_dir: str = DEFAULT_M1_DIR) -> nx.MultiDiGraph:
     """Construit le MultiDiGraph a partir des CSV de M1 (lecture seule)."""
     acc_path = os.path.join(data_dir, "accounts.csv")
     tx_path = os.path.join(data_dir, "transactions.csv")
     person_names = _load_person_names(data_dir)
+    decoy_accounts = _load_decoy_accounts(data_dir)
 
     g = nx.MultiDiGraph()
     with open(acc_path, newline="", encoding="utf-8") as f:
@@ -75,8 +91,12 @@ def build_graph_from_m1(data_dir: str = DEFAULT_M1_DIR) -> nx.MultiDiGraph:
             first = last = ""
             if owner_type == "person":
                 first, last = person_names.get(r.get("owner_id"), ("", ""))
+            acc_id = r["account_id"]
+            role = (r.get("gt_role") or "normal")
+            # VERITE TERRAIN M1 (prefixe truth_) : affichage/eval UNIQUEMENT,
+            # JAMAIS une feature ni une entree du score (contrat anti-fuite M1).
             g.add_node(
-                r["account_id"],
+                acc_id,
                 bank=r.get("bank_name"),
                 country=r.get("country"),
                 opened_date=r.get("opened_at"),
@@ -86,8 +106,10 @@ def build_graph_from_m1(data_dir: str = DEFAULT_M1_DIR) -> nx.MultiDiGraph:
                 owner_name=r.get("owner_name") or None,
                 first_name=first or None,
                 last_name=last or None,
-                is_fraudster=1 if (r.get("gt_role") or "") not in ("", "normal") else 0,
-                gt_role=r.get("gt_role") or None,
+                truth_role=role,                       # normal/victim/fraudster/mule
+                truth_is_decoy=acc_id in decoy_accounts,
+                # conserve pour compat interne (statut d'arete), pas une feature
+                is_fraudster=1 if role in ("fraudster", "mule") else 0,
             )
 
     with open(tx_path, newline="", encoding="utf-8") as f:

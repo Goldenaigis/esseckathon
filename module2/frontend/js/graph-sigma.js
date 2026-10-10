@@ -9,7 +9,8 @@
  */
 
 const COLORS = { high: "#ff5a5a", mid: "#ffb020", low: "#35d07f" };
-function riskColor(s) { return s >= 60 ? COLORS.high : s >= 30 ? COLORS.mid : COLORS.low; }
+// seuils de couleur : rouge >= 50, jaune >= 25, vert sinon
+function riskColor(s) { return s >= 50 ? COLORS.high : s >= 25 ? COLORS.mid : COLORS.low; }
 
 const state = {
   graph: null,       // graphology
@@ -117,6 +118,7 @@ async function load() {
       color: riskColor(n.s), label: n.id,   // le libellé reste l'ID unique
       score: n.s, role: n.r, country: n.ci, ctype: n.ct, fi: n.fi, fo: n.fo,
       ownerName: n.nm, firstName: n.fn, lastName: n.ln,   // identité -> panneau infos
+      truthRole: n.tr, truthDecoy: n.td,                  // vérité terrain M1 (affichage)
     });
     // index de recherche : nom/prénom (ou raison sociale) + ID, normalisé
     const displayName = (n.fn || n.ln) ? `${n.fn || ""} ${n.ln || ""}`.trim() : (n.nm || "");
@@ -425,6 +427,14 @@ function showPanel(node) {
   document.querySelector(".score-ring").style.background =
     `conic-gradient(${riskColor(a.score)} ${a.score * 3.6}deg, #1b2434 0deg)`;
 
+  // Vérité terrain M1 (étiquetée comme telle, distincte du score)
+  const truthLabels = {
+    fraudster: "Fraudeur (vérité M1)", mule: "Mule (vérité M1)",
+    victim: "Victime (vérité M1)", normal: "Normal (vérité M1)",
+  };
+  let truth = truthLabels[a.truthRole] || null;
+  if (a.truthDecoy) truth = "Leurre — légitime mais trompeur (vérité M1)";
+
   // Identité du titulaire : nom + prénom pour une personne, raison sociale sinon.
   // N'apparaît QUE dans ce panneau (jamais sur le graphe).
   let identite;
@@ -436,6 +446,7 @@ function showPanel(node) {
 
   el("p-attrs").innerHTML = `
     <div><dt>Titulaire</dt><dd>${identite}</dd></div>
+    ${truth ? `<div><dt>Statut réel</dt><dd>${truth}</dd></div>` : ""}
     <div><dt>Pays</dt><dd>${a.country ?? "—"}</dd></div>
     <div><dt>Type client</dt><dd>${a.ctype ?? "—"}</dd></div>
     <div><dt>Flux entrants (total)</dt><dd>${a.fi}</dd></div>
