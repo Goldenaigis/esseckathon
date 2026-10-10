@@ -40,6 +40,14 @@ CHANNELS = ["mobile", "mobile", "web", "branch"]        # mobile majoritaire
 
 T0 = datetime(2026, 1, 10, 8, 0, 0)  # debut de la fenetre simulee
 
+# Racine du module (module2/) : .../module2/backend/module1_data/fixtures.py
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
+def _default_db_path() -> str:
+    """Chemin de la base ancre sur le module (robuste quel que soit le cwd)."""
+    return os.path.join(PROJECT_ROOT, "data", "bank.db")
+
 
 class _Gen:
     """Petit etat partage : compteurs d'IDs + accumulateurs."""
@@ -346,7 +354,7 @@ PRESETS = {
 def main():
     ap = argparse.ArgumentParser(description="Generateur de donnees jouet (faux M1)")
     ap.add_argument("--seed", type=int, default=42)
-    ap.add_argument("--db", default=os.path.join("data", "bank.db"))
+    ap.add_argument("--db", default=_default_db_path())
     ap.add_argument("--size", choices=PRESETS.keys(), default="medium",
                     help="taille de la base (small/medium/large)")
     ap.add_argument("--accounts", type=int, help="nb de comptes legitimes (override)")

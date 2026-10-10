@@ -43,6 +43,7 @@ function cytoStyle() {
     {
       selector: "edge",
       style: {
+        // épaisseur = montant (échelle log pour compresser les écarts)
         "width": ele => 1 + Math.log10((ele.data("amount") || 1) + 1),
         "line-color": ele => edgeColor(ele.data("status")),
         "target-arrow-color": ele => edgeColor(ele.data("status")),
@@ -50,12 +51,23 @@ function cytoStyle() {
         "curve-style": "bezier",
         "arrow-scale": 0.8,
         "opacity": 0.75,
+        // libellé du montant (vide par défaut, affiché au survol / highlight)
+        "label": "",
+        "font-size": 6,
+        "color": "#ffe08a",
+        "text-background-color": "#0e1420",
+        "text-background-opacity": 0.85,
+        "text-background-padding": 2,
+        "text-rotation": "autorotate",
       },
     },
     { selector: "node:selected", style: { "border-color": "#4da3ff", "border-width": 3, "label": "data(id)" } },
     // libellé affiché seulement au survol / sélection (sinon illisible)
     { selector: "node.hovered", style: { "label": "data(id)" } },
+    // montant affiché sur l'arête au survol et sur les arêtes mises en évidence
+    { selector: "edge.hovered", style: { "label": "data(amountLabel)", "opacity": 1, "width": 3, "z-index": 999 } },
     { selector: ".highlighted", style: { "line-color": "#4da3ff", "target-arrow-color": "#4da3ff", "opacity": 1, "width": 3, "label": "data(id)" } },
+    { selector: "edge.highlighted", style: { "label": "data(amountLabel)" } },
     { selector: ".faded", style: { "opacity": 0.12 } },
   ];
 }
@@ -83,12 +95,20 @@ function runLayout(name) {
   cy.layout(opts).run();
 }
 
+function formatAmount(a) {
+  if (a == null) return "—";
+  return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR",
+    maximumFractionDigits: 0 }).format(a);
+}
+
 function render(elements, layoutName) {
   currentElements = elements;
   const risk = parseInt(document.getElementById("risk-filter").value, 10);
   const nodes = elements.nodes.filter(n => (n.data.risk_score || 0) >= risk);
   const keepIds = new Set(nodes.map(n => n.data.id));
-  const edges = elements.edges.filter(e => keepIds.has(e.data.source) && keepIds.has(e.data.target));
+  const edges = elements.edges
+    .filter(e => keepIds.has(e.data.source) && keepIds.has(e.data.target))
+    .map(e => ({ data: { ...e.data, amountLabel: formatAmount(e.data.amount) } }));
 
   cy.elements().remove();
   cy.add(nodes);
@@ -122,8 +142,8 @@ function showAccount(node) {
     <div><dt>Pays</dt><dd>${d.country ?? "—"}</dd></div>
     <div><dt>Type client</dt><dd>${d.customer_type ?? "—"}</dd></div>
     <div><dt>Ouverture</dt><dd>${d.opened_date ?? "—"}</dd></div>
-    <div><dt>Flux entrants</dt><dd>${d.fan_in}</dd></div>
-    <div><dt>Flux sortants</dt><dd>${d.fan_out}</dd></div>
+    <div><dt>Flux entrants</dt><dd>${d.fan_in} · ${formatAmount(d.total_in)}</dd></div>
+    <div><dt>Flux sortants</dt><dd>${d.fan_out} · ${formatAmount(d.total_out)}</dd></div>
     <div><dt>Redistribution</dt><dd>${d.redistribution_speed_min != null ? d.redistribution_speed_min + " min" : "—"}</dd></div>`;
 
   const reasons = [];
@@ -190,9 +210,11 @@ function init() {
 
   cy.on("tap", "node", evt => showAccount(evt.target));
   cy.on("dbltap", "node", evt => focusAccount(evt.target.id()));
-  // libellé au survol
+  // libellé au survol (nœud = id ; arête = montant)
   cy.on("mouseover", "node", evt => evt.target.addClass("hovered"));
   cy.on("mouseout", "node", evt => evt.target.removeClass("hovered"));
+  cy.on("mouseover", "edge", evt => evt.target.addClass("hovered"));
+  cy.on("mouseout", "edge", evt => evt.target.removeClass("hovered"));
   cy.on("tap", evt => {
     if (evt.target === cy) {
       cy.elements().removeClass("highlighted faded");

@@ -63,7 +63,7 @@ def reload():
 
 
 @app.get("/api/graph")
-def api_graph(top_n: int = 8, radius: int = 1):
+def api_graph(top_n: int = 14, radius: int = 1):
     """Sous-graphe des comptes les plus a risque (+ voisinage immediat).
     Defaut volontairement petit : on veut que les STRUCTURES restent lisibles,
     pas afficher tout le trafic."""

@@ -223,7 +223,8 @@ if __name__ == "__main__":
     import os
     from backend.module2_graph.build_graph import build_graph
 
-    graph = build_graph(os.path.join("data", "bank.db"))
+    _root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    graph = build_graph(os.path.join(_root, "data", "bank.db"))
     fs = compute_account_features(graph)
     # affiche les comptes les plus "interessants"
     ranked = sorted(fs.items(), key=lambda kv: kv[1]["fan_in"], reverse=True)
