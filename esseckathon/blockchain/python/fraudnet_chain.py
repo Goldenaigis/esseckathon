@@ -116,8 +116,10 @@ class Chain:
 
 # ------------------------------------------------------------------ commandes
 
-# Variables hors chaine jointes sur tx_id (jamais les colonnes gt_ : verite terrain)
-OFFCHAIN_FEATURES = ("instrument", "tx_type", "channel", "currency", "src_country", "dst_country", "label")
+# Variables hors chaine jointes sur tx_id (jamais les colonnes gt_ : verite terrain).
+# `label` est exclu : dans le jeu 60 jours, 21 libelles n'apparaissent que sur des
+# fraudes et la colonne resout le probleme a elle seule (F1 0,949) -> fuite.
+OFFCHAIN_FEATURES = ("instrument", "tx_type", "channel", "currency", "src_country", "dst_country")
 
 
 def cmd_export(args):

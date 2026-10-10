@@ -120,8 +120,11 @@ $PY python/fraudnet_chain.py retract --bank BNK_01 ACC_000909        # faux posi
 - lu sur la chaîne : `tx_id, ts, src_account, dst_account, amount`, les adresses,
   le bloc et le hash de transaction ;
 - joint hors chaîne sur `tx_id` : `instrument, tx_type, channel, currency,
-  src_country, dst_country, label` (variables du Module 2 ; le périmètre scorable
+  src_country, dst_country` (variables du Module 2 ; le périmètre scorable
   est `instrument == "credit_transfer"`). `--chain-only` pour ne garder que la chaîne.
+- `label` (libellé du virement) est **volontairement exclu** : dans le jeu 60 jours,
+  21 libellés n'apparaissent que sur des fraudes et cette colonne seule atteint
+  F1 0,949 (fuite de données, corrigée dans le jeu 1 an).
 
 Jamais de colonne `gt_` : la jointure avec `transactions.csv` sur ces colonnes sert
 uniquement à l'évaluation.
