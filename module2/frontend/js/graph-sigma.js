@@ -46,6 +46,23 @@ function setHead(txt) { el("loading-txt").textContent = txt; }
 function setBar(pct) { el("load-bar-fill").style.width = Math.max(0, Math.min(100, pct)) + "%"; }
 const nf = n => n.toLocaleString("fr-FR");
 
+/* Détection du support WebGL + infos GPU (cause fréquente de blocage à l'init Sigma) */
+function detectWebGL() {
+  try {
+    const c = document.createElement("canvas");
+    const gl = c.getContext("webgl2") || c.getContext("webgl") || c.getContext("experimental-webgl");
+    if (!gl) return { ok: false, version: "aucun", renderer: "—" };
+    const version = (c.getContext("webgl2")) ? "WebGL 2" : "WebGL 1";
+    let renderer = "inconnu";
+    const dbg = gl.getExtension("WEBGL_debug_renderer_info");
+    if (dbg) renderer = gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || renderer;
+    const software = /swiftshader|software|llvmpipe|basic render/i.test(renderer);
+    return { ok: true, version, renderer, software };
+  } catch (e) {
+    return { ok: false, version: "erreur", renderer: String(e) };
+  }
+}
+
 /* ---------- Chargement + construction du graphe (verbeux) ---------- */
 async function load() {
   const started = t0();
@@ -165,7 +182,32 @@ function lodRiskThreshold() {
 }
 
 /* ---------- Rendu Sigma + effet focus (Obsidian) ---------- */
-function initSigma() {
+async function initSigma() {
+  // (a) Vérifier WebGL AVANT de créer Sigma (cause n°1 de blocage à cette étape)
+  logLine(">  Vérification du support WebGL...");
+  await nextFrame();
+  const wgl = detectWebGL();
+  if (!wgl.ok) {
+    logLine(`[X] WebGL INDISPONIBLE dans ce navigateur (${wgl.renderer}).`, "warn");
+    logLine("    Sigma ne peut pas s'initialiser sans WebGL. Essayez :", "warn");
+    logLine("    - un autre navigateur (Chrome/Firefox à jour),", "warn");
+    logLine("    - activer l'accélération matérielle,", "warn");
+    logLine("    - ou utilisez la vue classique (bouton en haut à droite).", "warn");
+    setHead("WebGL indisponible");
+    throw new Error("WebGL indisponible");
+  }
+  logLine(`[OK] ${wgl.version} disponible`
+    + (wgl.renderer && wgl.renderer !== "inconnu" ? ` · GPU : <span class="dim">${wgl.renderer}</span>` : ""), "ok");
+  if (wgl.software) {
+    logLine("[!] Rendu WebGL LOGICIEL détecté (pas de vraie carte graphique).", "warn");
+    logLine("    L'affichage peut être lent sur 7 000 nœuds. On continue...", "warn");
+  }
+  await nextFrame();
+
+  // (b) Construction du moteur Sigma
+  logLine(">  Instanciation du moteur Sigma...");
+  await nextFrame();
+  const tSig = t0();
   state.renderer = new Sigma(state.graph, el("sigma"), {
     renderEdgeLabels: false,
     labelRenderedSizeThreshold: 12,   // labels seulement sur gros nœuds / au zoom
@@ -176,6 +218,10 @@ function initSigma() {
     minCameraRatio: 0.03,
     maxCameraRatio: 1.4,
   });
+  logLine(`[OK] Moteur Sigma instancié en ${ms(tSig)}`, "ok");
+  await nextFrame();
+  logLine(">  Attachement des reducers (effet focus) et des événements...");
+  await nextFrame();
 
   // reducers = cœur de l'effet Obsidian : estompe tout sauf le focus
   state.renderer.setSetting("nodeReducer", (node, data) => {
@@ -226,6 +272,16 @@ function initSigma() {
     if (t !== state.lodThreshold) { state.lodThreshold = t; state.renderer.refresh(); }
     updateLodBadge();
   });
+  logLine("[OK] Reducers et événements attachés", "ok");
+  await nextFrame();
+
+  // (c) Premier rendu (dessin WebGL des 7 000 nœuds) — souvent le vrai coût
+  logLine(">  Premier rendu WebGL (dessin des nœuds et liens)...");
+  await nextFrame();
+  const tDraw = t0();
+  state.renderer.refresh();
+  logLine(`[OK] Premier rendu effectué en ${ms(tDraw)}`, "ok");
+  await nextFrame();
 }
 
 function updateLodBadge() {
@@ -387,29 +443,42 @@ function initControls() {
 }
 
 async function main() {
-  await load();
+  try {
+    await load();
 
-  setHead("Initialisation du rendu WebGL...");
-  logLine(">  Création du moteur Sigma (WebGL)...");
-  await nextFrame();
-  const tR = t0();
-  initSigma();
-  initControls();
-  state.lodThreshold = lodRiskThreshold();
-  updateLodBadge();
-  logLine(`[OK] Rendu WebGL initialisé en ${ms(tR)} · affichage : risque ≥ ${state.lodThreshold}`, "ok");
-  logLine("<span class='dim'>Astuce : molette = zoom (révèle le voisinage) · clic = focus · slider = frise temporelle</span>");
-  state.renderer.getCamera().animatedReset();
-  state.renderer.refresh();
-  setBar(100);
-  await nextFrame();
-  // petite pause pour laisser lire la dernière ligne, puis fondu
-  setTimeout(() => {
-    const o = el("loading");
-    o.style.transition = "opacity 0.4s ease";
-    o.style.opacity = "0";
-    setTimeout(() => { o.style.display = "none"; }, 420);
-  }, 500);
+    setHead("Initialisation du rendu WebGL...");
+    const tR = t0();
+    await initSigma();     // étape détaillée en sous-phases verbeuses (voir journal)
+    initControls();
+    state.lodThreshold = lodRiskThreshold();
+    updateLodBadge();
+    logLine(`[OK] Rendu WebGL initialisé (total étape) en ${ms(tR)} · affichage : risque >= ${state.lodThreshold}`, "ok");
+    logLine("<span class='dim'>Astuce : molette = zoom (révèle le voisinage) · clic = focus · slider = frise temporelle</span>");
+    state.renderer.getCamera().animatedReset();
+    state.renderer.refresh();
+    setBar(100);
+    await nextFrame();
+    // petite pause pour laisser lire la dernière ligne, puis fondu
+    setTimeout(() => {
+      const o = el("loading");
+      o.style.transition = "opacity 0.4s ease";
+      o.style.opacity = "0";
+      setTimeout(() => { o.style.display = "none"; }, 420);
+    }, 800);
+  } catch (err) {
+    // on NE masque PAS l'overlay : le journal reste affiché avec l'erreur
+    setHead("Chargement interrompu");
+    logLine("[X] Erreur : " + (err && err.message ? err.message : err), "warn");
+    logLine("<span class='dim'>Le journal ci-dessus indique la dernière étape atteinte.</span>");
+  }
 }
+
+// garde-fou : toute erreur JS imprévue est écrite dans le journal (pas de blocage muet)
+window.addEventListener("error", e => {
+  try { logLine("[X] JS : " + e.message, "warn"); } catch (_) {}
+});
+window.addEventListener("unhandledrejection", e => {
+  try { logLine("[X] Promesse rejetée : " + (e.reason && e.reason.message || e.reason), "warn"); } catch (_) {}
+});
 
 document.addEventListener("DOMContentLoaded", main);
