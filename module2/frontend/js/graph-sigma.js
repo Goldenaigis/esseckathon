@@ -19,6 +19,7 @@ const state = {
   tMin: null, tMax: null,
   riskMin: 0,
   lodThreshold: 50,  // seuil de risque courant selon le zoom (LOD)
+  winT0: null, winT1: null,  // fenêtre temporelle courante (ms epoch)
   cutoffIdx: null,   // index courant dans edgesByTime (cumulatif)
   hovered: null,
   selected: null,
@@ -230,10 +231,17 @@ async function initSigma() {
     const threshold = Math.max(state.riskMin, state.lodThreshold);
     const focus = state.selected || state.hovered;
     // on garde toujours visibles le focus et ses voisins, même sous le seuil
-    const protectedNode = focus && (node === focus || state.neighbors.has(node));
+    // CLIC (selected) : on ne montre QUE le nœud et ses partenaires de la fenêtre.
+    if (state.selected) {
+      if (node === state.selected) { res.size = data.baseSize * 1.7; res.zIndex = 2; res.forceLabel = true; return res; }
+      if (state.neighbors.has(node)) { res.zIndex = 1; res.forceLabel = true; return res; }
+      res.hidden = true; return res;      // tout le reste est masqué
+    }
+    // SURVOL (hovered) ou vue normale : LOD + estompage doux
+    const protectedNode = state.hovered && (node === state.hovered || state.neighbors.has(node));
     if (!protectedNode && data.score < threshold) { res.hidden = true; return res; }
-    if (focus) {
-      if (node === focus) { res.size = data.baseSize * 1.6; res.zIndex = 2; res.forceLabel = true; }
+    if (state.hovered) {
+      if (node === state.hovered) { res.size = data.baseSize * 1.6; res.zIndex = 2; res.forceLabel = true; }
       else if (state.neighbors.has(node)) { res.zIndex = 1; res.forceLabel = true; }
       else { res.color = "rgba(120,140,170,0.12)"; res.label = ""; res.zIndex = 0; }
     }
@@ -291,10 +299,16 @@ function updateLodBadge() {
   b.textContent = t > 0 ? `Affichage : risque ≥ ${t}` : "Affichage : tous les comptes";
 }
 
+/* Voisins d'un nœud, RESTREINTS à la fenêtre temporelle courante :
+ * seuls les comptes avec qui il a transigé entre winT0 et winT1 sont retenus. */
 function neighborsOf(node) {
-  const s = new Set([node]);
-  state.graph.forEachNeighbor(node, n => s.add(n));
-  return s;
+  const t0 = state.winT0, t1 = state.winT1;
+  if (t0 == null || t1 == null) {   // pas encore de fenêtre : tout le voisinage
+    const s = new Set([node]);
+    state.graph.forEachNeighbor(node, n => s.add(n));
+    return s;
+  }
+  return windowNeighbors(node, t0, t1);
 }
 
 function setHover(node) {
@@ -303,7 +317,8 @@ function setHover(node) {
   state.renderer.refresh();
 }
 
-/* clic = focus persistant + RESSERREMENT : on recadre la caméra sur le voisinage */
+/* clic = focus persistant + RESSERREMENT : on recadre la caméra sur le voisinage
+ * (uniquement les partenaires de la fenêtre temporelle sélectionnée) */
 function selectNode(node) {
   state.selected = node;
   state.hovered = null;
@@ -357,52 +372,64 @@ function showPanel(node) {
   el("p-attrs").innerHTML = `
     <div><dt>Pays</dt><dd>${a.country ?? "—"}</dd></div>
     <div><dt>Type client</dt><dd>${a.ctype ?? "—"}</dd></div>
-    <div><dt>Flux entrants</dt><dd>${a.fi}</dd></div>
-    <div><dt>Flux sortants</dt><dd>${a.fo}</dd></div>
-    <div><dt>Voisins</dt><dd>${state.neighbors.size - 1}</dd></div>`;
+    <div><dt>Flux entrants (total)</dt><dd>${a.fi}</dd></div>
+    <div><dt>Flux sortants (total)</dt><dd>${a.fo}</dd></div>
+    <div><dt>Partenaires (fenêtre)</dt><dd>${Math.max(state.neighbors.size - 1, 0)}</dd></div>`;
 }
 
-/* ---------- Timeline cumulative (positions fixes) ---------- */
-function applyTimeline(cutIdx) {
-  state.cutoffIdx = cutIdx;
-  const g = state.graph;
-  // tout masquer d'abord via flag, puis révéler jusqu'au curseur
-  state.edgesByTime.forEach((e, i) => {
-    g.setEdgeAttribute(e.key, "_tlHidden", i >= cutIdx);
+/* ---------- Timeline : FENÊTRE GLISSANTE [début, fin] via double slider ----------
+ * Les champs date bornent la plage TOTALE ; le double slider sélectionne une
+ * sous-fenêtre. On n'affiche que les liens dont la date tombe dans la fenêtre. */
+
+// plage totale (en ms epoch) definie par les champs date
+function dateRangeMs() {
+  const ds = el("date-start").value ? new Date(el("date-start").value + "T00:00:00") : new Date(state.tMin);
+  const de = el("date-end").value ? new Date(el("date-end").value + "T23:59:59") : new Date(state.tMax);
+  return { lo: ds.getTime(), hi: Math.max(de.getTime(), ds.getTime() + 1) };
+}
+
+// convertit la position (0..1000) des deux poignees en fenetre temporelle [t0,t1] (ms)
+function sliderWindowMs() {
+  const { lo, hi } = dateRangeMs();
+  let a = parseInt(el("time-min").value, 10);
+  let b = parseInt(el("time-max").value, 10);
+  if (a > b) { const t = a; a = b; b = t; }     // la poignee min reste <= max
+  const span = hi - lo;
+  return { t0: lo + span * (a / 1000), t1: lo + span * (b / 1000), a, b };
+}
+
+// recalcule le voisinage d'un noeud selectionne a partir des liens DANS la fenetre
+function windowNeighbors(node, t0, t1) {
+  const g = state.graph, s = new Set([node]);
+  const inWin = ts => { const t = new Date(ts).getTime(); return t >= t0 && t <= t1; };
+  g.forEachEdge(node, (edge, attr, src, tgt) => {
+    if (attr.ts && inWin(attr.ts)) s.add(src === node ? tgt : src);
   });
-  const shown = cutIdx;
-  const curTs = cutIdx > 0 ? state.edgesByTime[Math.min(cutIdx, state.edgesByTime.length) - 1].ts : state.tMin;
-  el("time-current").textContent = fmtDate(curTs);
-  el("tl-count").textContent = `${shown.toLocaleString("fr-FR")} / ${state.edgesByTime.length.toLocaleString("fr-FR")} liens affichés (cumulatif)`;
-  state.renderer.refresh();
+  return s;
 }
 
-/* borne la timeline entre deux dates choisies, puis mappe le slider dessus */
-function timelineBounds() {
-  const ds = el("date-start").value ? new Date(el("date-start").value).toISOString() : state.tMin;
-  const de = el("date-end").value ? new Date(el("date-end").value + "T23:59:59").toISOString() : state.tMax;
-  // indices des liens dans [ds, de]
-  const inRange = state.edgesByTime.filter(e => e.ts >= ds && e.ts <= de);
-  return { ds, de, inRange };
-}
-
-function onSlider() {
-  const { inRange } = timelineBounds();
-  const frac = parseInt(el("time-slider").value, 10) / 1000;
-  // les liens hors bornes restent masqués ; dans les bornes on révèle jusqu'à frac
-  const cutInRange = Math.round(frac * inRange.length);
+// applique la fenetre : masque les liens hors [t0,t1], met a jour la bande + compteur
+function applyWindow() {
+  const { t0, t1, a, b } = sliderWindowMs();
   const g = state.graph;
-  const rangeKeys = new Set(inRange.slice(0, cutInRange).map(e => e.key));
-  const outKeys = new Set(inRange.map(e => e.key));
   let shown = 0;
   state.edgesByTime.forEach(e => {
-    const visible = rangeKeys.has(e.key);
-    g.setEdgeAttribute(e.key, "_tlHidden", !visible);
-    if (visible) shown++;
+    const t = new Date(e.ts).getTime();
+    const vis = t >= t0 && t <= t1;
+    g.setEdgeAttribute(e.key, "_tlHidden", !vis);
+    if (vis) shown++;
   });
-  const curTs = cutInRange > 0 ? inRange[cutInRange - 1].ts : (inRange[0] && inRange[0].ts) || state.tMin;
-  el("time-current").textContent = fmtDate(curTs);
-  el("tl-count").textContent = `${shown.toLocaleString("fr-FR")} / ${inRange.length.toLocaleString("fr-FR")} liens (dans la période)`;
+  state.winT0 = t0; state.winT1 = t1;
+  // si un noeud est selectionne, recalcule son voisinage pour CETTE fenetre
+  if (state.selected) {
+    state.neighbors = windowNeighbors(state.selected, t0, t1);
+    showPanel(state.selected);
+  }
+  // bande visuelle entre les deux poignees
+  el("rs-range").style.left = (a / 10) + "%";
+  el("rs-range").style.right = (100 - b / 10) + "%";
+  el("time-current").textContent = `${fmtDate(new Date(t0).toISOString())}  ->  ${fmtDate(new Date(t1).toISOString())}`;
+  el("tl-count").textContent = `${shown.toLocaleString("fr-FR")} / ${state.edgesByTime.length.toLocaleString("fr-FR")} liens dans la fenêtre`;
   state.renderer.refresh();
 }
 
@@ -410,13 +437,17 @@ let playTimer = null;
 function togglePlay() {
   if (playTimer) { clearInterval(playTimer); playTimer = null; el("play-btn").textContent = "▶"; return; }
   el("play-btn").textContent = "⏸";
-  const slider = el("time-slider");
-  slider.value = 0; onSlider();
+  // la LARGEUR de fenetre est conservee ; on la fait glisser de gauche a droite
+  let a = parseInt(el("time-min").value, 10), b = parseInt(el("time-max").value, 10);
+  let width = Math.max(b - a, 40);
+  a = 0; b = width;
+  el("time-min").value = a; el("time-max").value = b; applyWindow();
   playTimer = setInterval(() => {
-    let v = parseInt(slider.value, 10) + 12;
-    if (v >= 1000) { v = 1000; clearInterval(playTimer); playTimer = null; el("play-btn").textContent = "▶"; }
-    slider.value = v; onSlider();
-  }, 60);
+    a += 10; b += 10;
+    if (b >= 1000) { b = 1000; a = 1000 - width; clearInterval(playTimer); playTimer = null; el("play-btn").textContent = "▶"; }
+    el("time-min").value = a; el("time-max").value = b;
+    applyWindow();
+  }, 70);
 }
 
 /* ---------- init ---------- */
@@ -425,12 +456,22 @@ function initControls() {
   const d0 = state.tMin ? state.tMin.slice(0, 10) : "";
   const d1 = state.tMax ? state.tMax.slice(0, 10) : "";
   el("date-start").value = d0; el("date-end").value = d1;
-  el("time-slider").value = 1000;
-  onSlider();
+  // fenêtre ouverte en grand au départ (toute la plage)
+  el("time-min").value = 0; el("time-max").value = 1000;
+  applyWindow();
 
-  el("time-slider").addEventListener("input", onSlider);
-  el("date-start").addEventListener("change", onSlider);
-  el("date-end").addEventListener("change", onSlider);
+  // garde les deux poignées cohérentes (min <= max) et applique la fenêtre
+  const mn = el("time-min"), mx = el("time-max");
+  mn.addEventListener("input", () => {
+    if (parseInt(mn.value, 10) > parseInt(mx.value, 10)) mn.value = mx.value;
+    applyWindow();
+  });
+  mx.addEventListener("input", () => {
+    if (parseInt(mx.value, 10) < parseInt(mn.value, 10)) mx.value = mn.value;
+    applyWindow();
+  });
+  el("date-start").addEventListener("change", applyWindow);
+  el("date-end").addEventListener("change", applyWindow);
   el("play-btn").addEventListener("click", togglePlay);
   el("risk-filter").addEventListener("input", e => {
     state.riskMin = parseInt(e.target.value, 10);
@@ -480,5 +521,13 @@ window.addEventListener("error", e => {
 window.addEventListener("unhandledrejection", e => {
   try { logLine("[X] Promesse rejetée : " + (e.reason && e.reason.message || e.reason), "warn"); } catch (_) {}
 });
+
+// hook de debug (tests only) : expose l'état et quelques actions
+window.__fg = {
+  state,
+  select: id => selectNode(id),
+  setWindow: (aPct, bPct) => { el("time-min").value = aPct; el("time-max").value = bPct; applyWindow(); },
+  neighborsOf: (id) => Array.from(neighborsOf(id)),
+};
 
 document.addEventListener("DOMContentLoaded", main);

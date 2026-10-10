@@ -59,20 +59,26 @@
   </main>
 
   <footer>
-    <!-- Timeline temporelle -->
+    <!-- Timeline temporelle : fenêtre glissante [début, fin] -->
     <div id="timeline">
       <div class="tl-row">
-        <label>Début <input type="date" id="date-start" /></label>
+        <label>Plage <input type="date" id="date-start" /></label>
+        <!-- double slider : deux poignées superposées sélectionnent une sous-fenêtre -->
         <div class="tl-slider-wrap">
-          <input type="range" id="time-slider" min="0" max="1000" value="1000" />
+          <div id="range-slider">
+            <div class="rs-track"></div>
+            <div class="rs-range" id="rs-range"></div>
+            <input type="range" id="time-min" min="0" max="1000" value="0" />
+            <input type="range" id="time-max" min="0" max="1000" value="1000" />
+          </div>
           <div id="time-current">—</div>
         </div>
-        <label>Fin <input type="date" id="date-end" /></label>
-        <button id="play-btn" title="Lecture animée">▶</button>
+        <label><input type="date" id="date-end" /> Fin</label>
+        <button id="play-btn" title="Faire glisser la fenêtre dans le temps">▶</button>
       </div>
       <div class="tl-stats">
         <span id="tl-count">—</span>
-        <span class="disclaimer">Mode cumulatif · données synthétiques · une alerte n'est pas une preuve de fraude.</span>
+        <span class="disclaimer">Fenêtre glissante · données synthétiques · une alerte n'est pas une preuve de fraude.</span>
       </div>
     </div>
   </footer>
