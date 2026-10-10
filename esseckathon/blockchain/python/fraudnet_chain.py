@@ -193,6 +193,77 @@ def cmd_demo_alerts(args):
     print(f"{len(rows)} alertes de demo ecrites dans {args.out}")
 
 
+def cmd_demo_scenario(args):
+    """Rejoue un scenario de fraude du point de vue des banques des victimes.
+
+    Avant chaque virement vers le compte collecteur, la banque de la victime interroge
+    isFlagged sur la chaine. La banque du collecteur publie le score du modele au rang
+    ou l'alerte se declenche (first_alert_leg_rank de consortium_analysis.csv).
+    Puis contraste avec un faux ami (cagnotte...) pour lequel le modele ne publie rien.
+    Demo : s'appuie sur la verite terrain pour choisir le scenario, jamais en production.
+    """
+    c = Chain()
+    analysis = {r["scenario_id"]: r for r in csv.DictReader(open(DATA_DIR / "consortium_analysis.csv", newline=""))}
+    if args.scenario not in analysis:
+        sys.exit(f"Scenario absent de consortium_analysis.csv : {args.scenario}")
+    a = analysis[args.scenario]
+    hub, hub_bank, alert_rank = a["hub_account"], a["hub_bank"], int(a["first_alert_leg_rank"])
+    scn = next(r for r in csv.DictReader(open(DATA_DIR / "scenarios.csv", newline="")) if r["scenario_id"] == args.scenario)
+    bank_of = {r["account_id"]: r["bank_id"] for r in csv.DictReader(open(DATA_DIR / "accounts.csv", newline=""))}
+    legs = sorted(
+        (r for r in csv.DictReader(open(DATA_DIR / "transactions.csv", newline=""))
+         if r["gt_scenario_id"] == args.scenario and r["dst_account"] == hub and r["status"] == "completed"),
+        key=lambda r: r["ts"],
+    )
+    hub_hash = c.account_hash(hub)
+    collector = c.bank_account(hub_bank)
+
+    # remise a zero pour pouvoir rejouer la demo
+    if c.registry.functions.getReport(hub_hash, collector.address).call()[0]:
+        c.send(collector, c.registry.functions.retractAlert(hub_hash))
+
+    banks = sorted({bank_of[l["src_account"]] for l in legs})
+    print(f"\n=== {args.scenario} : {scn['scenario_type_fr']} ===")
+    print(f"Compte collecteur {hub} chez {hub_bank} | {len(legs)} virements entrants de "
+          f"{len({l['src_account'] for l in legs})} victimes reparties dans {len(banks)} banques")
+    print(f"Seuil de blocage : score >= {args.threshold}\n")
+
+    sent = blocked = 0
+    saved = 0.0
+    for k, leg in enumerate(legs, start=1):
+        if k == alert_rank:
+            pattern = SCENARIO_TO_PATTERN[scn["scenario_type"]]
+            tx = c.send(collector, c.registry.functions.reportAlert(
+                hub_hash, args.score, PATTERNS.index(pattern),
+                hashlib.sha256(f"{args.scenario} {scn['description_fr']}".encode()).digest()))
+            print(f"  >>> {hub_bank} (banque du collecteur) publie le score du modele : {args.score}, "
+                  f"{pattern} (tx {tx[:12]}...)")
+        flagged, count, max_score, _ = c.registry.functions.isFlagged(hub_hash).call()
+        bank = bank_of[leg["src_account"]]
+        if flagged and max_score >= args.threshold:
+            blocked += 1
+            saved += float(leg["amount"])
+            verdict = f"BLOQUE (signale par {count} banque, score {max_score})"
+        else:
+            sent += 1
+            verdict = "envoye (aucun signalement)"
+        print(f"  {k:>2}. {leg['ts'][5:16]}  {bank} verifie {hub} avant {float(leg['amount']):>9.2f} EUR -> {verdict}")
+
+    total = sum(float(l["amount"]) for l in legs)
+    eur = lambda x: f"{x:,.2f}".replace(",", " ")
+    print(f"\nResultat : {blocked}/{len(legs)} virements bloques, {eur(saved)} EUR preserves "
+          f"sur {eur(total)} EUR ({100 * saved / total:.0f} %)")
+
+    if args.decoy:
+        d = next(r for r in csv.DictReader(open(DATA_DIR / "decoys.csv", newline="")) if r["decoy_id"] == args.decoy)
+        flagged, count, max_score, _ = c.registry.functions.isFlagged(c.account_hash(d["hub_account"])).call()
+        print(f"\n=== Contraste : {args.decoy} {d['decoy_type_fr']} ===")
+        print(f"Compte {d['hub_account']} : {d['n_accounts']} participants, {eur(float(d['total_amount']))} EUR")
+        print(f"  Une regle de seuil (>= 5 emetteurs) le bloquerait comme un collecteur.")
+        print(f"  isFlagged -> {'SIGNALE' if flagged else 'aucun signalement'} : le modele n'a pas publie d'alerte, "
+              f"les virements des invites passent.")
+
+
 def cmd_report(args):
     c = Chain()
     bank = c.bank_account(args.bank)
@@ -244,6 +315,13 @@ def main():
     s.add_argument("--bank", default="BNK_01")
     s.add_argument("--alerts", required=True)
     s.set_defaults(func=cmd_report)
+
+    s = sub.add_parser("demo-scenario", help="rejoue un scenario vu des banques des victimes")
+    s.add_argument("scenario", nargs="?", default="SCN_062")
+    s.add_argument("--decoy", default="DEC_001", help="faux ami a montrer en contraste ('' pour aucun)")
+    s.add_argument("--score", type=int, default=90)
+    s.add_argument("--threshold", type=int, default=80)
+    s.set_defaults(func=cmd_demo_scenario)
 
     s = sub.add_parser("check", help="verifie si un compte est signale")
     s.add_argument("account_id")

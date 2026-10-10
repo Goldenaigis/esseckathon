@@ -129,7 +129,32 @@ uniquement à l'évaluation.
 `demo-alerts` utilise la vérité terrain : à remplacer par la sortie du Module 2,
 au même format (`account_id, score, pattern, evidence`).
 
-## Démo du registre d'alertes
+## Démo principale : un scénario vu des banques des victimes
+
+```bash
+$PY python/fraudnet_chain.py demo-scenario SCN_062      # ou SCN_055 ; --decoy DEC_001 par défaut
+```
+
+Rejoue les 37 virements du compte collecteur `ACC_000480` (8 banques de victimes).
+Avant chaque virement, la banque de la victime interroge `isFlagged` sur la chaîne ;
+la banque du collecteur publie le score du modèle au 6e virement. Résultat on-chain :
+32/37 virements bloqués, 15 093,60 EUR préservés (88 %), identique à
+`fraudnet/data/consortium_analysis.csv`. Puis contraste : la cagnotte `DEC_001`
+(84 participants) n'est pas signalée.
+
+Message : la banque qui **peut** bloquer (celle de la victime) ne voit qu'un virement
+ordinaire ; la banque qui **voit** la convergence (celle du collecteur) ne peut que
+constater. Le registre fait passer le signal de l'une à l'autre. Il publie le
+**score du modèle**, pas un comptage d'émetteurs : une règle de seuil partagée
+bloquerait plus de 2 virements légitimes (cagnottes, associations) par fraude.
+
+Sur les 49 scénarios de convergence : 112 → 1 059 virements frauduleux bloqués sur
+1 321, montant préservé 8,7 % → 81,2 % (analyse du Module 1).
+
+La démo choisit le scénario grâce à la vérité terrain ; tant que le Module 2 ne
+publie pas ses propres scores, l'absence d'alerte sur la cagnotte est par construction.
+
+## Démo du registre d'alertes (retrait d'un faux positif)
 
 ```bash
 $PY python/fraudnet_chain.py check ACC_001359                          # aucun signalement
