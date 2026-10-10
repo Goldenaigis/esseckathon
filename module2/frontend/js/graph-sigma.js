@@ -296,7 +296,8 @@ async function initSigma() {
   state.renderer.on("enterNode", ({ node }) => { if (!state.selected) setHover(node); });
   state.renderer.on("leaveNode", () => { if (!state.selected) setHover(null); });
   state.renderer.on("clickNode", ({ node }) => selectNode(node));
-  state.renderer.on("clickStage", () => selectNode(null));
+  // NB : pas de désélection au clic sur le vide (évite les missclicks).
+  // Pour revenir à la vue générale : touche "\" (voir initControls).
   // survol d'une arête -> affiche le montant de la transaction
   state.renderer.on("enterEdge", ({ edge }) => { state.hoveredEdge = edge; state.renderer.refresh(); });
   state.renderer.on("leaveEdge", () => { state.hoveredEdge = null; state.renderer.refresh(); });
@@ -561,6 +562,15 @@ function initControls() {
   });
   el("reset-view-btn").addEventListener("click", () => state.renderer.getCamera().animatedReset());
   el("panel-close").addEventListener("click", () => selectNode(null));
+
+  // Touche "\" = seul moyen de revenir à la vue générale (depuis une vue isolée).
+  // On ignore si l'utilisateur est en train de taper dans un champ (recherche, dates).
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "\\") return;
+    const tag = (e.target && e.target.tagName) || "";
+    if (tag === "INPUT" || tag === "TEXTAREA") return;
+    if (state.selected) { e.preventDefault(); selectNode(null); }
+  });
 
   // recherche par nom / prénom / ID (debounce léger)
   let searchTimer = null;
