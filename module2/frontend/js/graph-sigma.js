@@ -234,6 +234,8 @@ async function initSigma() {
     defaultEdgeType: "arrow",   // flèches : directionnalité src -> dst
     zIndex: true,
     hideEdgesOnMove: true,   // ne pas dessiner les arêtes pendant pan/zoom (fluidité)
+    defaultEdgeColor: "rgba(130,170,230,0.8)",
+    minArrowSize: 10,        // taille mini de la pointe de flèche (plus visible)
     minCameraRatio: 0.03,
     maxCameraRatio: 1.4,
   });
@@ -282,10 +284,10 @@ async function initSigma() {
     res.label = data.amountLabel;
     if (edge === state.hoveredEdge) {        // survol = mise en évidence
       res.color = "rgba(255,224,138,0.95)";
-      res.size = Math.max(data.size, 1.8); res.zIndex = 3;
+      res.size = Math.max(data.size, 4); res.zIndex = 3;
     } else {
-      res.color = "rgba(130,170,230,0.8)";
-      res.size = Math.max(data.size, 1.1); res.zIndex = 2;
+      res.color = "rgba(130,170,230,0.85)";
+      res.size = Math.max(data.size, 3); res.zIndex = 2;
     }
     return res;
   });
