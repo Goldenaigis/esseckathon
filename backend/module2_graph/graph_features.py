@@ -97,18 +97,42 @@ def _redistribution_speed(g: nx.MultiDiGraph, node: str) -> Optional[float]:
     return round((ref_out - last_in).total_seconds() / 60.0, 1)
 
 
+def _inbound_window_min(g: nx.MultiDiGraph, node: str) -> Optional[float]:
+    """Duree (min) sur laquelle arrivent les virements entrants.
+    Fraude = concentree dans le temps ; activite legitime = etalee."""
+    times = [_parse(d.get("timestamp")) for _, _, d in g.in_edges(node, data=True)]
+    times = [t for t in times if t]
+    if len(times) < 2:
+        return None
+    return round((max(times) - min(times)).total_seconds() / 60.0, 1)
+
+
 def _classify_role(feats: dict) -> str:
-    """Heuristique de role (sert le rendu + le resume d'alerte)."""
+    """
+    Heuristique de role (sert le rendu + le resume d'alerte).
+
+    Point cle : distinguer une FRAUDE d'un gros compte LEGITIME. Les deux ont
+    un fort degre ; ce qui separe, c'est la CONCENTRATION TEMPORELLE (la fraude
+    arrive en rafale) et des signaux comme la redistribution rapide.
+    """
     fi, fo = feats["fan_in"], feats["fan_out"]
+    ds = feats.get("distinct_senders", fi)
     speed = feats["redistribution_speed_min"]
+    win = feats.get("inbound_window_min")
+    # une collecte frauduleuse concentre ses entrees sur < ~6h
+    bursty = win is not None and win <= 360
+
     if feats["in_cycle"]:
         return "cycle_member"
-    if fi >= 10 and fo <= 4 and speed is not None and speed <= 180:
-        return "collector_redistributor"   # sablier
-    if fi >= 10 and fo == 0:
-        return "collector"                 # etoile de collecte
-    if fo >= 10 and fi <= 2:
-        return "distributor"               # eventail / smurfing
+    # smurfing : beaucoup d'entrees d'UN SEUL emetteur, montants similaires, en rafale
+    if fi >= 8 and ds <= 2 and bursty and feats.get("same_amount_inflow"):
+        return "smurf_target"
+    # sablier : collecte de PLUSIEURS emetteurs + redistribution rapide
+    if ds >= 8 and fo <= 4 and bursty and speed is not None and speed <= 180:
+        return "collector_redistributor"
+    # etoile de collecte : beaucoup d'emetteurs DISTINCTS, pas de sortie
+    if ds >= 10 and fo == 0 and bursty:
+        return "collector"
     if fi == 1 and fo == 1:
         return "relay"                     # maillon de chaine
     return "normal"
@@ -125,20 +149,33 @@ def compute_account_features(g: nx.MultiDiGraph) -> dict[str, dict]:
       redistribution_speed_min, role
     """
     simple = _simple_digraph(g)
+    n = simple.number_of_nodes()
 
-    # centralites (sur le graphe simple)
-    deg_c = nx.degree_centrality(simple) if simple.number_of_nodes() else {}
+    # centralite de degre : rapide, toujours exacte.
+    deg_c = nx.degree_centrality(simple) if n else {}
+
+    # betweenness : exacte sur petits graphes, APPROXIMEE (echantillon) au-dela
+    # pour rester rapide (le calcul exact est O(V*E) et explose vers ~1000 noeuds).
     try:
-        betw = nx.betweenness_centrality(simple) if simple.number_of_nodes() else {}
+        if n == 0:
+            betw = {}
+        elif n <= 400:
+            betw = nx.betweenness_centrality(simple)
+        else:
+            k = min(200, n)  # echantillon de sources
+            betw = nx.betweenness_centrality(simple, k=k, seed=1)
     except Exception:
-        betw = {n: 0.0 for n in simple.nodes()}
+        betw = {node: 0.0 for node in simple.nodes()}
 
-    # cycles (sur le graphe simple). On ne retient que les cycles COURTS
-    # (3 a 6 comptes) : ce sont les cycles de blanchiment typiques. Les tres
-    # longs cycles sont le plus souvent du bruit du graphe legitime.
+    # cycles de blanchiment : on borne la recherche aux cycles COURTS (3..6) via
+    # `length_bound` pour eviter l'explosion combinatoire sur un gros graphe.
     in_cycle: set[str] = set()
     try:
-        for cyc in nx.simple_cycles(simple):
+        try:
+            cycle_iter = nx.simple_cycles(simple, length_bound=6)
+        except TypeError:  # networkx plus ancien : pas de length_bound
+            cycle_iter = nx.simple_cycles(simple)
+        for cyc in cycle_iter:
             if 3 <= len(cyc) <= 6 and _is_laundering_cycle(simple, cyc):
                 in_cycle.update(cyc)
     except Exception:
@@ -155,6 +192,13 @@ def compute_account_features(g: nx.MultiDiGraph) -> dict[str, dict]:
         fan_in = len(in_edges)
         fan_out = len(out_edges)
 
+        # signal smurfing : beaucoup d'ENTREES de montants SIMILAIRES
+        in_amts = [d.get("amount", 0.0) for _, _, d in in_edges if d.get("amount")]
+        same_amount_inflow = False
+        if len(in_amts) >= 8:
+            lo, hi = min(in_amts), max(in_amts)
+            same_amount_inflow = (hi / max(lo, 1e-9)) <= 1.5
+
         f = {
             "fan_in": fan_in,
             "fan_out": fan_out,
@@ -167,6 +211,8 @@ def compute_account_features(g: nx.MultiDiGraph) -> dict[str, dict]:
             "betweenness": round(betw.get(node, 0.0), 4),
             "in_cycle": node in in_cycle,
             "redistribution_speed_min": _redistribution_speed(g, node),
+            "inbound_window_min": _inbound_window_min(g, node),
+            "same_amount_inflow": same_amount_inflow,
         }
         f["role"] = _classify_role(f)
         feats[node] = f

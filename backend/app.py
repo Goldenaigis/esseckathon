@@ -63,11 +63,16 @@ def reload():
 
 
 @app.get("/api/graph")
-def api_graph(top_n: int = 15, radius: int = 1):
-    """Sous-graphe des comptes les plus a risque (+ voisinage)."""
+def api_graph(top_n: int = 8, radius: int = 1):
+    """Sous-graphe des comptes les plus a risque (+ voisinage immediat).
+    Defaut volontairement petit : on veut que les STRUCTURES restent lisibles,
+    pas afficher tout le trafic."""
     sub = top_risk_subgraph(state.graph, state.scores, top_n=top_n, radius=radius)
     feats = {n: state.features[n] for n in sub.nodes() if n in state.features}
-    return to_cytoscape(sub, feats, state.scores)
+    cy = to_cytoscape(sub, feats, state.scores)
+    # on expose aussi le decompte GLOBAL des structures (pas seulement le sous-graphe)
+    cy["meta"]["global_structures"] = detect_structures(state.graph, state.features)
+    return cy
 
 
 @app.get("/api/graph/full")

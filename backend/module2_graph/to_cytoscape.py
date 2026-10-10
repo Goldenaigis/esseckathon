@@ -70,14 +70,14 @@ def detect_structures(g: nx.MultiDiGraph,
         role = f.get("role")
         if role == "collector":
             out.append({"type": "collector_star", "center": acc,
-                        "detail": f"{f['fan_in']} emetteurs convergent vers ce compte"})
+                        "detail": f"{f['distinct_senders']} emetteurs convergent vers ce compte"})
         elif role == "collector_redistributor":
             out.append({"type": "hourglass", "center": acc,
-                        "detail": (f"{f['fan_in']} entrees puis redistribution en "
+                        "detail": (f"{f['distinct_senders']} entrees puis redistribution en "
                                    f"{f['redistribution_speed_min']} min")})
-        elif role == "distributor":
+        elif role == "smurf_target":
             out.append({"type": "smurfing_fan", "center": acc,
-                        "detail": f"{f['fan_out']} petits virements sortants"})
+                        "detail": f"{f['fan_in']} petits virements d'un meme compte (fractionnement)"})
     # un seul resume de cycle (membres)
     cycle_members = [a for a, f in account_features.items() if f.get("in_cycle")]
     if cycle_members:

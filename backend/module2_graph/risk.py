@@ -28,8 +28,9 @@ def heuristic_account_scores(features: dict[str, dict]) -> dict[str, int]:
             s += 20
         # role de pont (betweenness eleve)
         s += min(f["betweenness"] * 100, 15)
-        # eventail sortant (smurfing)
-        if f["fan_out"] >= 10 and f["fan_in"] <= 2:
-            s += 15
+        # fractionnement (smurfing) : entrees nombreuses, similaires, d'un meme compte
+        if f.get("same_amount_inflow") and f.get("distinct_senders", 99) <= 2 \
+                and f["fan_in"] >= 8:
+            s += 25
         scores[acc] = int(max(0, min(100, round(s))))
     return scores

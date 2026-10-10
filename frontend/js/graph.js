@@ -23,10 +23,10 @@ function cytoStyle() {
       selector: "node",
       style: {
         "background-color": ele => riskColor(ele.data("risk_score")),
-        "width": ele => 18 + Math.min((ele.data("fan_in") || 0) + (ele.data("fan_out") || 0), 30) * 1.6,
-        "height": ele => 18 + Math.min((ele.data("fan_in") || 0) + (ele.data("fan_out") || 0), 30) * 1.6,
+        "width": ele => 8 + Math.min((ele.data("fan_in") || 0) + (ele.data("fan_out") || 0), 30) * 0.7,
+        "height": ele => 8 + Math.min((ele.data("fan_in") || 0) + (ele.data("fan_out") || 0), 30) * 0.7,
         "label": "data(id)",
-        "font-size": 7,
+        "font-size": 5,
         "color": "#cdd8ea",
         "text-valign": "bottom",
         "text-margin-y": 3,
@@ -89,7 +89,7 @@ function showAccount(node) {
   const roleLabels = {
     collector: "Compte collecteur (étoile)",
     collector_redistributor: "Collecte + redistribution (sablier)",
-    distributor: "Distributeur (éventail / smurfing)",
+    smurf_target: "Cible de fractionnement (smurfing)",
     relay: "Maillon de chaîne",
     cycle_member: "Membre d'un cycle",
     normal: "Comportement normal",
@@ -111,10 +111,12 @@ function showAccount(node) {
     <div><dt>Redistribution</dt><dd>${d.redistribution_speed_min != null ? d.redistribution_speed_min + " min" : "—"}</dd></div>`;
 
   const reasons = [];
-  if (d.fan_in >= 10) reasons.push(`Convergence anormale : <b>${d.fan_in}</b> émetteurs distincts.`);
+  if (d.role === "collector" || d.role === "collector_redistributor")
+    reasons.push(`Convergence anormale : <b>${d.fan_in}</b> virements entrants concentrés.`);
   if (d.role === "collector_redistributor") reasons.push(`Redistribution rapide des fonds (${d.redistribution_speed_min} min).`);
+  if (d.role === "smurf_target") reasons.push(`<b>${d.fan_in}</b> petits virements d'un même compte (fractionnement sous seuil).`);
   if (d.in_cycle) reasons.push("Appartient à un <b>cycle financier</b> (argent qui revient à son origine).");
-  if (d.fan_out >= 10 && d.fan_in <= 2) reasons.push(`Éventail de <b>${d.fan_out}</b> virements sortants (fractionnement possible).`);
+  if (d.role === "relay") reasons.push("Maillon d'une <b>chaîne de transferts</b> (1 entrée → 1 sortie rapide).");
   if (d.customer_type === "senior") reasons.push("Profil <b>senior</b> impliqué (cible fréquente d'arnaques).");
   if (!reasons.length) reasons.push("Aucun signal réseau marquant.");
   document.getElementById("p-reasons").innerHTML = reasons.map(r => `<li>${r}</li>`).join("");
@@ -160,9 +162,10 @@ async function loadStructures() {
 
 async function loadGraph() {
   const mode = document.getElementById("view-mode").value;
-  const data = mode === "full" ? await API.graphFull() : await API.graph(15, 1);
+  const data = mode === "full" ? await API.graphFull() : await API.graph();
   render(data);
-  setStatus(`${data.meta.n_nodes} comptes · ${data.meta.n_edges} transactions · ${data.meta.suspicious_structures.length} structures suspectes`);
+  const nStruct = (data.meta.global_structures || data.meta.suspicious_structures || []).length;
+  setStatus(`${data.meta.n_nodes} comptes affichés · ${data.meta.n_edges} transactions · ${nStruct} structures suspectes détectées`);
 }
 
 function init() {

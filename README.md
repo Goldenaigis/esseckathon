@@ -10,9 +10,22 @@ données jouet) pour pouvoir développer sans attendre l'équipe données.
 
 ```bash
 pip install -r requirements.txt
-python -m backend.module1_data.fixtures   # génère data/bank.db (données jouet)
-./run.sh                                   # http://127.0.0.1:8000
+python -m backend.module1_data.fixtures            # base "medium" par défaut
+./run.sh                                           # http://127.0.0.1:8000
 ```
+
+### Tailles de base disponibles
+
+```bash
+python -m backend.module1_data.fixtures --size small    # ~130 comptes, ~440 tx
+python -m backend.module1_data.fixtures --size medium   # ~625 comptes, ~5000 tx (défaut)
+python -m backend.module1_data.fixtures --size large    # ~2000 comptes, ~20000 tx
+# overrides fins : --accounts N --transactions N --fraud-rings N --days N --seed N
+```
+
+La base `medium` contient ~2-3 % de transactions frauduleuses, réparties en
+plusieurs instances des 5 typologies (chaque instance a un `scenario_id` unique,
+indispensable à l'anti-fuite pour M3).
 
 La page de cartographie s'ouvre sur `/`. L'API est documentée sur `/docs` (Swagger).
 
@@ -24,8 +37,12 @@ La page de cartographie s'ouvre sur `/`. L'API est documentée sur `/docs` (Swag
 - Détecte visuellement les **structures suspectes** :
   - **Étoile de collecte** (compte mule : N émetteurs → 1 compte),
   - **Sablier** (collecte + redistribution rapide),
-  - **Cycle financier** (blanchiment en boucle),
-  - éventail de fractionnement, maillons de chaîne.
+  - **Fractionnement / smurfing** (N petits virements sous un seuil),
+  - **Chaîne de relais** (A→B→C→étranger),
+  - **Cycle financier** (blanchiment en boucle).
+
+> Les rôles sont classés avec une **concentration temporelle** (la fraude arrive
+> en rafale) pour ne pas confondre un gros compte *légitime* avec une mule.
 - Interface **Cytoscape.js** : zoom/pan, clic sur un compte → infos + flux,
   double-clic → centrer sur son réseau, filtre par niveau de risque, layouts.
 
