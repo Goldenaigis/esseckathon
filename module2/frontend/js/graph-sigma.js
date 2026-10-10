@@ -231,7 +231,7 @@ async function initSigma() {
     edgeLabelFont: "Inter, sans-serif",
     edgeLabelColor: { color: "#ffe08a" },
     edgeLabelSize: 11,
-    defaultEdgeType: "line",
+    defaultEdgeType: "arrow",   // flèches : directionnalité src -> dst
     zIndex: true,
     hideEdgesOnMove: true,   // ne pas dessiner les arêtes pendant pan/zoom (fluidité)
     minCameraRatio: 0.03,
@@ -278,13 +278,14 @@ async function initSigma() {
     // on ne garde que les arêtes incidentes au nœud focalisé
     const [s, t] = g.extremities(edge);
     if (s !== focus && t !== focus) { res.hidden = true; return res; }
-    // mise en évidence + montant au survol de l'arête
-    if (edge === state.hoveredEdge) {
-      res.label = data.amountLabel; res.color = "rgba(255,224,138,0.95)";
-      res.size = Math.max(data.size, 1.4); res.zIndex = 3;
+    // PRIX : le montant s'affiche sur TOUTES les arêtes du nœud focalisé
+    res.label = data.amountLabel;
+    if (edge === state.hoveredEdge) {        // survol = mise en évidence
+      res.color = "rgba(255,224,138,0.95)";
+      res.size = Math.max(data.size, 1.8); res.zIndex = 3;
     } else {
-      res.label = ""; res.color = "rgba(110,168,254,0.75)";
-      res.size = Math.max(data.size, 1.2); res.zIndex = 2;
+      res.color = "rgba(130,170,230,0.8)";
+      res.size = Math.max(data.size, 1.1); res.zIndex = 2;
     }
     return res;
   });
