@@ -23,10 +23,12 @@ function cytoStyle() {
       selector: "node",
       style: {
         "background-color": ele => riskColor(ele.data("risk_score")),
-        "width": ele => 8 + Math.min((ele.data("fan_in") || 0) + (ele.data("fan_out") || 0), 30) * 0.7,
-        "height": ele => 8 + Math.min((ele.data("fan_in") || 0) + (ele.data("fan_out") || 0), 30) * 0.7,
-        "label": "data(id)",
-        "font-size": 5,
+        // Taille = volume d'activité (fan_in + fan_out), mais compressée (sqrt)
+        // pour que les hubs restent visibles sans écraser le reste.
+        "width": ele => 4 + Math.sqrt(Math.min((ele.data("fan_in") || 0) + (ele.data("fan_out") || 0), 40)) * 2.2,
+        "height": ele => 4 + Math.sqrt(Math.min((ele.data("fan_in") || 0) + (ele.data("fan_out") || 0), 40)) * 2.2,
+        "label": "",
+        "font-size": 6,
         "color": "#cdd8ea",
         "text-valign": "bottom",
         "text-margin-y": 3,
@@ -50,19 +52,33 @@ function cytoStyle() {
         "opacity": 0.75,
       },
     },
-    { selector: "node:selected", style: { "border-color": "#4da3ff", "border-width": 4 } },
-    { selector: ".highlighted", style: { "line-color": "#4da3ff", "target-arrow-color": "#4da3ff", "opacity": 1, "width": 3 } },
+    { selector: "node:selected", style: { "border-color": "#4da3ff", "border-width": 3, "label": "data(id)" } },
+    // libellé affiché seulement au survol / sélection (sinon illisible)
+    { selector: "node.hovered", style: { "label": "data(id)" } },
+    { selector: ".highlighted", style: { "line-color": "#4da3ff", "target-arrow-color": "#4da3ff", "opacity": 1, "width": 3, "label": "data(id)" } },
     { selector: ".faded", style: { "opacity": 0.12 } },
   ];
 }
 
 function runLayout(name) {
-  const opts = { name, animate: true, animationDuration: 500, padding: 30 };
+  const nNodes = cy.nodes().length;
+  // au-delà de ~120 noeuds, on coupe l'animation (coûteuse) pour accélérer
+  const animate = nNodes <= 120;
+  const opts = { name, animate, animationDuration: 350, padding: 30 };
   if (name === "concentric") {
     opts.concentric = n => n.data("risk_score");
     opts.levelWidth = () => 2;
   }
-  if (name === "cose") { opts.idealEdgeLength = 90; opts.nodeRepulsion = 9000; }
+  if (name === "cose") {
+    // cose = simulation de forces = le poste le plus coûteux : on borne tout.
+    opts.idealEdgeLength = 70;
+    opts.nodeRepulsion = 6000;
+    opts.numIter = 500;          // au lieu de ~1000 par défaut
+    opts.nodeOverlap = 8;
+    opts.gravity = 0.3;
+    opts.coolingFactor = 0.95;
+    opts.animate = false;        // on calcule, puis on affiche d'un coup
+  }
   if (name === "breadthfirst") { opts.directed = true; opts.spacingFactor = 1.3; }
   cy.layout(opts).run();
 }
@@ -174,6 +190,9 @@ function init() {
 
   cy.on("tap", "node", evt => showAccount(evt.target));
   cy.on("dbltap", "node", evt => focusAccount(evt.target.id()));
+  // libellé au survol
+  cy.on("mouseover", "node", evt => evt.target.addClass("hovered"));
+  cy.on("mouseout", "node", evt => evt.target.removeClass("hovered"));
   cy.on("tap", evt => {
     if (evt.target === cy) {
       cy.elements().removeClass("highlighted faded");
