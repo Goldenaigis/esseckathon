@@ -22,6 +22,7 @@ const state = {
   winT0: null, winT1: null,  // fenêtre temporelle courante (ms epoch)
   cutoffIdx: null,   // index courant dans edgesByTime (cumulatif)
   hovered: null,
+  hoveredEdge: null,
   selected: null,
   neighbors: new Set(),
 };
@@ -112,8 +113,9 @@ async function load() {
     const base = 1.5 + Math.sqrt(Math.min((n.fi || 0) + (n.fo || 0), 80)) * 0.7;
     g.addNode(n.id, {
       x: n.x, y: n.y, size: base, baseSize: base,
-      color: riskColor(n.s), label: n.id,
+      color: riskColor(n.s), label: n.id,   // le libellé reste l'ID unique
       score: n.s, role: n.r, country: n.ci, ctype: n.ct, fi: n.fi, fo: n.fo,
+      ownerName: n.nm, firstName: n.fn, lastName: n.ln,   // identité -> panneau infos
     });
     if (n.s >= 50) risky++;
     if ((i + 1) % CHUNK === 0 || i === NB - 1) {
@@ -141,6 +143,9 @@ async function load() {
         size: 0.3 + Math.log10((e.m || 1) + 1) * 0.35,
         color: e.f ? "rgba(255,90,90,0.35)" : "rgba(130,150,180,0.07)",
         ts: e.ts, amount: e.m, count: e.c, fraud: e.f, hidden: false,
+        // libellé = montant (+ nb de transactions si agrégées), affiché au survol
+        amountLabel: e.c > 1 ? `${fmtAmount(e.m)} · ${e.c} tx` : fmtAmount(e.m),
+        label: "",
       });
       added++; if (e.f) frauds++;
       if (e.ts) tl.push({ key, ts: e.ts });
@@ -210,10 +215,13 @@ async function initSigma() {
   await nextFrame();
   const tSig = t0();
   state.renderer = new Sigma(state.graph, el("sigma"), {
-    renderEdgeLabels: false,
-    labelRenderedSizeThreshold: 12,   // labels seulement sur gros nœuds / au zoom
+    renderEdgeLabels: true,           // libellés d'arêtes (montant) au survol
+    labelRenderedSizeThreshold: 12,   // labels nœuds seulement sur gros nœuds / au zoom
     labelFont: "Inter, sans-serif",
     labelColor: { color: "#c9d4e8" },
+    edgeLabelFont: "Inter, sans-serif",
+    edgeLabelColor: { color: "#ffe08a" },
+    edgeLabelSize: 11,
     defaultEdgeType: "line",
     zIndex: true,
     minCameraRatio: 0.03,
@@ -251,19 +259,24 @@ async function initSigma() {
   state.renderer.setSetting("edgeReducer", (edge, data) => {
     const res = { ...data };
     const g = state.graph;
-    // timeline cumulative : masquer les liens postérieurs au curseur
+    // fenêtre temporelle : masquer les liens hors période
     if (data._tlHidden) { res.hidden = true; return res; }
+    // montant affiché uniquement sur l'arête survolée
+    res.label = (edge === state.hoveredEdge) ? data.amountLabel : "";
+    if (edge === state.hoveredEdge) { res.color = "rgba(255,224,138,0.9)"; res.size = Math.max(data.size, 1.4); res.zIndex = 3; }
     const focus = state.selected || state.hovered;
     if (focus) {
       const [s, t] = g.extremities(edge);
-      if (s === focus || t === focus) { res.color = "rgba(110,168,254,0.75)"; res.size = Math.max(data.size, 1.2); res.zIndex = 2; }
-      else { res.hidden = true; }    // hors focus : on cache tout le reste
+      if (s === focus || t === focus) {
+        if (edge !== state.hoveredEdge) { res.color = "rgba(110,168,254,0.75)"; res.size = Math.max(data.size, 1.2); res.zIndex = 2; }
+      }
+      else if (edge !== state.hoveredEdge) { res.hidden = true; }  // hors focus : masqué
       return res;
     }
     // sans focus : LOD. Dézoomé, on masque les liens légitimes (bruit),
     // on ne garde que les liens de fraude ; on révèle le reste en zoomant.
     const ratio = state.renderer.getCamera().ratio;
-    if (ratio >= 0.5 && !data.fraud) { res.hidden = true; }
+    if (ratio >= 0.5 && !data.fraud && edge !== state.hoveredEdge) { res.hidden = true; }
     return res;
   });
 
@@ -272,6 +285,9 @@ async function initSigma() {
   state.renderer.on("leaveNode", () => { if (!state.selected) setHover(null); });
   state.renderer.on("clickNode", ({ node }) => selectNode(node));
   state.renderer.on("clickStage", () => selectNode(null));
+  // survol d'une arête -> affiche le montant de la transaction
+  state.renderer.on("enterEdge", ({ edge }) => { state.hoveredEdge = edge; state.renderer.refresh(); });
+  state.renderer.on("leaveEdge", () => { state.hoveredEdge = null; state.renderer.refresh(); });
 
   // LOD : quand on zoome/dézoome, recalcule le seuil de risque affiché
   const cam = state.renderer.getCamera();
@@ -359,7 +375,7 @@ function zoomToNeighborhood(node) {
 function showPanel(node) {
   const a = state.graph.getNodeAttributes(node);
   el("panel").hidden = false;
-  el("p-id").textContent = node;
+  el("p-id").textContent = node;   // identifiant unique (titre)
   const roleLabels = {
     collector: "Compte collecteur (étoile)", collector_redistributor: "Collecte + redistribution",
     smurf_target: "Cible de fractionnement", relay: "Maillon de chaîne",
@@ -369,7 +385,18 @@ function showPanel(node) {
   el("p-score").textContent = a.score;
   document.querySelector(".score-ring").style.background =
     `conic-gradient(${riskColor(a.score)} ${a.score * 3.6}deg, #1b2434 0deg)`;
+
+  // Identité du titulaire : nom + prénom pour une personne, raison sociale sinon.
+  // N'apparaît QUE dans ce panneau (jamais sur le graphe).
+  let identite;
+  if (a.firstName || a.lastName) {
+    identite = `${a.firstName ?? ""} ${a.lastName ?? ""}`.trim();
+  } else {
+    identite = a.ownerName || "—";
+  }
+
   el("p-attrs").innerHTML = `
+    <div><dt>Titulaire</dt><dd>${identite}</dd></div>
     <div><dt>Pays</dt><dd>${a.country ?? "—"}</dd></div>
     <div><dt>Type client</dt><dd>${a.ctype ?? "—"}</dd></div>
     <div><dt>Flux entrants (total)</dt><dd>${a.fi}</dd></div>

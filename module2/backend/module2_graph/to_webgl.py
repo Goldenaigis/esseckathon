@@ -41,6 +41,10 @@ def to_webgl(g: nx.MultiDiGraph,
             "ct": attrs.get("customer_type"),
             "fi": f.get("fan_in", 0),
             "fo": f.get("fan_out", 0),
+            # identite du titulaire (affichee seulement dans le panneau d'infos)
+            "nm": attrs.get("owner_name"),
+            "fn": attrs.get("first_name"),
+            "ln": attrs.get("last_name"),
         })
 
     # agregation des liens paralleles (src,dst)

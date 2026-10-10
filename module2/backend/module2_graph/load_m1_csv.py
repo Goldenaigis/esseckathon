@@ -47,15 +47,34 @@ def _customer_type(row: dict) -> str:
     return "individual"
 
 
+def _load_person_names(data_dir: str) -> dict:
+    """person_id -> (first_name, last_name) depuis persons.csv (lecture seule)."""
+    path = os.path.join(data_dir, "persons.csv")
+    names: dict[str, tuple] = {}
+    if not os.path.exists(path):
+        return names
+    with open(path, newline="", encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            names[r["person_id"]] = (r.get("first_name") or "", r.get("last_name") or "")
+    return names
+
+
 def build_graph_from_m1(data_dir: str = DEFAULT_M1_DIR) -> nx.MultiDiGraph:
     """Construit le MultiDiGraph a partir des CSV de M1 (lecture seule)."""
     acc_path = os.path.join(data_dir, "accounts.csv")
     tx_path = os.path.join(data_dir, "transactions.csv")
+    person_names = _load_person_names(data_dir)
 
     g = nx.MultiDiGraph()
     with open(acc_path, newline="", encoding="utf-8") as f:
         for r in csv.DictReader(f):
             age = r.get("account_age_days")
+            owner_type = (r.get("owner_type") or "").lower()
+            # nom/prenom : pour une PERSONNE on prend persons.csv ; pour une
+            # ENTREPRISE il n'y a pas de prenom -> on garde la raison sociale.
+            first = last = ""
+            if owner_type == "person":
+                first, last = person_names.get(r.get("owner_id"), ("", ""))
             g.add_node(
                 r["account_id"],
                 bank=r.get("bank_name"),
@@ -64,6 +83,9 @@ def build_graph_from_m1(data_dir: str = DEFAULT_M1_DIR) -> nx.MultiDiGraph:
                 account_age_days=int(age) if age not in (None, "") else None,
                 balance=float(r["balance"]) if r.get("balance") else None,
                 customer_type=_customer_type(r),
+                owner_name=r.get("owner_name") or None,
+                first_name=first or None,
+                last_name=last or None,
                 is_fraudster=1 if (r.get("gt_role") or "") not in ("", "normal") else 0,
                 gt_role=r.get("gt_role") or None,
             )
