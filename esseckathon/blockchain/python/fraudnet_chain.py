@@ -9,7 +9,8 @@ Commandes (depuis le dossier blockchain/) :
   python python/fraudnet_chain.py retract --bank BNK_01 ACC_000123
 
 - export : lit les evenements Payment du jeton EURF et reconstruit la table des
-  virements a partir de la chaine (entree du module 2). Aucune colonne gt_.
+  virements a partir de la chaine (entree du module 2), puis joint sur tx_id les
+  variables hors chaine (instrument, tx_type, channel...). Jamais de colonne gt_.
 - Les alertes sont publiees sous la forme keccak256("<CONSORTIUM_SALT>:<account_id>"),
   signees par le wallet de la banque qui les emet.
 """
@@ -115,27 +116,41 @@ class Chain:
 
 # ------------------------------------------------------------------ commandes
 
+# Variables hors chaine jointes sur tx_id (jamais les colonnes gt_ : verite terrain)
+OFFCHAIN_FEATURES = ("instrument", "tx_type", "channel", "currency", "src_country", "dst_country", "label")
+
+
 def cmd_export(args):
     c = Chain()
+    features = {}
+    if not args.chain_only:
+        with open(DATA_DIR / "transactions.csv", newline="") as f:
+            for r in csv.DictReader(f):
+                features[r["tx_id"]] = [r.get(k, "") for k in OFFCHAIN_FEATURES]
     last = c.w3.eth.block_number
     event = c.token.events.Payment
     n = 0
     with open(args.out, "w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["tx_id", "ts", "src_account", "dst_account", "amount",
-                    "src_address", "dst_address", "block_number", "onchain_tx_hash"])
+                    "src_address", "dst_address", "block_number", "onchain_tx_hash"]
+                   + ([] if args.chain_only else list(OFFCHAIN_FEATURES)))
         for start in range(0, last + 1, LOG_CHUNK):
             logs = event.get_logs(from_block=start, to_block=min(start + LOG_CHUNK - 1, last))
             for log in logs:
                 e = log["args"]
-                w.writerow([
-                    e["txRef"].rstrip(b"\0").decode(),
+                tx_id = e["txRef"].rstrip(b"\0").decode()
+                row = [
+                    tx_id,
                     datetime.fromtimestamp(e["originalTs"], tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S"),
                     c.address_to_account.get(e["from"], ""),
                     c.address_to_account.get(e["to"], ""),
                     f"{e['amount'] / 100:.2f}",
                     e["from"], e["to"], log["blockNumber"], "0x" + log["transactionHash"].hex().removeprefix("0x"),
-                ])
+                ]
+                if not args.chain_only:
+                    row += features.get(tx_id, [""] * len(OFFCHAIN_FEATURES))
+                w.writerow(row)
                 n += 1
             print(f"\r  blocs {min(start + LOG_CHUNK - 1, last)}/{last} - {n} virements", end="")
     print(f"\n{n} virements on-chain exportes dans {args.out}")
@@ -212,6 +227,8 @@ def main():
 
     s = sub.add_parser("export", help="reconstruit la table des virements depuis la chaine")
     s.add_argument("--out", default="onchain_transactions.csv")
+    s.add_argument("--chain-only", action="store_true",
+                   help="uniquement les champs lus sur la chaine, sans les variables jointes depuis transactions.csv")
     s.set_defaults(func=cmd_export)
 
     s = sub.add_parser("anchor", help="notarise le jeu de donnees")

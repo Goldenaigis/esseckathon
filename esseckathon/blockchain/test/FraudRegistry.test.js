@@ -47,6 +47,31 @@ describe("FraudRegistry", function () {
     await expect(reg.retractAlert(h("ACC_2"))).to.be.revertedWithCustomError(reg, "NoActiveReport");
   });
 
+  it("le score redescend apres retrait d'un signalement (scenario de demo)", async function () {
+    const { reg, bank2 } = await setup();
+    await reg.reportAlert(h("ACC_9"), 90, 0, ethers.ZeroHash);
+    await reg.connect(bank2).reportAlert(h("ACC_9"), 60, 0, ethers.ZeroHash);
+    let [flagged, count, maxScore] = await reg.isFlagged(h("ACC_9"));
+    expect([flagged, count, maxScore]).to.deep.equal([true, 2n, 90n]);
+    await reg.retractAlert(h("ACC_9"));
+    [flagged, count, maxScore] = await reg.isFlagged(h("ACC_9"));
+    expect([flagged, count, maxScore]).to.deep.equal([true, 1n, 60n]);
+    // re-signaler apres retrait ne duplique pas la banque dans la liste
+    await reg.reportAlert(h("ACC_9"), 70, 0, ethers.ZeroHash);
+    expect((await reg.getReporters(h("ACC_9"))).length).to.equal(2);
+    [, count, maxScore] = await reg.isFlagged(h("ACC_9"));
+    expect([count, maxScore]).to.deep.equal([2n, 70n]);
+  });
+
+  it("les signalements d'un membre exclu ne comptent plus", async function () {
+    const { reg, bank2 } = await setup();
+    await reg.connect(bank2).reportAlert(h("ACC_7"), 95, 1, ethers.ZeroHash);
+    await reg.reportAlert(h("ACC_7"), 40, 1, ethers.ZeroHash);
+    await reg.removeMember(bank2.address);
+    const [flagged, count, maxScore] = await reg.isFlagged(h("ACC_7"));
+    expect([flagged, count, maxScore]).to.deep.equal([true, 1n, 40n]);
+  });
+
   it("refuse les non-membres et les scores > 100", async function () {
     const { reg, outsider } = await setup();
     await expect(reg.connect(outsider).reportAlert(h("X"), 50, 0, ethers.ZeroHash))

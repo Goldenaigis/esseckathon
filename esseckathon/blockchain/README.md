@@ -22,6 +22,12 @@ Ce qui ne va **jamais** sur la chaîne : les noms, les colonnes `gt_` (vérité
 terrain), le lien compte ↔ personne. `wallets.json` (compte → adresse) reste
 chez la banque, comme un fichier KYC.
 
+Dans le registre d'alertes, les comptes sont **pseudonymisés** par
+`keccak256(sel du consortium + account_id)` : aucune donnée personnelle en clair,
+mais ce n'est pas une anonymisation (le RGPD s'applique toujours, et qui connaît le
+sel peut énumérer les identifiants). En production : intersection privée
+d'ensembles (PSI) entre banques.
+
 ## Contenu
 
 | Fichier | Rôle |
@@ -33,6 +39,7 @@ chez la banque, comme un fichier KYC.
 | `scripts/2_deploy.js` | déploie les 3 contrats → `deployment.json` |
 | `scripts/3_fund.js` | gas, soldes initiaux EURF, inscription des banques |
 | `scripts/4_replay.js` | rejoue les virements (reprise automatique, sans doublon) |
+| `scripts/5_registry.js` | redéploie uniquement FraudRegistry et réinscrit les banques (`npm run registry`) |
 | `python/fraudnet_chain.py` | export des virements on-chain, alertes, vérification, notarisation |
 
 ## Étapes
@@ -109,13 +116,32 @@ $PY python/fraudnet_chain.py check ACC_000909
 $PY python/fraudnet_chain.py retract --bank BNK_01 ACC_000909        # faux positif
 ```
 
-`onchain_transactions.csv` a les colonnes `tx_id, ts, src_account, dst_account,
-amount` (comme `transactions.csv`, sans les `gt_`) plus les adresses, le bloc et le
-hash de transaction. La jointure sur `tx_id` avec `transactions.csv` sert
+`onchain_transactions.csv` contient :
+- lu sur la chaîne : `tx_id, ts, src_account, dst_account, amount`, les adresses,
+  le bloc et le hash de transaction ;
+- joint hors chaîne sur `tx_id` : `instrument, tx_type, channel, currency,
+  src_country, dst_country, label` (variables du Module 2 ; le périmètre scorable
+  est `instrument == "credit_transfer"`). `--chain-only` pour ne garder que la chaîne.
+
+Jamais de colonne `gt_` : la jointure avec `transactions.csv` sur ces colonnes sert
 uniquement à l'évaluation.
 
 `demo-alerts` utilise la vérité terrain : à remplacer par la sortie du Module 2,
 au même format (`account_id, score, pattern, evidence`).
+
+## Démo du registre d'alertes
+
+```bash
+$PY python/fraudnet_chain.py check ACC_001359                          # aucun signalement
+$PY python/fraudnet_chain.py report --bank BNK_01 --alerts a90.csv     # score 90
+$PY python/fraudnet_chain.py report --bank BNK_02 --alerts a60.csv     # score 60
+$PY python/fraudnet_chain.py check ACC_001359                          # 2 banques, max 90
+$PY python/fraudnet_chain.py retract --bank BNK_01 ACC_001359          # faux positif
+$PY python/fraudnet_chain.py check ACC_001359                          # 1 banque, max 60
+```
+
+`isFlagged` recalcule à chaque lecture sur les seuls signalements actifs de membres
+actuels : un retrait ou l'exclusion d'une banque fait redescendre le score.
 
 ## Notes techniques
 
@@ -127,5 +153,6 @@ au même format (`account_id, score, pattern, evidence`).
   l'horodatage du bloc est celui du rejeu.
 - Nonce déterministe : le k-ième virement d'un compte porte le nonce k. Relancer
   `npm run replay` après une coupure ne paie jamais deux fois.
-- Tests : `npm test` (contrats). Pipeline validé sur 5 084 virements :
-  export on-chain identique au CSV.
+- Tests : `npm test` (11 tests). Pipeline validé sur la L1 : 146 533 virements
+  rejoués, export on-chain identique au CSV (0 différence, 0 manquant).
+- Avalanche (Subnet-EVM) : web3.py a besoin de `ExtraDataToPOAMiddleware`.

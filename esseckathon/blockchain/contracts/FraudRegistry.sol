@@ -2,8 +2,10 @@
 pragma solidity ^0.8.24;
 
 /// @title FraudRegistry - registre partage d'alertes de fraude entre banques
-/// @notice Aucune donnee personnelle n'est stockee : les comptes sont identifies
-///         par keccak256(sel du consortium + account_id), calcule hors chaine.
+/// @notice Aucune donnee personnelle en clair : les comptes sont pseudonymises par
+///         keccak256(sel du consortium + account_id), calcule hors chaine. C'est une
+///         pseudonymisation (le RGPD s'applique toujours) ; en production, viser une
+///         intersection privee d'ensembles (PSI) entre banques.
 contract FraudRegistry {
     // ------------------------------------------------------------------ types
 
@@ -15,12 +17,6 @@ contract FraudRegistry {
         DormantReactivation,
         Cycle,
         FanInOnly
-    }
-
-    struct AccountStatus {
-        uint32 reportCount;    // nombre de banques ayant un signalement actif
-        uint8 maxScore;        // score de risque maximal signale (0-100)
-        uint64 lastReportAt;   // horodatage du dernier signalement
     }
 
     struct Report {
@@ -37,8 +33,9 @@ contract FraudRegistry {
     mapping(address => bool) public isMember;
     mapping(address => string) public memberName;
 
-    mapping(bytes32 => AccountStatus) private _status;
     mapping(bytes32 => mapping(address => Report)) private _reports;
+    /// Banques ayant deja signale ce compte (au plus une entree par banque)
+    mapping(bytes32 => address[]) private _reporters;
 
     // ---------------------------------------------------------------- events
 
@@ -87,6 +84,7 @@ contract FraudRegistry {
         emit MemberAdded(member, name);
     }
 
+    /// @notice Les signalements d'un membre retire cessent immediatement de compter dans isFlagged
     function removeMember(address member) external onlyAdmin {
         isMember[member] = false;
         emit MemberRemoved(member);
@@ -109,19 +107,14 @@ contract FraudRegistry {
         if (score > 100) revert InvalidScore();
 
         Report storage r = _reports[accountHash][msg.sender];
-        AccountStatus storage s = _status[accountHash];
-
-        if (!r.active) {
-            s.reportCount += 1;
+        if (r.reportedAt == 0) {
+            _reporters[accountHash].push(msg.sender);
         }
         r.active = true;
         r.score = score;
         r.pattern = pattern;
         r.evidenceHash = evidenceHash;
         r.reportedAt = uint64(block.timestamp);
-
-        if (score > s.maxScore) s.maxScore = score;
-        s.lastReportAt = uint64(block.timestamp);
 
         emit AlertReported(accountHash, msg.sender, score, pattern, evidenceHash, uint64(block.timestamp));
     }
@@ -131,26 +124,35 @@ contract FraudRegistry {
         Report storage r = _reports[accountHash][msg.sender];
         if (!r.active) revert NoActiveReport();
         r.active = false;
-        _status[accountHash].reportCount -= 1;
-        if (_status[accountHash].reportCount == 0) {
-            _status[accountHash].maxScore = 0;
-        }
         emit AlertRetracted(accountHash, msg.sender, uint64(block.timestamp));
     }
 
     // ------------------------------------------------------------ lecture
 
     /// @notice Verification avant virement : ce beneficiaire est-il signale ?
+    /// @dev Recalcule a chaque appel sur les seuls signalements actifs de membres actuels :
+    ///      un retrait ou l'exclusion d'une banque fait donc redescendre le score.
     function isFlagged(bytes32 accountHash)
         external
         view
         returns (bool flagged, uint32 reportCount, uint8 maxScore, uint64 lastReportAt)
     {
-        AccountStatus memory s = _status[accountHash];
-        return (s.reportCount > 0, s.reportCount, s.maxScore, s.lastReportAt);
+        address[] storage reporters = _reporters[accountHash];
+        for (uint256 i = 0; i < reporters.length; i++) {
+            Report storage r = _reports[accountHash][reporters[i]];
+            if (!r.active || !isMember[reporters[i]]) continue;
+            reportCount += 1;
+            if (r.score > maxScore) maxScore = r.score;
+            if (r.reportedAt > lastReportAt) lastReportAt = r.reportedAt;
+        }
+        flagged = reportCount > 0;
     }
 
     function getReport(bytes32 accountHash, address reporter) external view returns (Report memory) {
         return _reports[accountHash][reporter];
+    }
+
+    function getReporters(bytes32 accountHash) external view returns (address[] memory) {
+        return _reporters[accountHash];
     }
 }

@@ -9,7 +9,8 @@
     "wallets": "node scripts/1_wallets.js",
     "deploy": "hardhat compile --quiet && node scripts/2_deploy.js",
     "fund": "node scripts/3_fund.js",
-    "replay": "node scripts/4_replay.js"
+    "replay": "node scripts/4_replay.js",
+    "registry": "hardhat compile --quiet && node scripts/5_registry.js"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "5.0.0",
