@@ -81,6 +81,7 @@ def summary(g: nx.MultiDiGraph) -> dict:
 
 if __name__ == "__main__":
     import os
-    db = os.path.join("data", "bank.db")
+    _root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    db = os.path.join(_root, "data", "bank.db")
     graph = build_graph(db)
     print("Graphe construit :", summary(graph))

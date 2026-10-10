@@ -8,7 +8,10 @@ données jouet) pour pouvoir développer sans attendre l'équipe données.
 
 ## Démarrage rapide
 
+> Toutes les commandes se lancent depuis ce dossier `module2/`.
+
 ```bash
+cd module2
 pip install -r requirements.txt
 python -m backend.module1_data.fixtures            # base "medium" par défaut
 ./run.sh                                           # http://127.0.0.1:8000

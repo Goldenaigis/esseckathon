@@ -1,7 +1,7 @@
 // Client API centralise (partage par toutes les pages du front).
 const API = {
   async health() { return fetch("/api/health").then(r => r.json()); },
-  async graph(topN = 8, radius = 1) {
+  async graph(topN = 14, radius = 1) {
     return fetch(`/api/graph?top_n=${topN}&radius=${radius}`).then(r => r.json());
   },
   async graphFull() { return fetch("/api/graph/full").then(r => r.json()); },

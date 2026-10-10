@@ -1,5 +1,6 @@
 # Données générées
 data/*.db
+module2/data/*.db
 
 # Python
 __pycache__/
