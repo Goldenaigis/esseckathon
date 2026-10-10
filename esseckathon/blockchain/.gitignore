@@ -1,0 +1,13 @@
+node_modules/
+artifacts/
+cache/
+typechain-types/
+coverage/
+.env
+deployment.json
+__pycache__/
+replay_progress.json
+wallets.json
+alerts_demo.csv
+onchain_transactions.csv
+.venv/

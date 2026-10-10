@@ -1,0 +1,21 @@
+{
+  "name": "fraudnet-blockchain",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FraudNet on-chain : wallets, euro EURF et registre d'alertes sur une L1 Avalanche",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "wallets": "node scripts/1_wallets.js",
+    "deploy": "hardhat compile --quiet && node scripts/2_deploy.js",
+    "fund": "node scripts/3_fund.js",
+    "replay": "node scripts/4_replay.js"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "5.0.0",
+    "@openzeppelin/contracts": "^5.1.0",
+    "dotenv": "16.4.5",
+    "hardhat": "2.28.6",
+    "ethers": "^6.13.4"
+  }
+}
