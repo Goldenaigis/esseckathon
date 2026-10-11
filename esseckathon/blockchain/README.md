@@ -7,10 +7,10 @@ le graphe des flux directement depuis la chaîne, et les banques publient leurs
 alertes dans un registre partagé.
 
 ```
-fraudnet/data/*.csv ──► 1 wallet par compte (7 046) + 1 par banque (24) + 1 admin
+fraudnet/data/*.csv ──► 1 wallet par compte (7 060) + 1 par banque (24) + 1 admin
                         │
 L1 Avalanche "fraudnet" │  jeton de gas natif : FNET
-  ├─ EURToken (EURF)    │  soldes initiaux + 146 645 virements rejoués (event Payment)
+  ├─ EURToken (EURF)    │  soldes initiaux + 146 533 virements rejoués (event Payment)
   ├─ GasFunder          │  distribue le gas aux wallets par lots
   └─ FraudRegistry      │  alertes inter-banques (comptes hachés), notarisation des données
                         ▼
@@ -99,9 +99,9 @@ Arrêter / relancer plus tard : `avalanche network stop` / `avalanche network st
 
 ```bash
 npm run deploy      # ~10 s
-npm run fund        # ~1 min : gas + soldes EURF + banques
+npm run fund        # ~10 min : gas + soldes EURF + banques (~150 transactions séquentielles)
 npm run replay -- --limit 5000   # essai rapide
-npm run replay      # tout le reste (~25 min, reprend où il s'est arrêté)
+npm run replay      # tout le reste (1 528 lots, 30 à 60 min, reprend où il s'est arrêté)
 ```
 
 ### 6. Utiliser la chaîne
@@ -212,9 +212,11 @@ actuels : un retrait ou l'exclusion d'une banque fait redescendre le score.
 ## Notes techniques
 
 - Seuls les virements `completed` sont rejoués (`pending` / `rejected` n'existent pas on-chain).
-- Les soldes initiaux sont reconstruits depuis les soldes finaux. 1 575 comptes sont
-  légèrement rehaussés : le générateur bornait les soldes à 0, ce qui créerait des
-  découverts pendant le rejeu, qu'un ERC-20 refuse.
+- Les soldes initiaux sont reconstruits depuis les soldes finaux. 1 543 comptes sont
+  légèrement rehaussés : ils dépensent avant d'encaisser dans la fenêtre, donc leur solde
+  reconstruit passerait sous zéro pendant le rejeu, ce qu'un ERC-20 refuse. Le rehaussement
+  est exactement le découvert maximal de chaque compte, vérifié par simulation : plus aucun
+  solde négatif sur les 146 533 virements.
 - L'horodatage d'origine est conservé dans l'événement `Payment` (`originalTs`) ;
   l'horodatage du bloc est celui du rejeu.
 - Nonce déterministe : le k-ième virement d'un compte porte le nonce k. Relancer
@@ -222,3 +224,64 @@ actuels : un retrait ou l'exclusion d'une banque fait redescendre le score.
 - Tests : `npm test` (11 tests). Pipeline validé sur la L1 : 146 533 virements
   rejoués, export on-chain identique au CSV (0 différence, 0 manquant).
 - Avalanche (Subnet-EVM) : web3.py a besoin de `ExtraDataToPOAMiddleware`.
+
+## Windows (Git Bash)
+
+Les commandes ci-dessus supposent macOS ou Linux. Sous Windows, trois choses ne
+marchent pas telles quelles : `curl ... | sh` (le script d'installation d'avalanche-cli
+ne reconnait que linux et darwin), `export PATH=~/bin:$PATH` (`~/bin` n'est pas vu par
+les programmes Windows) et `.venv/bin/python` (c'est `.venv/Scripts/python.exe`).
+
+### Ce qu'il faut installer
+
+| Etape | Commande | Temps |
+|---|---|---|
+| Node.js 22 LTS | `winget install OpenJS.NodeJS.LTS` puis rouvrir le terminal | 5 min |
+| Dependances npm | `cd esseckathon/blockchain && npm ci` | 3 min |
+| Compilation | `npx hardhat compile` (telecharge solc 0.8.24) | 2 min |
+| Tests | `npm test` | 1 min |
+| venv Python | `python -m venv .venv && .venv/Scripts/python.exe -m pip install -r python/requirements.txt` | 2 min |
+| L1 Avalanche | voir ci-dessous | 30 a 45 min |
+
+`package-lock.json` contient bien le binaire natif `@nomicfoundation/edr-win32-x64-msvc`,
+donc `npm ci` suffit, sans Visual Studio Build Tools. Les deux etapes npm et la
+compilation ont besoin du reseau.
+
+Python : teste sur 3.14.2 avec `web3==7.6.0`, les roues sont disponibles, rien a compiler.
+Exporter `PYTHONUTF8=1` avant tout appel (`accounts.csv` contient des accents et
+l'encodage par defaut de la console est cp1252).
+
+### La L1 : passer par WSL2
+
+avalanche-cli ne s'installe pas sous Windows natif. Le plus court est WSL2 :
+
+```bash
+wsl --install -d Ubuntu          # redemarrage necessaire, 15 min
+# dans Ubuntu :
+curl -sSfL https://raw.githubusercontent.com/ava-labs/avalanche-cli/main/scripts/install.sh | sh -s
+export PATH=~/bin:$PATH
+avalanche blockchain create fraudnet --evm --latest --evm-chain-id 20261 --evm-token FNET --proof-of-authority
+avalanche blockchain deploy fraudnet --local
+```
+
+Le reste (npm, scripts, Python) peut rester sous Windows : WSL2 expose ses ports sur
+`localhost`, donc l'URL RPC `http://127.0.0.1:9650/ext/bc/.../rpc` est joignable des
+deux cotes. Compter 8 Go de RAM libres et le telechargement d'avalanchego au premier
+`deploy --local`. Si la place manque, tout faire dans WSL2 (y compris `npm ci`) et
+copier le dossier dedans.
+
+### Temps reels des etapes du pipeline
+
+```bash
+npm run wallets                  # 7 085 derivations HD, 30 s
+npm run deploy                   # 10 s
+npm run fund                     # 10 min : ~150 transactions sequentielles + 14 000 appels RPC
+npm run replay -- --limit 5000   # 2 min, pour verifier la chaine avant de lancer le reste
+npm run replay                   # 1 528 lots pour 146 533 virements, 30 a 60 min
+PY=.venv/Scripts/python.exe
+$PY python/fraudnet_chain.py export --out onchain_transactions.csv   # 5 a 15 min
+$PY python/fraudnet_chain.py demo-scenario                           # 1 min
+```
+
+Pour la demo du jury, `demo-scenario` n'a besoin que de `deploy` et de `fund` : les
+146 533 virements ne servent qu'au Module 2. Lancer le rejeu complet la veille.

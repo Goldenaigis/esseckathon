@@ -81,15 +81,17 @@ async function main() {
     }));
     const ALREADY = { status: "0x1" }; // nonce deja consomme = virement deja on-chain (reprise)
     const receipts = new Array(signed.length).fill(null);
-    const hashes = await Promise.all(signed.map(async (raw, k) => {
+    const hashes = signed.map((raw) => ethers.keccak256(raw)); // = hash renvoye par le noeud
+    await Promise.all(signed.map(async (raw, k) => {
       try {
-        return await p.send("eth_sendRawTransaction", [raw]);
+        await p.send("eth_sendRawTransaction", [raw]);
       } catch (e) {
-        if (/nonce too low|already known/i.test(e.error?.message || e.message)) {
-          receipts[k] = ALREADY;
-          return null;
-        }
-        throw e;
+        const m = e.error?.message || e.message;
+        // "nonce too low" : le virement est deja mine, on reprend. "already known" : il est
+        // seulement dans la file du noeud, on attend son recu comme les autres (le compter
+        // comme confirme ferait avancer la progression sur un virement pas encore mine).
+        if (/nonce too low/i.test(m)) receipts[k] = ALREADY;
+        else if (!/already known/i.test(m)) throw e;
       }
     }));
 
