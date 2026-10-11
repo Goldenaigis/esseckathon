@@ -59,7 +59,7 @@ détecter tôt et geler avant évasion des fonds.
 | **Taux de faux positifs** | **0,35 %** |
 | PR-AUC / ROC-AUC | 0,96 / 0,99 |
 | **Time to detect** | **≈ 0,03 ms / transaction** (scoring quasi temps réel) |
-| **Time to respond** | alerte générée immédiatement ; action humaine (gel) = minutes vs **~17 h** d'évasion observées sans système |
+| **Time to respond** | alerte générée immédiatement ; action humaine (gel) = minutes vs a minima quelques dizaines de minutes d'évasion observées sans système |
 
 ## 5. Known limitations
 
