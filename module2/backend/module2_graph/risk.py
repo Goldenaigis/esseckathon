@@ -34,3 +34,31 @@ def heuristic_account_scores(features: dict[str, dict]) -> dict[str, int]:
             s += 25
         scores[acc] = int(max(0, min(100, round(s))))
     return scores
+
+
+def truth_account_scores(graph) -> dict[str, int]:
+    """
+    Score 0..100 derive de la VERITE TERRAIN de M1 (transitoire, en attendant M3).
+
+    Mapping (categoriel -> echelle, compatible avec les seuils 50/25) :
+      - fraudster / mule           -> 85  (rouge, >= 50)
+      - victime (manipulee)        -> 40  (jaune, >= 25) : impliquee, pas coupable
+      - leurre / decoy (trompeur)  -> 30  (jaune, >= 25) : legitime mais suspect
+      - normal                     -> 5   (vert)
+
+    >>> POINT DE BRANCHEMENT M3 <<<
+    Quand M3 livre, on remplace cet appel par les scores reels du modele ;
+    le format (dict account_id -> int 0..100) et les seuils ne changent pas.
+    """
+    scores: dict[str, int] = {}
+    for node, attrs in graph.nodes(data=True):
+        role = (attrs.get("truth_role") or "normal")
+        if role in ("fraudster", "mule"):
+            scores[node] = 85
+        elif role == "victim":
+            scores[node] = 40
+        elif attrs.get("truth_is_decoy"):
+            scores[node] = 30
+        else:
+            scores[node] = 5
+    return scores

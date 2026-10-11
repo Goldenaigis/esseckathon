@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FraudGraph — Cartographie WebGL (Obsidian)</title>
+  <!-- graphology (core) + Sigma (WebGL). Pas de layout navigateur :
+       les positions sont precalculees cote serveur (layout.py). -->
+  <script src="https://cdn.jsdelivr.net/npm/graphology@0.25.4/dist/graphology.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sigma@3.0.0/dist/sigma.min.js"></script>
+  <link rel="stylesheet" href="css/webgl.css" />
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="logo">◉</span>
+      <div>
+        <h1>FraudGraph <span class="tag">WebGL</span></h1>
+        <p>Module 2 — Cartographie façon Obsidian</p>
+      </div>
+    </div>
+    <div class="controls">
+      <label>Risque min
+        <input type="range" id="risk-filter" min="0" max="100" value="0" />
+        <span id="risk-filter-val">0</span>
+      </label>
+      <div id="search-wrap">
+        <input type="text" id="search-input" placeholder="Rechercher un nom, prénom ou ID…" autocomplete="off" />
+        <ul id="search-results" hidden></ul>
+      </div>
+      <label class="show-all"><input type="checkbox" id="show-all" /> Afficher tous les comptes</label>
+      <span id="lod-badge" class="lod-badge">Affichage : risque ≥ 50</span>
+      <button id="risklist-btn" title="Liste des comptes à risque">⚠ Comptes à risque</button>
+      <button id="reset-view-btn" title="Recadrer">⤢ Recadrer</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="sigma"></div>
+    <div id="loading">
+      <div class="load-box">
+        <div class="load-head"><div class="spinner"></div><span id="loading-txt">Initialisation…</span></div>
+        <div id="load-bar"><div id="load-bar-fill"></div></div>
+        <pre id="load-log" aria-live="polite"></pre>
+      </div>
+    </div>
+
+    <aside id="panel" hidden>
+      <button id="panel-close" title="Revenir à la vue générale (touche Retour arrière)">×</button>
+      <h2 id="p-id"></h2>
+      <span id="p-role" class="badge"></span>
+      <div class="score-ring-wrap">
+        <div class="score-ring"><span id="p-score"></span><small>/100</small></div>
+        <span class="score-label">Score de risque</span>
+      </div>
+      <dl id="p-attrs"></dl>
+    </aside>
+
+    <div id="legend">
+      <span><i class="dot high"></i> risque élevé</span>
+      <span><i class="dot mid"></i> moyen</span>
+      <span><i class="dot low"></i> faible</span>
+    </div>
+
+    <!-- Liste des comptes à risque (panneau latéral gauche) -->
+    <aside id="risklist" hidden>
+      <div class="rl-head">
+        <strong>Comptes à risque</strong>
+        <button id="risklist-close" title="Fermer">×</button>
+      </div>
+      <div class="rl-filter">
+        <label>Seuil
+          <select id="rl-threshold">
+            <option value="50">élevé (≥ 50)</option>
+            <option value="25">moyen (≥ 25)</option>
+          </select>
+        </label>
+        <span id="rl-count"></span>
+      </div>
+      <ul id="rl-items"></ul>
+    </aside>
+  </main>
+
+  <footer>
+    <!-- Timeline temporelle : fenêtre glissante [début, fin] -->
+    <div id="timeline">
+      <div class="tl-row">
+        <label>Plage <input type="date" id="date-start" /></label>
+        <!-- double slider : deux poignées superposées sélectionnent une sous-fenêtre -->
+        <div class="tl-slider-wrap">
+          <div id="range-slider">
+            <div class="rs-track"></div>
+            <div class="rs-range" id="rs-range"></div>
+            <input type="range" id="time-min" min="0" max="1000" value="0" />
+            <input type="range" id="time-max" min="0" max="1000" value="1000" />
+          </div>
+          <div id="time-current">—</div>
+        </div>
+        <label><input type="date" id="date-end" /> Fin</label>
+        <button id="play-btn" title="Faire glisser la fenêtre dans le temps">▶</button>
+      </div>
+      <div class="tl-stats">
+        <span id="tl-count">—</span>
+        <span class="disclaimer">Fenêtre glissante · données synthétiques · une alerte n'est pas une preuve de fraude.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/graph-sigma.js"></script>
+</body>
+</html>
