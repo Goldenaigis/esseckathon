@@ -1,10 +1,11 @@
-/* M2 - Cartographie WebGL façon Obsidian (Sigma.js + graphology + ForceAtlas2).
+/* M2 - Cartographie WebGL façon Obsidian (Sigma.js + graphology).
  *
- * Principes de performance (7000 nœuds / ~77k liens) :
+ * Principes de performance (7060 nœuds / 77 355 liens sur les vraies données) :
  *  - rendu WebGL (Sigma) : la carte graphique dessine, le CPU respire ;
- *  - layout ForceAtlas2 calculé UNE fois dans un worker (ne gèle pas l'UI) ;
- *  - timeline cumulative = on masque/affiche des liens déjà positionnés
- *    (aucune recomputation de layout pendant le scroll) ;
+ *  - AUCUN layout navigateur : les positions (x, y) arrivent précalculées du
+ *    serveur (backend/module2_graph/layout.py) ;
+ *  - timeline = on masque/affiche des liens déjà positionnés, avec les dates
+ *    converties en ms UNE fois au chargement (pas de new Date() par image) ;
  *  - focus Obsidian = on joue sur l'opacité (reducers), pas sur la topologie.
  */
 
@@ -16,13 +17,13 @@ const state = {
   graph: null,       // graphology
   renderer: null,    // sigma
   fa2: null,         // worker layout
-  edgesByTime: [],   // [{key, ts}] trié par ts (pour la timeline cumulative)
+  edgesByTime: [],   // [{key, t}] trié par t (ms epoch, converti une seule fois)
   tMin: null, tMax: null,
+  extent: 1000,      // étendue (x et y) du layout serveur, mesurée au chargement
   riskMin: 0,
   lodThreshold: 50,  // seuil de risque courant selon le zoom (LOD)
   showAll: false,    // "Afficher tous les comptes" : désactive le filtre LOD
   winT0: null, winT1: null,  // fenêtre temporelle courante (ms epoch)
-  cutoffIdx: null,   // index courant dans edgesByTime (cumulatif)
   hovered: null,
   hoveredEdge: null,
   selected: null,
@@ -31,6 +32,10 @@ const state = {
 };
 
 const el = id => document.getElementById(id);
+// échappement HTML : les noms de titulaires viennent des CSV de M1 et sont
+// injectés dans du innerHTML (un "&" ou un "<" casserait le panneau).
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const fmtAmount = a => a == null ? "—" :
   new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(a);
 const fmtDate = ts => { const d = new Date(ts); return isNaN(d) ? "—" :
@@ -110,9 +115,12 @@ async function load() {
   const NB = data.nodes.length;
   const CHUNK = 1000;
   let risky = 0;
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
   const tNodes = t0();
   for (let i = 0; i < NB; i++) {
     const n = data.nodes[i];
+    if (n.x < minX) minX = n.x; if (n.x > maxX) maxX = n.x;
+    if (n.y < minY) minY = n.y; if (n.y > maxY) maxY = n.y;
     const base = 1.5 + Math.sqrt(Math.min((n.fi || 0) + (n.fo || 0), 80)) * 0.7;
     g.addNode(n.id, {
       x: n.x, y: n.y, size: base, baseSize: base,
@@ -134,8 +142,11 @@ async function load() {
       await nextFrame();   // rend la main au navigateur -> le log s'affiche vraiment
     }
   }
+  // étendue réelle du layout serveur (sert au recadrage sur un voisinage)
+  state.extent = Math.max(maxX - minX, maxY - minY, 1);
   logLine(`[OK] ${nf(NB)} comptes ajoutés en ${ms(tNodes)} · `
-    + `<span class="num">${nf(risky)}</span> à risque ≥ 50`, "ok");
+    + `<span class="num">${nf(risky)}</span> à risque ≥ 50 · `
+    + `<span class="dim">étendue ${state.extent.toFixed(0)} unités</span>`, "ok");
   await nextFrame();
 
   // 4) Construction des liens — PAR LOTS
@@ -158,7 +169,11 @@ async function load() {
         label: "",
       });
       added++; if (e.f) frauds++;
-      if (e.ts) tl.push({ key, ts: e.ts });
+      // date convertie en ms UNE SEULE FOIS : applyWindow() est appelée à
+      // chaque mouvement de poignée et 14 fois/s en lecture animée. Reparser
+      // les 77 355 chaînes ISO à chaque appel coûtait ~25 ms (mesuré), soit
+      // un tiers d'un cœur en continu pendant la lecture.
+      if (e.ts) { const t = new Date(e.ts).getTime(); if (!isNaN(t)) tl.push({ key, t }); }
     }
     if ((i + 1) % 5000 === 0 || i === NE - 1) {
       setBar(60 + 25 * (i + 1) / NE);
@@ -172,7 +187,7 @@ async function load() {
   // 5) Frise temporelle
   setHead("Tri de la frise temporelle...");
   const tSort = t0();
-  tl.sort((a, b) => a.ts < b.ts ? -1 : a.ts > b.ts ? 1 : 0);
+  tl.sort((a, b) => a.t - b.t);
   logLine(`[OK] ${nf(tl.length)} liens horodatés triés en ${ms(tSort)}`, "ok");
   setBar(90); await nextFrame();
 
@@ -180,7 +195,6 @@ async function load() {
   state.edgesByTime = tl;
   state.tMin = data.meta.t_min;
   state.tMax = data.meta.t_max;
-  state.cutoffIdx = tl.length;
   logLine(`[OK] Graphe prêt — temps total ${ms(started)}`, "ok");
 }
 
@@ -251,7 +265,6 @@ async function initSigma() {
     const res = { ...data };
     // filtre utilisateur (curseur) ET niveau de détail selon le zoom (LOD)
     const threshold = Math.max(state.riskMin, state.lodThreshold);
-    const focus = state.selected || state.hovered;
     // on garde toujours visibles le focus et ses voisins, même sous le seuil
     // CLIC (selected) : on ne montre QUE le nœud et ses partenaires de la fenêtre.
     if (state.selected) {
@@ -340,13 +353,13 @@ function renderRiskList() {
   el("rl-count").textContent = `${items.length.toLocaleString("fr-FR")} comptes`;
   const ul = el("rl-items");
   ul.innerHTML = items.slice(0, 500).map(m => {
-    const col = m.score >= 50 ? "#ff5a5a" : m.score >= 25 ? "#ffb020" : "#35d07f";
+    const col = riskColor(m.score);
     const name = m.name || "(sans nom)";
-    return `<li data-id="${m.id}">
+    return `<li data-id="${esc(m.id)}">
       <span class="rl-dot" style="background:${col}"></span>
       <span>
-        <span class="rl-name">${name}</span><br/>
-        <span class="rl-sub">${m.id} · ${m.ct ?? ""}</span>
+        <span class="rl-name">${esc(name)}</span><br/>
+        <span class="rl-sub">${esc(m.id)} · ${esc(m.ct ?? "")}</span>
       </span>
       <span class="rl-score" style="color:${col}">${m.score}</span></li>`;
   }).join("");
@@ -381,12 +394,12 @@ function runSearch(q) {
     box.hidden = false; return;
   }
   box.innerHTML = matches.map(m => {
-    const col = m.score >= 60 ? "#ff5a5a" : m.score >= 30 ? "#ffb020" : "#35d07f";
+    const col = riskColor(m.score);   // mêmes seuils (50/25) que le graphe et la liste
     const name = m.name || "(sans nom)";
-    return `<li data-id="${m.id}">
+    return `<li data-id="${esc(m.id)}">
       <span class="sr-dot" style="background:${col}"></span>
-      <span class="sr-name">${name}</span>
-      <span class="sr-meta"> · ${m.id} · ${m.ct ?? ""} · risque ${m.score}</span></li>`;
+      <span class="sr-name">${esc(name)}</span>
+      <span class="sr-meta"> · ${esc(m.id)} · ${esc(m.ct ?? "")} · risque ${m.score}</span></li>`;
   }).join("");
   box.hidden = false;
   box.querySelectorAll("li[data-id]").forEach(li => {
@@ -455,8 +468,10 @@ function zoomToNeighborhood(node) {
   // convertir en coord écran via le ratio ; on vise un ratio serré
   const cam = state.renderer.getCamera();
   const spanX = Math.max(maxX - minX, 1), spanY = Math.max(maxY - minY, 1);
-  const graphExtent = 200; // approx de l'étendue totale posée par FA2
-  const ratio = Math.max(0.08, Math.min(spanX, spanY) / graphExtent * 1.4);
+  // étendue RÉELLE du layout serveur (~1040 unités), mesurée au chargement.
+  // L'ancienne constante 200 (héritée de ForceAtlas2) sous-estimait l'échelle
+  // d'un facteur 5 : la caméra zoomait beaucoup trop près du voisinage.
+  const ratio = Math.max(0.08, Math.min(spanX, spanY) / state.extent * 1.4);
   const { x, y } = state.renderer.graphToViewport({ x: cx, y: cy });
   // Sigma raisonne en coord normalisées ; on anime vers le centre du voisinage
   const pos = state.renderer.viewportToFramedGraph({ x, y });
@@ -467,6 +482,7 @@ function showPanel(node) {
   const a = state.graph.getNodeAttributes(node);
   el("panel").hidden = false;
   el("p-id").textContent = node;   // identifiant unique (titre)
+  // 6 rôles produits par graph_features._classify_role (+ "normal" par défaut)
   const roleLabels = {
     collector: "Compte collecteur (étoile)", collector_redistributor: "Collecte + redistribution",
     smurf_target: "Cible de fractionnement", relay: "Maillon de chaîne",
@@ -494,13 +510,14 @@ function showPanel(node) {
     identite = a.ownerName || "—";
   }
 
+  // fi / fo sont des NOMBRES de transactions (fan_in / fan_out), pas des montants
   el("p-attrs").innerHTML = `
-    <div><dt>Titulaire</dt><dd>${identite}</dd></div>
-    ${truth ? `<div><dt>Statut réel</dt><dd>${truth}</dd></div>` : ""}
-    <div><dt>Pays</dt><dd>${a.country ?? "—"}</dd></div>
-    <div><dt>Type client</dt><dd>${a.ctype ?? "—"}</dd></div>
-    <div><dt>Flux entrants (total)</dt><dd>${a.fi}</dd></div>
-    <div><dt>Flux sortants (total)</dt><dd>${a.fo}</dd></div>
+    <div><dt>Titulaire</dt><dd>${esc(identite)}</dd></div>
+    ${truth ? `<div><dt>Statut réel</dt><dd>${esc(truth)}</dd></div>` : ""}
+    <div><dt>Pays</dt><dd>${esc(a.country ?? "—")}</dd></div>
+    <div><dt>Type client</dt><dd>${esc(a.ctype ?? "—")}</dd></div>
+    <div><dt>Transactions reçues</dt><dd>${a.fi}</dd></div>
+    <div><dt>Transactions émises</dt><dd>${a.fo}</dd></div>
     <div><dt>Partenaires (fenêtre)</dt><dd>${Math.max(state.neighbors.size - 1, 0)}</dd></div>`;
 }
 
@@ -541,8 +558,7 @@ function applyWindow() {
   const g = state.graph;
   let shown = 0;
   state.edgesByTime.forEach(e => {
-    const t = new Date(e.ts).getTime();
-    const vis = t >= t0 && t <= t1;
+    const vis = e.t >= t0 && e.t <= t1;   // e.t déjà en ms (converti au chargement)
     g.setEdgeAttribute(e.key, "_tlHidden", !vis);
     if (vis) shown++;
   });

@@ -7,10 +7,17 @@ SQLite historique (fixtures). On lit les CSV et on expose les memes structures
 que build_graph (dicts accounts / transactions) + un graphe NetworkX.
 
 Mapping des colonnes M1 -> schema M2 :
-  accounts.csv   : account_id, country, opened_at, account_age_days,
-                   balance, segment/owner_type -> customer_type, gt_role
+  accounts.csv   : account_id, bank_name -> bank, country, opened_at -> opened_date,
+                   account_age_days, balance, owner_type -> customer_type,
+                   owner_name, gt_role -> truth_role
+  persons.csv    : first_name, last_name (joints via owner_id)
   transactions.csv: tx_id, src_account, dst_account, amount, ts -> timestamp,
-                   channel, status, gt_is_fraud -> is_fraud, gt_scenario_id
+                   channel, status, gt_is_fraud -> is_fraud,
+                   gt_scenario_id -> scenario_id, gt_decoy_id -> truth_is_decoy
+
+ATTENTION, le domaine de `status` differe du contrat : M1 ecrit completed /
+pending / rejected (et non legitimate / suspicious / confirmed_fraud). Ce champ
+n'est ni une feature ni un signal de fraude ici, il est transporte tel quel.
 """
 from __future__ import annotations
 
@@ -21,25 +28,32 @@ from typing import Optional
 import networkx as nx
 
 # chemin par defaut vers les donnees M1.
-# _HERE = .../esseckathon/module2/backend/module2_graph
-#  3 up  = .../esseckathon/module2  ; 4 up = .../esseckathon (racine du depot)
-# M1 vit dans <racine>/esseckathon/fraudnet/data (dossier imbrique).
+# _HERE = <racine>/module2/backend/module2_graph  ->  3 remontees = <racine>.
+# M1 vit dans <racine>/esseckathon/fraudnet/data (dossier imbrique), avec repli
+# sur <racine>/fraudnet/data. On NE deduit PAS le chemin du NOM du dossier de la
+# racine : le depot peut etre clone sous n'importe quel nom.
 _HERE = os.path.dirname(os.path.abspath(__file__))
-_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(_HERE))))
-DEFAULT_M1_DIR = os.environ.get(
-    "M1_DATA_DIR",
-    os.path.join(_REPO_ROOT, "esseckathon", "esseckathon", "fraudnet", "data"),
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(_HERE)))
+_CANDIDATES = [
+    os.path.join(_REPO_ROOT, "esseckathon", "fraudnet", "data"),
+    os.path.join(_REPO_ROOT, "fraudnet", "data"),
+]
+DEFAULT_M1_DIR = os.environ.get("M1_DATA_DIR") or next(
+    (p for p in _CANDIDATES if os.path.exists(os.path.join(p, "accounts.csv"))),
+    _CANDIDATES[0],
 )
-# repli : si l'imbrication n'existe pas, essayer sans le doublon
-if not os.path.exists(os.path.join(DEFAULT_M1_DIR, "accounts.csv")):
-    _alt = os.path.join(_REPO_ROOT, "esseckathon", "fraudnet", "data")
-    if os.path.exists(os.path.join(_alt, "accounts.csv")):
-        DEFAULT_M1_DIR = _alt
 
 
 def _customer_type(row: dict) -> str:
+    """
+    owner_type M1 -> customer_type du contrat. Mesure sur les CSV reels :
+    6525 "person", 490 "company", 45 "association". Une association n'est pas
+    un particulier, on la compte en "business".
+    Le type "senior" du contrat reste INATTEIGNABLE ici : les segments M1 valent
+    particulier / pro / association, l'age est dans persons.csv (champ age_band).
+    """
     owner = (row.get("owner_type") or "").lower()
-    if owner == "company":
+    if owner in ("company", "association"):
         return "business"
     seg = (row.get("segment") or "").lower()
     if "senior" in seg:
@@ -59,27 +73,14 @@ def _load_person_names(data_dir: str) -> dict:
     return names
 
 
-def _load_decoy_accounts(data_dir: str) -> set:
-    """Comptes impliques dans un LEURRE (decoy) : legitimes mais trompeurs.
-    Reperes via les transactions portant un gt_decoy_id (lecture seule)."""
-    tx_path = os.path.join(data_dir, "transactions.csv")
-    decoy_accounts: set = set()
-    if not os.path.exists(tx_path):
-        return decoy_accounts
-    with open(tx_path, newline="", encoding="utf-8") as f:
-        for r in csv.DictReader(f):
-            if r.get("gt_decoy_id"):
-                decoy_accounts.add(r["src_account"])
-                decoy_accounts.add(r["dst_account"])
-    return decoy_accounts
-
-
 def build_graph_from_m1(data_dir: str = DEFAULT_M1_DIR) -> nx.MultiDiGraph:
-    """Construit le MultiDiGraph a partir des CSV de M1 (lecture seule)."""
+    """Construit le MultiDiGraph a partir des CSV de M1 (lecture seule).
+
+    transactions.csv (18 Mo) n'est lu QU'UNE fois : les comptes impliques dans
+    un leurre (gt_decoy_id) sont marques au passage, dans la meme boucle."""
     acc_path = os.path.join(data_dir, "accounts.csv")
     tx_path = os.path.join(data_dir, "transactions.csv")
     person_names = _load_person_names(data_dir)
-    decoy_accounts = _load_decoy_accounts(data_dir)
 
     g = nx.MultiDiGraph()
     with open(acc_path, newline="", encoding="utf-8") as f:
@@ -107,7 +108,7 @@ def build_graph_from_m1(data_dir: str = DEFAULT_M1_DIR) -> nx.MultiDiGraph:
                 first_name=first or None,
                 last_name=last or None,
                 truth_role=role,                       # normal/victim/fraudster/mule
-                truth_is_decoy=acc_id in decoy_accounts,
+                truth_is_decoy=False,                  # renseigne dans la boucle tx
                 # conserve pour compat interne (statut d'arete), pas une feature
                 is_fraudster=1 if role in ("fraudster", "mule") else 0,
             )
@@ -117,7 +118,12 @@ def build_graph_from_m1(data_dir: str = DEFAULT_M1_DIR) -> nx.MultiDiGraph:
             s, d = r["src_account"], r["dst_account"]
             for acc in (s, d):
                 if acc not in g:
-                    g.add_node(acc, country=None, customer_type=None, is_fraudster=0)
+                    g.add_node(acc, country=None, customer_type=None,
+                               is_fraudster=0, truth_is_decoy=False)
+            if r.get("gt_decoy_id"):
+                # LEURRE : compte legitime mais trompeur. Affichage/eval seulement.
+                g.nodes[s]["truth_is_decoy"] = True
+                g.nodes[d]["truth_is_decoy"] = True
             g.add_edge(
                 s, d,
                 key=r["tx_id"],

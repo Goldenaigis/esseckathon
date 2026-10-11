@@ -1,21 +1,28 @@
 """
 M2 - Serialisation COMPACTE du graphe pour le rendu WebGL (Sigma.js).
 
-Contrairement a to_cytoscape (sous-graphe riche), ici on envoie TOUT le graphe
-(~7000 noeuds) mais en payload minimal, car :
-  - le layout (positions) est calcule cote navigateur (graphology + ForceAtlas2),
+On envoie TOUT le graphe (~7000 noeuds) en un seul payload, car :
+  - les positions sont PRECALCULEES cote serveur (layout.py) et transmises
+    telles quelles : le navigateur ne fait aucune simulation de forces,
   - la timeline a besoin du timestamp de chaque lien,
   - au-dela de ~80k liens le rendu sature -> on AGREGE les transactions
     paralleles (meme couple src->dst) en un seul lien.
 
 Format (clefs courtes = payload plus leger) :
   {
-    "nodes": [ { "id", "s"(score), "r"(role), "ci"(country),
-                 "ct"(customer_type), "fi"(fan_in), "fo"(fan_out) } ],
+    "nodes": [ { "id", "x", "y", "s"(score), "r"(role), "ci"(country),
+                 "ct"(customer_type), "fi"(fan_in), "fo"(fan_out),
+                 "nm"(owner_name), "fn"(first_name), "ln"(last_name),
+                 "tr"(truth_role M1), "td"(truth_is_decoy M1) } ],
     "edges": [ { "s"(src), "t"(dst), "ts"(1er timestamp), "m"(montant cumule),
                  "c"(nb tx), "f"(fraude 0/1) } ],
     "meta":  { "n_nodes", "n_edges_raw", "n_edges", "t_min", "t_max" }
   }
+
+Taille mesuree sur les vraies donnees M1 : 7,9 Mo compacts pour 7060 noeuds
+(1,3 Mo) et 77 355 liens agreges (6,6 Mo, soit 84 % du payload) issus de
+151 770 transactions brutes. Les champs "tr"/"td" sont de la VERITE TERRAIN :
+affichage seulement, jamais une feature.
 """
 from __future__ import annotations
 

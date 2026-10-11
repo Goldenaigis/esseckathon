@@ -5,11 +5,11 @@ Objectif : donner a chaque compte une position (x, y) STABLE, calculee en une
 passe (pas de simulation de forces), pour un rendu WebGL fluide a ~7000 noeuds.
 
 Strategie "la moins couteuse et la plus sure" :
-  1. Detecter les communautes (Louvain, ~1-2 s sur 7000 noeuds) -> des amas de
-     comptes qui transigent entre eux.
+  1. Detecter les communautes (Louvain : 4,6 s mesurees sur les 7060 comptes /
+     74 524 liens de M1) -> des amas de comptes qui transigent entre eux.
   2. Placer chaque communaute comme un ILOT sur un grand cercle (bien espaces).
-  3. A l'interieur d'un ilot, disposer les noeuds en disque (spiral) ; les
-     comptes a risque eleve plutot au centre de l'ilot (plus visibles).
+  3. A l'interieur d'un ilot, disposer les noeuds en disque (spirale de Vogel),
+     repartition homogene (pas de biais de risque, cf. _disk_positions).
   Repli automatique : si Louvain echoue/trop lent -> ANNEAUX par score de risque
   (a risque au centre, legitimes en peripherie). Instantane, deterministe.
 
@@ -34,12 +34,13 @@ def _to_simple_undirected(g: nx.MultiDiGraph) -> nx.Graph:
 
 def _disk_positions(nodes: list[str], scores: dict[str, int],
                     cx: float, cy: float, radius: float) -> dict[str, tuple]:
-    """Place des noeuds dans un disque (spirale de Vogel), les plus a risque
-    vers le centre pour les rendre saillants."""
+    """
+    Place des noeuds dans un disque, repartition HOMOGENE (spirale de Vogel),
+    SANS biais de risque : les comptes a risque affiches en vue d'ensemble sont
+    ainsi bien etales et non empiles au centre de l'ilot. `scores` est conserve
+    dans la signature pour pouvoir reintroduire un tri par risque si besoin.
+    """
     pos: dict[str, tuple] = {}
-    # repartition HOMOGENE dans le disque (spirale de Vogel), sans biais de risque,
-    # pour que les comptes a risque affiches en vue d'ensemble soient bien etales
-    # (et non empiles au centre de l'ilot).
     nodes = list(nodes)
     golden = math.pi * (3 - math.sqrt(5))
     n = max(len(nodes), 1)

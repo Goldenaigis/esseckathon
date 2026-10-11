@@ -8,19 +8,27 @@ Endpoints :
   GET  /api/graph/webgl      -> graphe complet, payload compact + positions figees
   POST /api/reload
 
-Lancer :  uvicorn backend.app:app --reload --port 8000
+Lancer :  uvicorn backend.app:app --port 8000   (ou ./run.sh)
+
+Variables d'environnement :
+  DATA_SOURCE  "auto" (defaut) | "m1" (CSV reels) | "sqlite" (fixtures jouet)
+  M1_DATA_DIR  dossier des CSV M1 (defaut : <racine>/esseckathon/fraudnet/data)
+  M3_SCORES    artefact de scores M3 (defaut : module3/ml/artifacts/account_scores.json)
 """
 from __future__ import annotations
 
 import os
 
+import json
+
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from backend.module2_graph.build_graph import build_graph, summary
 from backend.module2_graph.graph_features import compute_account_features
-from backend.module2_graph.risk import heuristic_account_scores, truth_account_scores
+from backend.module2_graph.risk import (
+    heuristic_account_scores, load_m3_scores, truth_account_scores)
 from backend.module2_graph.to_webgl import to_webgl
 from backend.module2_graph.load_m1_csv import build_graph_from_m1, m1_available
 from backend.module2_graph.layout import compute_layout
@@ -38,35 +46,70 @@ app = FastAPI(title="FraudGraph - Module 2 (Cartographie WebGL)")
 
 class _State:
     """Charge le graphe + features + positions une fois, en cache.
-    Le gros graphe (M1, ~7000 noeuds) utilise les features en mode `fast`."""
+    Le gros graphe (M1, ~7000 noeuds) utilise les features en mode `fast`.
+
+    Tout est calcule au DEMARRAGE (import du module) : ~10 s mesurees sur les
+    vraies donnees M1 (CSV 1,3 s + features 3,3 s + layout 4,6 s) avant que le
+    serveur ne reponde. Les requetes, elles, ne recalculent rien."""
     def __init__(self):
         self.reload()
 
     def reload(self):
+        # On construit dans des variables LOCALES puis on publie d'un coup :
+        # une requete concurrente ne peut pas voir un graphe neuf avec des
+        # features perimees pendant les secondes de recalcul.
         use_m1 = DATA_SOURCE == "m1" or (DATA_SOURCE == "auto" and m1_available())
         if use_m1:
-            self.source = "m1"
-            self.graph = build_graph_from_m1()
-            self.fast = True
+            source = "m1"
+            graph = build_graph_from_m1()
+            fast = True
         else:
             if not os.path.exists(DB_PATH):
                 raise RuntimeError(
-                    f"Base introuvable : {DB_PATH}. "
-                    f"Lancez d'abord : python -m backend.module1_data.fixtures")
-            self.source = "sqlite"
-            self.graph = build_graph(DB_PATH)
-            self.fast = self.graph.number_of_nodes() > 1500
-        self.features = compute_account_features(self.graph, fast=self.fast)
-        # Couleur du graphe :
-        #  - sur M1 : VERITE TERRAIN de M1 (transitoire, en attendant M3) ;
-        #  - sur fixtures : score heuristique de graphe.
-        # >>> POINT DE BRANCHEMENT M3 : remplacer par les scores reels du modele <<<
-        if self.source == "m1":
-            self.scores = truth_account_scores(self.graph)
+                    f"Base introuvable : {DB_PATH}. Generez-la d'abord avec "
+                    f"`./run.sh` ou `<python> -m backend.module1_data.fixtures` "
+                    f"depuis le dossier module2/.")
+            source = "sqlite"
+            graph = build_graph(DB_PATH)
+            fast = graph.number_of_nodes() > 1500
+        features = compute_account_features(graph, fast=fast)
+
+        # Couleur du graphe, par ordre de preference :
+        #  1. scores REELS de M3 (module3/ml/artifacts/account_scores.json) ;
+        #  2. sur M1 sans M3 : verite terrain M1 (demo uniquement) ;
+        #  3. sur fixtures sans M3 : score heuristique de graphe.
+        # M3 n'est utilise QUE sur la source "m1" : son modele est entraine sur
+        # les CSV de M1, et les fixtures jouet reutilisent la MEME numerotation
+        # ACC_xxxxxx -> appliquer M3 aux fixtures colorierait au hasard.
+        m3 = load_m3_scores() if source == "m1" else None
+        if m3:
+            score_source = "m3"
+            # un compte absent de l'artefact M3 reste a 0 (on n'invente rien)
+            scores = {n: m3.get(n, 0) for n in graph.nodes()}
+        elif source == "m1":
+            score_source = "truth_m1"
+            scores = truth_account_scores(graph)
         else:
-            self.scores = heuristic_account_scores(self.features)
+            score_source = "heuristic"
+            scores = heuristic_account_scores(features)
+
         # layout geometrique precalcule UNE fois (positions figees pour le WebGL)
-        self.positions = compute_layout(self.graph, self.scores)
+        positions = compute_layout(graph, scores)
+
+        # Payload WebGL SERIALISE une fois pour toutes : il est identique a
+        # chaque requete. Le reconstruire a chaque appel coutait 3,6 s et
+        # 7,9 Mo d'allocations sur les vraies donnees M1.
+        webgl_json = json.dumps(
+            to_webgl(graph, features, scores, positions), separators=(",", ":")
+        ).encode("utf-8")
+        # resume aussi mis en cache : il compte les aretes frauduleuses, soit un
+        # parcours des 151 770 transactions (310 ms) a chaque /api/health.
+        stats = summary(graph)
+
+        (self.source, self.graph, self.fast, self.features, self.scores,
+         self.score_source, self.positions, self.webgl_json, self.stats) = (
+            source, graph, fast, features, scores, score_source, positions,
+            webgl_json, stats)
 
 
 state = _State()
@@ -74,25 +117,27 @@ state = _State()
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", **summary(state.graph)}
+    return {"status": "ok", **state.stats}
 
 
 @app.post("/api/reload")
 def reload():
     state.reload()
-    return {"status": "reloaded", **summary(state.graph)}
+    return {"status": "reloaded", **state.stats}
 
 
 @app.get("/api/graph/webgl")
 def api_graph_webgl():
     """Graphe COMPLET en payload compact pour le rendu WebGL (Sigma.js).
-    Positions PRECALCULEES cote serveur (figees) ; timeline par timestamp."""
-    return to_webgl(state.graph, state.features, state.scores, state.positions)
+    Positions PRECALCULEES cote serveur (figees) ; timeline par timestamp.
+    Le JSON est serialise au demarrage et renvoye tel quel (cf. _State)."""
+    return Response(content=state.webgl_json, media_type="application/json")
 
 
 @app.get("/api/meta")
 def api_meta():
-    return {"source": state.source, "fast": state.fast, **summary(state.graph)}
+    return {"source": state.source, "fast": state.fast,
+            "score_source": state.score_source, **state.stats}
 
 
 # --- Fichiers statiques (front) : monte en DERNIER pour ne pas masquer /api ---
