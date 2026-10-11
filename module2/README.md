@@ -1,10 +1,6 @@
 # FraudGraph, Module 2 : cartographie des réseaux financiers
 
-Détection de schémas de fraude bancaire par analyse de graphe. Le module contient
-le backend FastAPI, le rendu WebGL, et un faux M1 (générateur de données jouet)
-pour développer sans attendre l'équipe données.
-
-Données synthétiques uniquement. Une alerte n'est pas une preuve de fraude.
+Détection de schémas de fraude bancaire par analyse de graphe.
 
 ## Démarrage rapide
 
@@ -15,12 +11,6 @@ cd module2
 pip install -r requirements.txt
 ./run.sh                                # http://127.0.0.1:8000
 ```
-
-`run.sh` génère la base jouet si `data/bank.db` est absente, puis démarre uvicorn.
-Il choisit l'interpréteur dans l'ordre `python3`, `python`, `py`, en écartant ceux
-qui ne lancent rien (sous Windows, `python` et `python3` sont souvent le raccourci
-Microsoft Store, qui existe dans le PATH mais sort en erreur). Pour forcer :
-`PYTHON=/chemin/vers/python ./run.sh`.
 
 Dans les commandes ci-dessous, `python` désigne votre interpréteur 3.10+.
 
