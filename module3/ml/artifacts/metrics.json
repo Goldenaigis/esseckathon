@@ -9,27 +9,27 @@
       "test_decoys": 990,
       "variants": {
         "transaction": {
-          "pr_auc": 0.8942720264266243,
-          "roc_auc": 0.9877184684674106,
-          "brier": 0.01011822101392865,
-          "threshold": 0.42215348075581405,
-          "precision": 0.941712204007286,
-          "recall": 0.7704918032786885,
-          "f1": 0.8475409836065574,
-          "false_positive_rate": 0.002017018594390167,
+          "pr_auc": 0.8506722290566859,
+          "roc_auc": 0.9622106794333523,
+          "brier": 0.01049337166370529,
+          "threshold": 0.10248888118072298,
+          "precision": 0.889267461669506,
+          "recall": 0.7779433681073026,
+          "f1": 0.8298887122416535,
+          "false_positive_rate": 0.0040970690198550265,
           "confusion": {
-            "tp": 517,
-            "fp": 32,
-            "fn": 154,
-            "tn": 15833
+            "tp": 522,
+            "fp": 65,
+            "fn": 149,
+            "tn": 15800
           },
           "precision_at_k": 1.0,
           "recall_at_k": 0.14903129657228018,
           "k": 100,
-          "scoring_ms_per_tx": 0.028544654088176157,
-          "decoy_flag_rate": 0.0,
+          "scoring_ms_per_tx": 0.028345283019788635,
+          "decoy_flag_rate": 0.011111111111111112,
           "n_decoys": 990,
-          "plain_legit_flag_rate": 0.0021512605042016807,
+          "plain_legit_flag_rate": 0.003630252100840336,
           "recall_par_scenario": {
             "chaine_mules": {
               "frauds": 14,
@@ -45,15 +45,15 @@
             },
             "dormant_reactive": {
               "frauds": 27,
-              "recall": 0.14814814814814814
+              "recall": 0.2222222222222222
             },
             "faux_conseiller": {
               "frauds": 200,
-              "recall": 0.915
+              "recall": 0.925
             },
             "faux_investissement": {
               "frauds": 237,
-              "recall": 0.9957805907172996
+              "recall": 1.0
             },
             "smurfing": {
               "frauds": 52,
@@ -63,7 +63,7 @@
           "flag_rate_par_leurre": {
             "bailleur_multi_loyers": {
               "transactions": 81,
-              "flag_rate": 0.0
+              "flag_rate": 0.1111111111111111
             },
             "cagnotte_mariage": {
               "transactions": 207,
@@ -75,7 +75,7 @@
             },
             "corridor_remise": {
               "transactions": 77,
-              "flag_rate": 0.0
+              "flag_rate": 0.025974025974025976
             },
             "tresorerie_entrepreneur": {
               "transactions": 29,
@@ -88,27 +88,27 @@
           }
         },
         "comportement": {
-          "pr_auc": 0.8977362556012212,
-          "roc_auc": 0.9903907926558053,
-          "brier": 0.010343957339878765,
-          "threshold": 0.6140144052646073,
-          "precision": 0.9691119691119691,
-          "recall": 0.7481371087928465,
-          "f1": 0.8444070647603027,
+          "pr_auc": 0.8570452484515022,
+          "roc_auc": 0.9675714850008197,
+          "brier": 0.010317877189884705,
+          "threshold": 0.3238533769555814,
+          "precision": 0.9695817490494296,
+          "recall": 0.7600596125186289,
+          "f1": 0.8521303258145362,
           "false_positive_rate": 0.0010085092971950835,
           "confusion": {
-            "tp": 502,
+            "tp": 510,
             "fp": 16,
-            "fn": 169,
+            "fn": 161,
             "tn": 15849
           },
           "precision_at_k": 1.0,
           "recall_at_k": 0.14903129657228018,
           "k": 100,
-          "scoring_ms_per_tx": 0.027598657475238222,
-          "decoy_flag_rate": 0.0,
+          "scoring_ms_per_tx": 0.02799914731498448,
+          "decoy_flag_rate": 0.0030303030303030303,
           "n_decoys": 990,
-          "plain_legit_flag_rate": 0.0010756302521008404,
+          "plain_legit_flag_rate": 0.0008739495798319327,
           "recall_par_scenario": {
             "chaine_mules": {
               "frauds": 14,
@@ -124,11 +124,11 @@
             },
             "dormant_reactive": {
               "frauds": 27,
-              "recall": 0.07407407407407407
+              "recall": 0.18518518518518517
             },
             "faux_conseiller": {
               "frauds": 200,
-              "recall": 0.855
+              "recall": 0.88
             },
             "faux_investissement": {
               "frauds": 237,
@@ -142,7 +142,7 @@
           "flag_rate_par_leurre": {
             "bailleur_multi_loyers": {
               "transactions": 81,
-              "flag_rate": 0.0
+              "flag_rate": 0.037037037037037035
             },
             "cagnotte_mariage": {
               "transactions": 207,
@@ -167,27 +167,27 @@
           }
         },
         "reseau": {
-          "pr_auc": 0.960577835583719,
-          "roc_auc": 0.9948244385023974,
-          "brier": 0.007193766981181603,
-          "threshold": 0.42833479544527825,
-          "precision": 0.9131121642969984,
-          "recall": 0.8614008941877794,
-          "f1": 0.8865030674846627,
-          "false_positive_rate": 0.0034667507091080997,
+          "pr_auc": 0.9447685164673794,
+          "roc_auc": 0.9930581381749795,
+          "brier": 0.007484018900028909,
+          "threshold": 0.4167752769529206,
+          "precision": 0.8977443609022556,
+          "recall": 0.8897168405365127,
+          "f1": 0.8937125748502994,
+          "false_positive_rate": 0.004286164513079105,
           "confusion": {
-            "tp": 578,
-            "fp": 55,
-            "fn": 93,
-            "tn": 15810
+            "tp": 597,
+            "fp": 68,
+            "fn": 74,
+            "tn": 15797
           },
           "precision_at_k": 1.0,
           "recall_at_k": 0.14903129657228018,
           "k": 100,
-          "scoring_ms_per_tx": 0.028592416545205303,
-          "decoy_flag_rate": 0.047474747474747475,
+          "scoring_ms_per_tx": 0.030627134737397473,
+          "decoy_flag_rate": 0.06363636363636363,
           "n_decoys": 990,
-          "plain_legit_flag_rate": 0.0005378151260504202,
+          "plain_legit_flag_rate": 0.0003361344537815126,
           "recall_par_scenario": {
             "chaine_mules": {
               "frauds": 14,
@@ -195,7 +195,7 @@
             },
             "compte_collecteur": {
               "frauds": 131,
-              "recall": 0.44274809160305345
+              "recall": 0.5343511450381679
             },
             "cycle": {
               "frauds": 10,
@@ -203,15 +203,15 @@
             },
             "dormant_reactive": {
               "frauds": 27,
-              "recall": 0.5185185185185185
+              "recall": 0.7037037037037037
             },
             "faux_conseiller": {
               "frauds": 200,
-              "recall": 0.985
+              "recall": 0.98
             },
             "faux_investissement": {
               "frauds": 237,
-              "recall": 0.9831223628691983
+              "recall": 0.9957805907172996
             },
             "smurfing": {
               "frauds": 52,
@@ -233,7 +233,7 @@
             },
             "corridor_remise": {
               "transactions": 77,
-              "flag_rate": 0.38961038961038963
+              "flag_rate": 0.5974025974025974
             },
             "tresorerie_entrepreneur": {
               "transactions": 29,
@@ -246,27 +246,27 @@
           }
         },
         "rf_control": {
-          "pr_auc": 0.9650576586055221,
-          "roc_auc": 0.9943037448516567,
-          "brier": 0.006023255617500298,
-          "threshold": 0.41221100344492734,
-          "precision": 0.910355486862442,
-          "recall": 0.8777943368107303,
-          "f1": 0.8937784522003035,
-          "false_positive_rate": 0.003655846202332178,
+          "pr_auc": 0.9629086434539881,
+          "roc_auc": 0.9958917524586876,
+          "brier": 0.006231225383874886,
+          "threshold": 0.4492120790546065,
+          "precision": 0.9060092449922958,
+          "recall": 0.8763040238450075,
+          "f1": 0.8909090909090909,
+          "false_positive_rate": 0.003844941695556256,
           "confusion": {
-            "tp": 589,
-            "fp": 58,
-            "fn": 82,
-            "tn": 15807
+            "tp": 588,
+            "fp": 61,
+            "fn": 83,
+            "tn": 15804
           },
           "precision_at_k": 1.0,
           "recall_at_k": 0.14903129657228018,
           "k": 100,
-          "scoring_ms_per_tx": 0.018069375907790716,
-          "decoy_flag_rate": 0.044444444444444446,
+          "scoring_ms_per_tx": 0.02399141267567468,
+          "decoy_flag_rate": 0.05454545454545454,
           "n_decoys": 990,
-          "plain_legit_flag_rate": 0.0009411764705882353,
+          "plain_legit_flag_rate": 0.00047058823529411766,
           "recall_par_scenario": {
             "chaine_mules": {
               "frauds": 14,
@@ -274,7 +274,7 @@
             },
             "compte_collecteur": {
               "frauds": 131,
-              "recall": 0.5190839694656488
+              "recall": 0.5038167938931297
             },
             "cycle": {
               "frauds": 10,
@@ -282,7 +282,7 @@
             },
             "dormant_reactive": {
               "frauds": 27,
-              "recall": 0.7777777777777778
+              "recall": 0.7407407407407407
             },
             "faux_conseiller": {
               "frauds": 200,
@@ -290,7 +290,7 @@
             },
             "faux_investissement": {
               "frauds": 237,
-              "recall": 0.9789029535864979
+              "recall": 0.9873417721518988
             },
             "smurfing": {
               "frauds": 52,
@@ -300,7 +300,7 @@
           "flag_rate_par_leurre": {
             "bailleur_multi_loyers": {
               "transactions": 81,
-              "flag_rate": 0.18518518518518517
+              "flag_rate": 0.19753086419753085
             },
             "cagnotte_mariage": {
               "transactions": 207,
@@ -312,7 +312,7 @@
             },
             "corridor_remise": {
               "transactions": 77,
-              "flag_rate": 0.37662337662337664
+              "flag_rate": 0.4935064935064935
             },
             "tresorerie_entrepreneur": {
               "transactions": 29,
@@ -327,75 +327,75 @@
       },
       "demo_candidates": [
         {
-          "tx_id": "TX_0142184",
-          "ts": "2026-10-06 10:51:49",
-          "src_account": "ACC_004321",
-          "dst_account": "ACC_001746",
-          "amount": 1489.58,
-          "gt_scenario_type": "compte_collecteur",
-          "score_tx_only": 1,
-          "score_full": 96,
-          "dst_n_distinct_src_24h": 19.0,
-          "dst_fanout_ratio": 0.0
-        },
-        {
-          "tx_id": "TX_0135867",
-          "ts": "2026-10-04 11:26:52",
-          "src_account": "ACC_002423",
-          "dst_account": "ACC_006861",
-          "amount": 232.9,
-          "gt_scenario_type": "dormant_reactive",
-          "score_tx_only": 2,
-          "score_full": 96,
-          "dst_n_distinct_src_24h": 3.0,
-          "dst_fanout_ratio": 0.0
-        },
-        {
-          "tx_id": "TX_0142315",
-          "ts": "2026-10-06 11:35:44",
-          "src_account": "ACC_004588",
-          "dst_account": "ACC_001746",
-          "amount": 941.5,
-          "gt_scenario_type": "compte_collecteur",
-          "score_tx_only": 1,
-          "score_full": 94,
-          "dst_n_distinct_src_24h": 20.0,
-          "dst_fanout_ratio": 0.0
-        },
-        {
-          "tx_id": "TX_0122200",
-          "ts": "2026-09-29 09:24:12",
-          "src_account": "ACC_004917",
-          "dst_account": "ACC_006941",
-          "amount": 80.0,
-          "gt_scenario_type": "faux_conseiller",
-          "score_tx_only": 2,
-          "score_full": 96,
-          "dst_n_distinct_src_24h": 12.0,
-          "dst_fanout_ratio": 0.0
-        },
-        {
-          "tx_id": "TX_0142014",
-          "ts": "2026-10-06 09:53:55",
-          "src_account": "ACC_003479",
-          "dst_account": "ACC_001746",
-          "amount": 697.19,
-          "gt_scenario_type": "compte_collecteur",
-          "score_tx_only": 2,
-          "score_full": 96,
-          "dst_n_distinct_src_24h": 18.0,
-          "dst_fanout_ratio": 0.0
-        },
-        {
-          "tx_id": "TX_0142321",
-          "ts": "2026-10-06 11:37:03",
-          "src_account": "ACC_001273",
-          "dst_account": "ACC_001746",
-          "amount": 1707.09,
+          "tx_id": "TX_0129191",
+          "ts": "2026-10-01 17:52:20",
+          "src_account": "ACC_004469",
+          "dst_account": "ACC_001359",
+          "amount": 441.11,
           "gt_scenario_type": "compte_collecteur",
           "score_tx_only": 0,
-          "score_full": 93,
-          "dst_n_distinct_src_24h": 21.0,
+          "score_full": 99,
+          "dst_n_distinct_src_24h": 15.0,
+          "dst_fanout_ratio": 0.0
+        },
+        {
+          "tx_id": "TX_0127738",
+          "ts": "2026-10-01 11:34:12",
+          "src_account": "ACC_005150",
+          "dst_account": "ACC_001359",
+          "amount": 253.02,
+          "gt_scenario_type": "compte_collecteur",
+          "score_tx_only": 0,
+          "score_full": 99,
+          "dst_n_distinct_src_24h": 15.0,
+          "dst_fanout_ratio": 0.0
+        },
+        {
+          "tx_id": "TX_0129872",
+          "ts": "2026-10-01 21:51:22",
+          "src_account": "ACC_004190",
+          "dst_account": "ACC_001359",
+          "amount": 220.07,
+          "gt_scenario_type": "compte_collecteur",
+          "score_tx_only": 0,
+          "score_full": 99,
+          "dst_n_distinct_src_24h": 14.0,
+          "dst_fanout_ratio": 0.05952681911019605
+        },
+        {
+          "tx_id": "TX_0128063",
+          "ts": "2026-10-01 13:02:48",
+          "src_account": "ACC_003430",
+          "dst_account": "ACC_001359",
+          "amount": 899.97,
+          "gt_scenario_type": "compte_collecteur",
+          "score_tx_only": 0,
+          "score_full": 99,
+          "dst_n_distinct_src_24h": 16.0,
+          "dst_fanout_ratio": 0.0
+        },
+        {
+          "tx_id": "TX_0129040",
+          "ts": "2026-10-01 17:09:13",
+          "src_account": "ACC_001586",
+          "dst_account": "ACC_001359",
+          "amount": 763.93,
+          "gt_scenario_type": "compte_collecteur",
+          "score_tx_only": 0,
+          "score_full": 99,
+          "dst_n_distinct_src_24h": 14.0,
+          "dst_fanout_ratio": 0.0
+        },
+        {
+          "tx_id": "TX_0127549",
+          "ts": "2026-10-01 10:40:36",
+          "src_account": "ACC_004937",
+          "dst_account": "ACC_001359",
+          "amount": 900.0,
+          "gt_scenario_type": "compte_collecteur",
+          "score_tx_only": 0,
+          "score_full": 99,
+          "dst_n_distinct_src_24h": 14.0,
           "dst_fanout_ratio": 0.0
         }
       ]
@@ -409,27 +409,27 @@
       "test_decoys": 46,
       "variants": {
         "transaction": {
-          "pr_auc": 0.9119659216993472,
-          "roc_auc": 0.9702795877857918,
-          "brier": 0.03363791663600422,
-          "threshold": 0.4448530717396187,
-          "precision": 0.9351351351351351,
-          "recall": 0.7757847533632287,
-          "f1": 0.8480392156862745,
-          "false_positive_rate": 0.008629989212513484,
+          "pr_auc": 0.885467931223591,
+          "roc_auc": 0.945773933627127,
+          "brier": 0.03443239612022178,
+          "threshold": 0.10248888118072298,
+          "precision": 0.9285714285714286,
+          "recall": 0.7869955156950673,
+          "f1": 0.8519417475728156,
+          "false_positive_rate": 0.009708737864077669,
           "confusion": {
-            "tp": 346,
-            "fp": 24,
-            "fn": 100,
-            "tn": 2757
+            "tp": 351,
+            "fp": 27,
+            "fn": 95,
+            "tn": 2754
           },
           "precision_at_k": 1.0,
           "recall_at_k": 0.2242152466367713,
           "k": 100,
-          "scoring_ms_per_tx": 0.04060139448591486,
+          "scoring_ms_per_tx": 0.04274180353563458,
           "decoy_flag_rate": 0.0,
           "n_decoys": 46,
-          "plain_legit_flag_rate": 0.008775137111517367,
+          "plain_legit_flag_rate": 0.009872029250457038,
           "recall_par_scenario": {
             "chaine_mules": {
               "frauds": 9,
@@ -445,15 +445,15 @@
             },
             "dormant_reactive": {
               "frauds": 15,
-              "recall": 0.13333333333333333
+              "recall": 0.2
             },
             "faux_conseiller": {
               "frauds": 143,
-              "recall": 0.8951048951048951
+              "recall": 0.916083916083916
             },
             "faux_investissement": {
               "frauds": 156,
-              "recall": 0.9935897435897436
+              "recall": 1.0
             },
             "smurfing": {
               "frauds": 33,
@@ -476,27 +476,27 @@
           }
         },
         "comportement": {
-          "pr_auc": 0.9254060387475443,
-          "roc_auc": 0.9788265343143656,
-          "brier": 0.03311056487276814,
-          "threshold": 0.6140144052646073,
-          "precision": 0.9767441860465116,
-          "recall": 0.7533632286995515,
-          "f1": 0.8506329113924049,
-          "false_positive_rate": 0.002876663070837828,
+          "pr_auc": 0.8923838453476461,
+          "roc_auc": 0.9521561266957237,
+          "brier": 0.0345343303533729,
+          "threshold": 0.30415893715048226,
+          "precision": 0.9743589743589743,
+          "recall": 0.7668161434977578,
+          "f1": 0.8582183186951067,
+          "false_positive_rate": 0.003236245954692557,
           "confusion": {
-            "tp": 336,
-            "fp": 8,
-            "fn": 110,
-            "tn": 2773
+            "tp": 342,
+            "fp": 9,
+            "fn": 104,
+            "tn": 2772
           },
           "precision_at_k": 1.0,
           "recall_at_k": 0.2242152466367713,
           "k": 100,
-          "scoring_ms_per_tx": 0.040968081807898925,
+          "scoring_ms_per_tx": 0.044646451816391076,
           "decoy_flag_rate": 0.0,
           "n_decoys": 46,
-          "plain_legit_flag_rate": 0.0029250457038391227,
+          "plain_legit_flag_rate": 0.0032906764168190127,
           "recall_par_scenario": {
             "chaine_mules": {
               "frauds": 9,
@@ -516,7 +516,7 @@
             },
             "faux_conseiller": {
               "frauds": 143,
-              "recall": 0.8321678321678322
+              "recall": 0.8741258741258742
             },
             "faux_investissement": {
               "frauds": 156,
@@ -543,27 +543,27 @@
           }
         },
         "reseau": {
-          "pr_auc": 0.9829184220568099,
-          "roc_auc": 0.9923463670035136,
-          "brier": 0.017574553743446356,
-          "threshold": 0.42833479544527825,
-          "precision": 0.9922680412371134,
-          "recall": 0.8632286995515696,
-          "f1": 0.9232613908872903,
-          "false_positive_rate": 0.0010787486515641855,
+          "pr_auc": 0.9741960332618186,
+          "roc_auc": 0.9906806758868233,
+          "brier": 0.014419764010791048,
+          "threshold": 0.4167752769529206,
+          "precision": 0.9975,
+          "recall": 0.8946188340807175,
+          "f1": 0.9432624113475178,
+          "false_positive_rate": 0.0003595828838547285,
           "confusion": {
-            "tp": 385,
-            "fp": 3,
-            "fn": 61,
-            "tn": 2778
+            "tp": 399,
+            "fp": 1,
+            "fn": 47,
+            "tn": 2780
           },
           "precision_at_k": 1.0,
           "recall_at_k": 0.2242152466367713,
           "k": 100,
-          "scoring_ms_per_tx": 0.04195308335392982,
+          "scoring_ms_per_tx": 0.04493755810505323,
           "decoy_flag_rate": 0.0,
           "n_decoys": 46,
-          "plain_legit_flag_rate": 0.0010968921389396709,
+          "plain_legit_flag_rate": 0.00036563071297989033,
           "recall_par_scenario": {
             "chaine_mules": {
               "frauds": 9,
@@ -571,7 +571,7 @@
             },
             "compte_collecteur": {
               "frauds": 82,
-              "recall": 0.4268292682926829
+              "recall": 0.5
             },
             "cycle": {
               "frauds": 8,
@@ -579,7 +579,7 @@
             },
             "dormant_reactive": {
               "frauds": 15,
-              "recall": 0.4666666666666667
+              "recall": 0.8
             },
             "faux_conseiller": {
               "frauds": 143,
@@ -587,7 +587,7 @@
             },
             "faux_investissement": {
               "frauds": 156,
-              "recall": 0.9743589743589743
+              "recall": 0.9935897435897436
             },
             "smurfing": {
               "frauds": 33,
@@ -610,24 +610,24 @@
           }
         },
         "rf_control": {
-          "pr_auc": 0.9916377259053394,
-          "roc_auc": 0.9959357459248618,
-          "brier": 0.01420966397443511,
-          "threshold": 0.4516925088698608,
-          "precision": 0.9948453608247423,
-          "recall": 0.8654708520179372,
-          "f1": 0.9256594724220623,
+          "pr_auc": 0.9919264401406725,
+          "roc_auc": 0.9967903599537541,
+          "brier": 0.01419051669692512,
+          "threshold": 0.4492120790546065,
+          "precision": 0.9949238578680203,
+          "recall": 0.8789237668161435,
+          "f1": 0.9333333333333332,
           "false_positive_rate": 0.000719165767709457,
           "confusion": {
-            "tp": 386,
+            "tp": 392,
             "fp": 2,
-            "fn": 60,
+            "fn": 54,
             "tn": 2779
           },
           "precision_at_k": 1.0,
           "recall_at_k": 0.2242152466367713,
           "k": 100,
-          "scoring_ms_per_tx": 0.07359646730259728,
+          "scoring_ms_per_tx": 0.10079510381106468,
           "decoy_flag_rate": 0.0,
           "n_decoys": 46,
           "plain_legit_flag_rate": 0.0007312614259597807,
@@ -638,7 +638,7 @@
             },
             "compte_collecteur": {
               "frauds": 82,
-              "recall": 0.45121951219512196
+              "recall": 0.4878048780487805
             },
             "cycle": {
               "frauds": 8,
@@ -650,11 +650,11 @@
             },
             "faux_conseiller": {
               "frauds": 143,
-              "recall": 0.9440559440559441
+              "recall": 0.951048951048951
             },
             "faux_investissement": {
               "frauds": 156,
-              "recall": 0.967948717948718
+              "recall": 0.9807692307692307
             },
             "smurfing": {
               "frauds": 33,
@@ -679,76 +679,76 @@
       },
       "demo_candidates": [
         {
-          "tx_id": "TX_0142184",
-          "ts": "2026-10-06 10:51:49",
-          "src_account": "ACC_004321",
-          "dst_account": "ACC_001746",
-          "amount": 1489.58,
+          "tx_id": "TX_0129191",
+          "ts": "2026-10-01 17:52:20",
+          "src_account": "ACC_004469",
+          "dst_account": "ACC_001359",
+          "amount": 441.11,
+          "gt_scenario_type": "compte_collecteur",
+          "score_tx_only": 0,
+          "score_full": 99,
+          "dst_n_distinct_src_24h": 15.0,
+          "dst_fanout_ratio": 0.0
+        },
+        {
+          "tx_id": "TX_0129872",
+          "ts": "2026-10-01 21:51:22",
+          "src_account": "ACC_004190",
+          "dst_account": "ACC_001359",
+          "amount": 220.07,
+          "gt_scenario_type": "compte_collecteur",
+          "score_tx_only": 0,
+          "score_full": 99,
+          "dst_n_distinct_src_24h": 14.0,
+          "dst_fanout_ratio": 0.05952681911019605
+        },
+        {
+          "tx_id": "TX_0129040",
+          "ts": "2026-10-01 17:09:13",
+          "src_account": "ACC_001586",
+          "dst_account": "ACC_001359",
+          "amount": 763.93,
+          "gt_scenario_type": "compte_collecteur",
+          "score_tx_only": 0,
+          "score_full": 99,
+          "dst_n_distinct_src_24h": 14.0,
+          "dst_fanout_ratio": 0.0
+        },
+        {
+          "tx_id": "TX_0130013",
+          "ts": "2026-10-02 01:07:53",
+          "src_account": "ACC_004855",
+          "dst_account": "ACC_001359",
+          "amount": 595.73,
           "gt_scenario_type": "compte_collecteur",
           "score_tx_only": 1,
-          "score_full": 96,
-          "dst_n_distinct_src_24h": 19.0,
-          "dst_fanout_ratio": 0.0
+          "score_full": 99,
+          "dst_n_distinct_src_24h": 14.0,
+          "dst_fanout_ratio": 0.05901113081062935
         },
         {
-          "tx_id": "TX_0135867",
-          "ts": "2026-10-04 11:26:52",
-          "src_account": "ACC_002423",
-          "dst_account": "ACC_006861",
-          "amount": 232.9,
-          "gt_scenario_type": "dormant_reactive",
-          "score_tx_only": 2,
-          "score_full": 96,
-          "dst_n_distinct_src_24h": 3.0,
-          "dst_fanout_ratio": 0.0
-        },
-        {
-          "tx_id": "TX_0142315",
-          "ts": "2026-10-06 11:35:44",
-          "src_account": "ACC_004588",
-          "dst_account": "ACC_001746",
-          "amount": 941.5,
-          "gt_scenario_type": "compte_collecteur",
-          "score_tx_only": 1,
-          "score_full": 94,
-          "dst_n_distinct_src_24h": 20.0,
-          "dst_fanout_ratio": 0.0
-        },
-        {
-          "tx_id": "TX_0122200",
-          "ts": "2026-09-29 09:24:12",
-          "src_account": "ACC_004917",
-          "dst_account": "ACC_006941",
-          "amount": 80.0,
+          "tx_id": "TX_0132526",
+          "ts": "2026-10-02 19:27:45",
+          "src_account": "ACC_002447",
+          "dst_account": "ACC_006787",
+          "amount": 323.1,
           "gt_scenario_type": "faux_conseiller",
-          "score_tx_only": 2,
-          "score_full": 96,
-          "dst_n_distinct_src_24h": 12.0,
+          "score_tx_only": 1,
+          "score_full": 99,
+          "dst_n_distinct_src_24h": 9.0,
           "dst_fanout_ratio": 0.0
         },
         {
-          "tx_id": "TX_0142321",
-          "ts": "2026-10-06 11:37:03",
-          "src_account": "ACC_001273",
-          "dst_account": "ACC_001746",
-          "amount": 1707.09,
+          "tx_id": "TX_0129893",
+          "ts": "2026-10-01 22:07:21",
+          "src_account": "ACC_002166",
+          "dst_account": "ACC_001359",
+          "amount": 618.06,
           "gt_scenario_type": "compte_collecteur",
           "score_tx_only": 0,
-          "score_full": 93,
-          "dst_n_distinct_src_24h": 21.0,
-          "dst_fanout_ratio": 0.0
-        },
-        {
-          "tx_id": "TX_0143321",
-          "ts": "2026-10-06 17:33:26",
-          "src_account": "ACC_002461",
-          "dst_account": "ACC_001746",
-          "amount": 932.5,
-          "gt_scenario_type": "compte_collecteur",
-          "score_tx_only": 0,
-          "score_full": 92,
-          "dst_n_distinct_src_24h": 18.0,
-          "dst_fanout_ratio": 0.000340596765541504
+          "score_full": 98,
+          "dst_n_distinct_src_24h": 15.0,
+          "dst_fanout_ratio": 0.058025316803902514
         }
       ]
     }

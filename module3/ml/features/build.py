@@ -9,7 +9,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from ml.config import ARTIFACTS, PROCESSED, require_data
-from ml.features.blocks import ALL_FEATURES, CARRY, GROUND_TRUTH
+from ml.features.blocks import AGE_FEATURES, ALL_FEATURES, CARRY, GROUND_TRUTH
 from ml.features.causal import compute_causal_features
 
 from fraudnet.shared.schema import assert_no_leakage
@@ -40,8 +40,9 @@ def build_features(accounts, banks, persons, transactions, maps=None):
     domestic = dict(zip(banks["bank_id"], banks["is_domestic"].astype(int)))
     acc = accounts.set_index("account_id")
     opened = acc["opened_at"]
-    # `persons.age` n'est volontairement pas chargé : colonne sensible du contrat, et
-    # le générateur s'en sert pour tirer les victimes. Voir features/blocks.py.
+    # `persons.age` est une colonne sensible du contrat, chargée uniquement parce que
+    # `blocks.AGE_FEATURES` la réclame. Voir la dérogation documentée dans blocks.py.
+    person_age = persons.set_index("person_id")["age"] if AGE_FEATURES else None
     person_csp = persons.set_index("person_id")["csp"]
 
     for side, column in (("src", "src_account"), ("dst", "dst_account")):
@@ -55,6 +56,8 @@ def build_features(accounts, banks, persons, transactions, maps=None):
         # titulaires personnes physiques.
         owner_id = ids.map(acc["owner_id"])
         tx[f"{side}_owner_csp"] = owner_id.map(person_csp)
+        if person_age is not None:
+            tx[f"{side}_owner_age"] = owner_id.map(person_age)
 
     tx["dst_bank_is_domestic"] = tx["dst_account"].map(acc["bank_id"]).map(domestic).fillna(0).astype(int)
     for name, source in (
@@ -80,7 +83,10 @@ def build_features(accounts, banks, persons, transactions, maps=None):
     keep += [c for c in GROUND_TRUTH if c in out.columns and c not in keep]
     out = out[keep]
 
-    assert_no_leakage(ALL_FEATURES, "variables du modele")
+    # Le garde-fou ne teste que des noms exacts : `src_owner_age` y passerait sans
+    # bruit. On retire donc explicitement la dérogation du périmètre contrôlé, pour que
+    # l'exception se lise ici au lieu de se cacher derrière un renommage.
+    assert_no_leakage([c for c in ALL_FEATURES if c not in AGE_FEATURES], "variables du modele")
     missing = [c for c in ALL_FEATURES if c not in out.columns]
     if missing:
         raise AssertionError(f"Variables déclarées mais non calculées : {missing}")

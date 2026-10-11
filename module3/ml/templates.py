@@ -145,9 +145,10 @@ PHRASES = {
     "channel_code": lambda v, r: f"opération passée par le canal {r.get('channel')}"
     if r.get("channel")
     else None,
-    # Pas de phrase sur l'âge du titulaire : la variable a été retirée du modèle
-    # (voir features/blocks.py), et justifier une alerte par l'âge d'un client est
-    # exactement ce que SENSITIVE_COLUMNS interdit.
+    # Phrases sur l'âge : actives parce que `blocks.AGE_FEATURES` réintroduit la
+    # variable, à lire comme un contexte d'enquête et non comme un motif de refus.
+    "src_owner_age": lambda v, r: f"l'émetteur est âgé de {_nb(v)} ans" if v >= 65 else None,
+    "dst_owner_age": lambda v, r: f"le destinataire est âgé de {_nb(v)} ans" if v >= 65 else None,
     "src_owner_csp_code": lambda v, r: "l'émetteur est déclaré retraité"
     if r.get("src_owner_csp") == "retraite"
     else None,
