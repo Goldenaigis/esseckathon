@@ -12,7 +12,8 @@ Mapping des colonnes M1 -> schema M2 :
                    owner_name, gt_role -> truth_role
   persons.csv    : first_name, last_name (joints via owner_id)
   transactions.csv: tx_id, src_account, dst_account, amount, ts -> timestamp,
-                   channel, status, gt_is_fraud -> is_fraud,
+                   channel, status, currency, instrument, tx_type,
+                   gt_is_fraud -> is_fraud,
                    gt_scenario_id -> scenario_id, gt_decoy_id -> truth_is_decoy
 
 ATTENTION, le domaine de `status` differe du contrat : M1 ecrit completed /
@@ -77,7 +78,8 @@ def build_graph_from_m1(data_dir: str = DEFAULT_M1_DIR) -> nx.MultiDiGraph:
     """Construit le MultiDiGraph a partir des CSV de M1 (lecture seule).
 
     transactions.csv (18 Mo) n'est lu QU'UNE fois : les comptes impliques dans
-    un leurre (gt_decoy_id) sont marques au passage, dans la meme boucle."""
+    un leurre (gt_decoy_id) sont marques au passage, dans la meme boucle, et le
+    debut de la partition de test y est releve (cf. g.graph["t_demo_start"])."""
     acc_path = os.path.join(data_dir, "accounts.csv")
     tx_path = os.path.join(data_dir, "transactions.csv")
     person_names = _load_person_names(data_dir)
@@ -113,6 +115,10 @@ def build_graph_from_m1(data_dir: str = DEFAULT_M1_DIR) -> nx.MultiDiGraph:
                 is_fraudster=1 if role in ("fraudster", "mule") else 0,
             )
 
+    # gt_split n'est PAS importe sur les aretes (ce n'est ni une feature ni un
+    # attribut d'affichage), mais la frise de demo doit demarrer au debut de la
+    # partition de test : on en retient seulement le premier horodatage.
+    t_test_min: Optional[str] = None
     with open(tx_path, newline="", encoding="utf-8") as f:
         for r in csv.DictReader(f):
             s, d = r["src_account"], r["dst_account"]
@@ -124,17 +130,31 @@ def build_graph_from_m1(data_dir: str = DEFAULT_M1_DIR) -> nx.MultiDiGraph:
                 # LEURRE : compte legitime mais trompeur. Affichage/eval seulement.
                 g.nodes[s]["truth_is_decoy"] = True
                 g.nodes[d]["truth_is_decoy"] = True
+            ts = r.get("ts")
+            if ts and r.get("gt_split") == "test" and (
+                    t_test_min is None or ts < t_test_min):
+                t_test_min = ts
             g.add_edge(
                 s, d,
                 key=r["tx_id"],
                 tx_id=r["tx_id"],
                 amount=float(r["amount"]) if r.get("amount") else 0.0,
-                timestamp=r.get("ts"),
+                timestamp=ts,
                 channel=r.get("channel"),
                 status=r.get("status"),
+                # moyen de paiement (perimetre scoré par M3) vs finalite
+                # economique : `instrument` et `tx_type` ne sont PAS
+                # interchangeables, cf. CLAUDE.md a la racine.
+                instrument=r.get("instrument") or None,
+                tx_type=r.get("tx_type") or None,
+                currency=r.get("currency") or None,
                 is_fraud=int(r["gt_is_fraud"]) if r.get("gt_is_fraud") else 0,
                 scenario_id=r.get("gt_scenario_id") or None,
             )
+    if t_test_min:
+        # On ramene au debut du JOUR : la frise avance jour par jour, demarrer a
+        # 00:09:20 ferait sauter la premiere journee a un instant arbitraire.
+        g.graph["t_demo_start"] = t_test_min[:10] + "T00:00:00"
     return g
 
 

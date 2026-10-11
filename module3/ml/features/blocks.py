@@ -13,14 +13,10 @@ Colonnes sciemment écartées des variables, et pourquoi :
 - `label` : libellé saisi par le client, utile pour l'interface mais trop proche
   d'une annotation pour servir de variable dans un prototype.
 - `status` : `rejected` dépend de l'issue de l'opération, pas de son contexte.
-- l'âge du titulaire : `persons.age` est dans `SENSITIVE_COLUMNS`, et le renommer
-  en `src_owner_age` ne change rien au fond. Le générateur pondère le tirage des
-  victimes par l'âge (`world.pick_victims`, biais x2,2 au-delà de 60 ans), donc
-  c'est un paramètre de sélection de la simulation, pas un signal de fraude.
-  Mesuré : les retirer fait *monter* la PR-AUC du modèle complet de 0,945 à 0,961
-  et fait baisser le taux de signalement des leurres de 6,4 % à 4,8 %.
-- tout préfixe `gt_` ou `sim_`, et les colonnes sensibles (âge) : contrôlé par
+- tout préfixe `gt_` ou `sim_` : contrôlé par
   `fraudnet.shared.schema.assert_no_leakage`.
+
+L'âge du titulaire est la seule exception à ce garde-fou, voir `AGE_FEATURES`.
 """
 
 import ml.config  # noqa: F401  amorce le chemin d'import vers le dépôt de l'équipe
@@ -36,6 +32,21 @@ PERIMETER_INSTRUMENT = SCORABLE_INSTRUMENT
 # (100 transactions), mais leurs montants y sont indiscernables de ceux des fraudes,
 # alors que dans `p2p` le montant suffit à les séparer.
 SECONDARY_TX_TYPES = ("transfer",)
+
+# Dérogation assumée à SENSITIVE_COLUMNS, décidée pour la démo : l'âge du titulaire
+# redevient une variable, afin que l'interface puisse justifier une alerte par une
+# phrase du type « l'émetteur est âgé de 78 ans ». Ce que ça coûte, mesuré sur le jeu
+# de test : la PR-AUC du modèle complet descend de 0,961 à 0,945 et le taux de
+# signalement des leurres légitimes remonte de 4,8 % à 6,4 %, parce que les leurres
+# mettent aussi en scène des personnes âgées.
+#
+# Ce que ça expose : `world.pick_victims` pondère le tirage des victimes par l'âge
+# (biais x2,2 au-delà de 60 ans), donc le modèle apprend en partie le critère de
+# sélection du simulateur et non un signal de fraude. Un jury peut aussi y voir une
+# décision de refus fondée sur l'âge du client.
+#
+# Pour revenir en arrière : vider cette liste. Rien d'autre à changer.
+AGE_FEATURES = ["src_owner_age", "dst_owner_age"]
 
 BLOC_A = [
     "amount",
@@ -58,6 +69,7 @@ BLOC_A = [
     # au modèle complet. À surveiller si le prototype passe en production.
     "src_owner_csp_code",
     "dst_owner_csp_code",
+    *AGE_FEATURES,
 ]
 
 # Mesuré sur le jeu de test : `dst_account_age_days` seule, dans un modèle à une
