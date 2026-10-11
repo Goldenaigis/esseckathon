@@ -7,7 +7,7 @@ fraude injectés). Un signalement est une aide à la décision, pas une preuve.
 
 ---
 
-## 1. Threat scenario addressed
+## 1. Scénario de menace traité
 
 Fraude par ingénierie sociale (faux conseiller, fausse voix/vidéo IA d'un proche,
 faux investissement) suivie de **blanchiment en réseau** : des victimes virent
@@ -17,7 +17,7 @@ souvent vers l'étranger, avant que la victime ne réalise l'arnaque. On ne cibl
 que les transactions victime/collecteur. Cible : banques partenaires souhaitant
 détecter tôt et geler avant évasion des fonds.
 
-## 2. NIST CSF 2.0 functions covered
+## 2. Fonctions du NIST CSF 2.0 couvertes
 
 | Fonction | Couverture par le système |
 |---|---|
@@ -25,7 +25,7 @@ détecter tôt et geler avant évasion des fonds.
 | **Detect (DE)** | Cœur du système. Scoring par transaction, score agrégé par compte, détection d'anomalies de réseau et de rupture comportementale ; alertes continues. |
 | **Respond (RS)** | Alertes explicables (motif, facteurs, comptes liés) orientant l'analyste vers le gel du compte et l'avertissement des victimes. |
 
-## 3. ATT&CK / ATLAS / OWASP mapping
+## 3. Cartographie ATT&CK / ATLAS / OWASP
 
 - **MITRE ATT&CK (fraude financière, analogie)** : la chaîne détectée correspond à
   *Collection → Exfiltration* appliquée aux fonds (collecte sur un hub,
@@ -46,7 +46,7 @@ détecter tôt et geler avant évasion des fonds.
   - *OWASP ML Top 10* : ML02 (data poisoning), ML01 (input manipulation/evasion),
     ML06 (ML supply chain) pris en compte via contrôle des artefacts versionnés.
 
-## 4. Metrics achieved
+## 4. Indicateurs atteints
 
 Évaluation **sur le split test** (16 536 virements jamais vus à l'entraînement,
 671 fraudes, 990 leurres légitimes), modèle « réseau » :
@@ -61,7 +61,7 @@ détecter tôt et geler avant évasion des fonds.
 | **Time to detect** | **≈ 0,03 ms / transaction** (scoring quasi temps réel) |
 | **Time to respond** | alerte générée immédiatement ; action humaine (gel) = minutes vs a minima quelques dizaines de minutes d'évasion observées sans système |
 
-## 5. Known limitations
+## 5. Limites connues
 
 - **Données synthétiques** : performances à recalibrer sur données réelles ;
   
