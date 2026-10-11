@@ -122,6 +122,11 @@ main { flex: 1; position: relative; min-height: 0; }
 #legend span { display: flex; align-items: center; gap: 5px; }
 .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 .dot.high { background: var(--high); } .dot.mid { background: var(--mid); } .dot.low { background: var(--low); }
+/* gris = aucun virement noté dans la fenêtre affichée, donc rien à juger.
+   Doit rester distinct du vert, qui veut dire « jugé peu risqué ».
+   Même valeur que COLORS.none dans graph-sigma.js. */
+.dot.none { background: #55607a; }
+.edge-hot { display: inline-block; width: 18px; height: 3px; border-radius: 2px; background: #ff4646; }
 
 /* Panel détail */
 #panel {
@@ -144,6 +149,73 @@ main { flex: 1; position: relative; min-height: 0; }
 #p-attrs div { display: flex; justify-content: space-between; padding: 4px 0;
   border-bottom: 1px solid var(--border); }
 #p-attrs dt { color: #7d8eac; } #p-attrs dd { margin: 0; }
+
+/* Panneau compte : hauteur bornée, le détail d'activité peut être long */
+#panel { max-height: calc(100vh - 140px); overflow-y: auto; }
+
+/* Activité du compte (API /api/account) */
+#p-activity { margin-top: 12px; font-size: 12.5px; }
+#p-activity h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em;
+  color: #7d8eac; margin: 14px 0 6px; font-weight: 600; }
+.pa-grid { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; }
+.pa-grid span:nth-child(odd) { color: #7d8eac; }
+.pa-grid span:nth-child(even) { text-align: right; font-variant-numeric: tabular-nums; }
+.pa-truth { margin: 8px 0 0; padding: 7px 9px; border-radius: 6px; font-size: 11.5px;
+  background: rgba(110,168,254,0.08); border: 1px solid rgba(110,168,254,0.25); color: #a9b6cf; }
+.pa-truth b { color: var(--text); }
+.pa-wait, .pa-err { color: #7d8eac; font-style: italic; margin: 8px 0 0; }
+.pa-err { color: var(--mid); font-style: normal; }
+#pa-tx { list-style: none; margin: 0; padding: 0; max-height: 240px; overflow-y: auto; }
+#pa-tx li { display: flex; align-items: center; gap: 7px; padding: 5px 6px;
+  border-radius: 5px; cursor: pointer; font-size: 11.5px; border-bottom: 1px solid #1c2534; }
+#pa-tx li:hover { background: var(--panel-2); }
+#pa-tx .pa-dir { width: 12px; flex: 0 0 auto; color: #7d8eac; }
+#pa-tx .pa-cp { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#pa-tx .pa-amt { font-variant-numeric: tabular-nums; color: #a9b6cf; }
+#pa-tx .pa-sc { width: 30px; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+#pa-tx .pa-date { color: #5f6f8c; font-size: 10.5px; }
+
+/* Panneau détail d'un virement */
+#txpanel {
+  position: absolute; top: 12px; right: 304px; width: 320px;
+  max-height: calc(100vh - 140px); overflow-y: auto;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+  padding: 16px; z-index: 9; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-size: 12.5px;
+}
+#txpanel-close { position: absolute; top: 8px; right: 10px; background: none; border: none;
+  color: #7d8eac; font-size: 20px; cursor: pointer; }
+#txpanel h2 { margin: 0 0 10px; font-size: 14px; }
+#txpanel h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em;
+  color: #7d8eac; margin: 14px 0 6px; font-weight: 600; }
+.tx-grid { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; }
+.tx-grid span:nth-child(odd) { color: #7d8eac; }
+.tx-grid span:nth-child(even) { text-align: right; }
+.tx-score { display: flex; align-items: baseline; gap: 8px; margin: 10px 0 2px; }
+.tx-score b { font-size: 26px; font-variant-numeric: tabular-nums; }
+.tx-score small { color: #7d8eac; }
+.tx-thesis { margin: 10px 0 0; padding: 9px 10px; border-radius: 7px;
+  background: rgba(53,208,127,0.08); border: 1px solid rgba(53,208,127,0.3); line-height: 1.5; }
+.tx-thesis b { font-variant-numeric: tabular-nums; }
+#txpanel ul.tx-factors { margin: 0; padding-left: 18px; line-height: 1.55; }
+#txpanel ul.tx-factors li { margin-bottom: 3px; }
+.tx-note { margin: 12px 0 0; font-size: 11px; color: #7d8eac; font-style: italic; line-height: 1.5; }
+.tx-wait { color: #7d8eac; font-style: italic; }
+.tx-err { color: var(--mid); line-height: 1.5; }
+
+/* Deuxième rangée de la frise : seuil d'alerte + agrégateur */
+.tl-row2 { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+.tl-row2 select { background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+  border-radius: 5px; padding: 3px 6px; font-size: 12px; }
+.thr-label input[type=range] { width: 150px; accent-color: var(--high); }
+.thr-label input[type=number] { width: 62px; background: var(--panel-2); color: var(--text);
+  border: 1px solid var(--border); border-radius: 5px; padding: 3px 6px; font-size: 12px; }
+.thr-val { font-size: 12px; color: var(--high); font-weight: 600; font-variant-numeric: tabular-nums; }
+#demo-cumul-btn { background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+  border-radius: 6px; padding: 6px 10px; font-size: 12px; cursor: pointer; white-space: nowrap; }
+#demo-cumul-btn:hover { border-color: var(--accent); }
+#demo-cumul-btn.on { background: var(--accent); color: #06101f; border-color: var(--accent); }
+#demo-status { color: var(--accent); font-weight: 600; }
+.tl-stats { gap: 12px; }
 
 /* Footer / timeline */
 footer { background: var(--panel); border-top: 1px solid var(--border); padding: 8px 16px; z-index: 10; }

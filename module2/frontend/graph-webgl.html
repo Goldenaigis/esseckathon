@@ -20,23 +20,22 @@
       </div>
     </div>
     <div class="controls">
-      <label>Risque min
-        <input type="range" id="risk-filter" min="0" max="100" value="0" />
-        <span id="risk-filter-val">0</span>
-      </label>
       <div id="search-wrap">
         <input type="text" id="search-input" placeholder="Rechercher un nom, prénom ou ID…" autocomplete="off" />
         <ul id="search-results" hidden></ul>
       </div>
+      <!-- Période par défaut = TEST : les scores antérieurs sont in-sample. -->
       <label class="period-sel">Période
         <select id="period-select" title="Filtrer sur la période d'entraînement ou de test du modèle">
+          <option value="test" selected>Test (25 sept. → 9 oct.)</option>
           <option value="all">Tout (août → oct.)</option>
           <option value="train">Entraînement (→ 25 sept.)</option>
-          <option value="test">Test (25 sept. → 9 oct.)</option>
         </select>
       </label>
-      <label class="show-all"><input type="checkbox" id="show-all" /> Afficher tous les comptes</label>
-      <span id="lod-badge" class="lod-badge">Affichage : risque ≥ 50</span>
+      <!-- Décochable uniquement comme soupape de performance : les 95 000 liens
+           sont tous dessinés par défaut (cf. graph-sigma.js, edgeReducer). -->
+      <label class="show-all"><input type="checkbox" id="all-edges" checked /> Tous les liens dessinés</label>
+      <span id="lod-badge" class="lod-badge">—</span>
       <button id="risklist-btn" title="Liste des comptes à risque">⚠ Comptes à risque</button>
       <button id="demo-btn" class="accent-btn" title="Simulation d'une arnaque en temps réel">▶ Démo</button>
       <button id="testai-btn" title="Rejeu temporel des détections du modèle sur des données jamais vues">🧪 Test IA</button>
@@ -60,15 +59,27 @@
       <span id="p-role" class="badge"></span>
       <div class="score-ring-wrap">
         <div class="score-ring"><span id="p-score"></span><small>/100</small></div>
-        <span class="score-label">Score de risque</span>
+        <span class="score-label" id="p-score-label">Score de risque</span>
       </div>
       <dl id="p-attrs"></dl>
+      <!-- Activité du compte (GET /api/account/{id}), chargée au clic -->
+      <div id="p-activity"></div>
+    </aside>
+
+    <!-- Détail d'un virement (GET /api/tx/{tx_id}) : clic sur une arête ou sur
+         une ligne de la liste des transactions du compte -->
+    <aside id="txpanel" hidden>
+      <button id="txpanel-close" title="Fermer">×</button>
+      <h2 id="tx-title">Virement</h2>
+      <div id="tx-body"></div>
     </aside>
 
     <div id="legend">
       <span><i class="dot high"></i> risque élevé</span>
       <span><i class="dot mid"></i> moyen</span>
       <span><i class="dot low"></i> faible</span>
+      <span><i class="dot none"></i> non noté sur la période</span>
+      <span><i class="edge-hot"></i> virement au-dessus du seuil</span>
     </div>
 
     <!-- Liste des comptes à risque (panneau latéral gauche) -->
@@ -80,8 +91,11 @@
       <div class="rl-filter">
         <label>Seuil
           <select id="rl-threshold">
+            <option value="90">critique (≥ 90)</option>
+            <option value="80">très élevé (≥ 80)</option>
             <option value="50">élevé (≥ 50)</option>
             <option value="25">moyen (≥ 25)</option>
+            <option value="20">faible (≥ 20)</option>
           </select>
         </label>
         <span id="rl-count"></span>
@@ -152,10 +166,40 @@
         </div>
         <label><input type="date" id="date-end" /> Fin</label>
         <button id="play-btn" title="Faire glisser la fenêtre dans le temps">▶</button>
+        <button id="demo-cumul-btn" title="Frise cumulative : un jour de plus toutes les 2 secondes depuis le début de la période de test">⏩ Démo cumulative</button>
+        <!-- Les scores des virements antérieurs au début de la partition de test
+             sont IN-SAMPLE : le modèle s'est entraîné dessus. La plage démarre
+             donc sur le test ; inclure l'historique passe par le sélecteur Période. -->
+        <span id="split-badge" class="lod-badge">—</span>
       </div>
+
+      <!-- Seuil d'alerte sur les virements + agrégateur de score par compte -->
+      <div class="tl-row tl-row2">
+        <label class="thr-label">Seuil d'alerte
+          <input type="range" id="edge-threshold" min="0" max="100" step="1" value="80" />
+          <input type="number" id="edge-threshold-num" min="0" max="100" step="1" value="80"
+                 title="Au clavier : 80 ou 0.8, les deux sont comprises" />
+        </label>
+        <span id="edge-threshold-lbl" class="thr-val">—</span>
+        <label class="show-all"><input type="checkbox" id="hot-edges" checked /> Liens au-dessus du seuil toujours visibles</label>
+        <span id="hot-count" class="lod-badge">—</span>
+        <label>Score du compte
+          <select id="agg-mode">
+            <option value="max">max des virements reçus</option>
+            <option value="top3">moyenne des 3 plus hauts</option>
+            <option value="count">nombre au-dessus du seuil</option>
+            <option value="amount">moyenne pondérée par les montants</option>
+            <option value="noisyor">cumul (noisy-or)</option>
+          </select>
+        </label>
+        <span id="agg-count" class="lod-badge">—</span>
+      </div>
+
       <div class="tl-stats">
         <span id="tl-count">—</span>
-        <span class="disclaimer">Fenêtre glissante · données synthétiques · une alerte n'est pas une preuve de fraude.</span>
+        <span id="demo-status"></span>
+        <span id="agg-note" class="disclaimer"></span>
+        <span class="disclaimer">Données synthétiques · une alerte n'est pas une preuve de fraude.</span>
       </div>
     </div>
   </footer>
