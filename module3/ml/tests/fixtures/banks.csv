@@ -1,0 +1,6 @@
+bank_id,bank_name,bic,country,is_domestic,n_accounts
+BNK_01,Banque Un,BUNFRPP,FR,1,4
+BNK_02,Banque Deux,BDEFRPP,FR,1,3
+BNK_03,Banque Trois,BTRFRPP,FR,1,1
+EXT_01,Paiement Est,PESTROBU,RO,0,2
+EXT_02,Paiement Baltique,PBALLV22,LV,0,1

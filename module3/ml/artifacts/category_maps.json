@@ -1,0 +1,46 @@
+{
+  "channel_code": {
+    "branch": 0,
+    "mobile": 1,
+    "web": 2
+  },
+  "dst_product_code": {
+    "courant": 0,
+    "epargne": 1,
+    "pro": 2
+  },
+  "dst_segment_code": {
+    "association": 0,
+    "particulier": 1,
+    "pro": 2
+  },
+  "dst_owner_type_code": {
+    "association": 0,
+    "company": 1,
+    "person": 2
+  },
+  "src_owner_csp_code": {
+    "agriculteur": 0,
+    "artisan_commercant": 1,
+    "cadre": 2,
+    "employe": 3,
+    "etudiant": 4,
+    "nan": 5,
+    "ouvrier": 6,
+    "profession_intermediaire": 7,
+    "retraite": 8,
+    "sans_emploi": 9
+  },
+  "dst_owner_csp_code": {
+    "agriculteur": 0,
+    "artisan_commercant": 1,
+    "cadre": 2,
+    "employe": 3,
+    "etudiant": 4,
+    "nan": 5,
+    "ouvrier": 6,
+    "profession_intermediaire": 7,
+    "retraite": 8,
+    "sans_emploi": 9
+  }
+}

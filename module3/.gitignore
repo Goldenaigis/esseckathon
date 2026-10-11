@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+
+# Sorties régénérables par les quatre scripts, trop lourdes pour un dépôt git :
+# features.parquet (19 Mo), les modèles sérialisés (14 Mo), scores.csv (11 Mo).
+data/processed/
+ml/artifacts/*.joblib
+ml/artifacts/scores.csv
+ml/artifacts/scores_high_risk.csv

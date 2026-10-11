@@ -1,0 +1,12 @@
+account_id,owner_type,owner_id,owner_name,bank_id,bank_name,country,iban_masked,product,segment,opened_at,account_age_days,balance,gt_role,gt_scenario_id
+ACC_A,person,PER_000001,Aline Bertin,BNK_01,Banque Un,FR,FR76****1001,courant,particulier,2022-03-14,1200,3400.0,normal,
+ACC_B,person,PER_000002,Bernard Colin,BNK_01,Banque Un,FR,FR76****1002,courant,particulier,2019-06-02,2500,8100.0,victim,SCN_001
+ACC_C,person,PER_000003,Claire Dumas,BNK_02,Banque Deux,FR,FR76****1003,courant,particulier,2017-08-21,3100,15200.0,victim,SCN_001
+ACC_D,person,PER_000004,Denis Evrard,BNK_02,Banque Deux,FR,FR76****1004,courant,particulier,2021-01-09,1900,6400.0,victim,SCN_001
+ACC_E,person,PER_000005,Elise Fabre,BNK_01,Banque Un,FR,FR76****1005,courant,particulier,2018-11-30,2800,9700.0,victim,SCN_001
+ACC_F,person,PER_000006,Fabien Gros,BNK_02,Banque Deux,FR,FR76****1006,courant,particulier,2017-02-15,3300,12500.0,victim,SCN_001
+ACC_G,person,PER_000007,Gisele Henry,BNK_03,Banque Trois,FR,FR76****1007,courant,particulier,2015-05-05,4000,21000.0,victim,SCN_002
+ACC_SHOP,company,CMP_00001,Boulangerie Ideale,BNK_01,Banque Un,FR,FR76****2001,pro,pro,2020-04-18,2200,45000.0,normal,
+ACC_COLLECT,person,PER_000008,Hugo Ivanov,EXT_01,Paiement Est,RO,RO76****3001,courant,particulier,2026-01-01,5,120.0,mule,SCN_001
+ACC_MULE1,person,PER_000009,Iris Jalbert,EXT_01,Paiement Est,RO,RO76****3002,courant,particulier,2025-12-25,11,60.0,mule,SCN_001
+ACC_MULE2,person,PER_000010,Jonas Keller,EXT_02,Paiement Baltique,LV,LV76****3003,courant,particulier,2027-01-01,8,30.0,mule,SCN_001
