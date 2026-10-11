@@ -42,6 +42,10 @@ header p { margin: 0; font-size: 11px; color: #7d8eac; }
   border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; }
 .show-all { font-size: 12px; color: #a9b6cf; display: flex; align-items: center; gap: 5px; cursor: pointer; }
 .show-all input { accent-color: var(--accent); }
+.period-sel { font-size: 12px; color: #a9b6cf; display: flex; align-items: center; gap: 6px; }
+.period-sel select { background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+  border-radius: 6px; padding: 4px 8px; font-size: 12px; }
+.period-sel select:focus { outline: none; border-color: var(--accent); }
 
 /* Liste des comptes à risque (panneau latéral gauche) */
 #risklist {
@@ -174,3 +178,75 @@ footer { background: var(--panel); border-top: 1px solid var(--border); padding:
   width: 34px; height: 30px; font-size: 13px; cursor: pointer; }
 .tl-stats { display: flex; justify-content: space-between; margin-top: 4px; font-size: 11px; color: #7d8eac; }
 .disclaimer { font-style: italic; }
+
+/* Bouton accentué (Démo, lancer la simulation, rejouer) */
+.accent-btn { background: var(--accent) !important; color: #06101f !important;
+  border: 1px solid var(--accent) !important; font-weight: 600; }
+.accent-btn:hover { filter: brightness(1.08); }
+
+/* ---------- Overlay DÉMO (simulation d'arnaque) ---------- */
+#demo-overlay {
+  position: absolute; inset: 0; z-index: 40; display: flex;
+  align-items: center; justify-content: center;
+  background: rgba(6,10,18,0.82); backdrop-filter: blur(2px);
+}
+.demo-modal {
+  position: relative; width: min(760px, 92vw); max-height: 90vh; overflow-y: auto;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+  padding: 22px 26px; box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+#demo-close { position: absolute; top: 12px; right: 16px; background: none; border: none;
+  color: #7d8eac; font-size: 24px; cursor: pointer; line-height: 1; }
+.demo-modal h2 { margin: 0 0 4px; font-size: 20px; }
+.demo-sub { font-size: 12px; color: #7d8eac; font-weight: 400; }
+.demo-story { font-size: 13px; color: #c9d4e8; line-height: 1.55; margin: 10px 0 18px; }
+.demo-cols { display: flex; gap: 16px; }
+.demo-col { flex: 1; border: 1px solid var(--border); border-radius: 10px; padding: 16px;
+  text-align: center; background: var(--panel-2); }
+.demo-col-bad { border-color: rgba(255,90,90,0.4); }
+.demo-col-good { border-color: rgba(53,208,127,0.4); }
+.demo-col h3 { margin: 0 0 12px; font-size: 14px; }
+.demo-clock { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 30px;
+  font-weight: 700; font-variant-numeric: tabular-nums; }
+.demo-col-bad .demo-clock { color: var(--high); }
+.demo-col-good .demo-clock { color: var(--low); }
+.demo-money { font-size: 22px; font-weight: 700; margin: 8px 0 10px; font-variant-numeric: tabular-nums; }
+.demo-caption { font-size: 11.5px; color: #7d8eac; margin: 0; line-height: 1.45; }
+.demo-verdict { margin: 18px 0 0; padding: 14px 16px; border-radius: 10px;
+  background: rgba(53,208,127,0.08); border: 1px solid rgba(53,208,127,0.35);
+  font-size: 13.5px; line-height: 1.55; color: #d7f3e4; }
+.demo-verdict strong { color: var(--low); }
+.demo-actions { display: flex; gap: 10px; align-items: center; margin-top: 18px; }
+.demo-actions button { background: var(--panel-2); color: var(--text);
+  border: 1px solid var(--border); border-radius: 7px; padding: 8px 14px;
+  font-size: 13px; cursor: pointer; }
+.demo-actions button:hover { border-color: var(--accent); }
+.demo-disclaimer { margin: 14px 0 0; font-size: 11px; color: #7d8eac; }
+
+/* ---------- Bandeau MODE "Test IA" ---------- */
+#testai-banner {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+  z-index: 11; display: flex; align-items: center; gap: 22px;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+  padding: 10px 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+}
+#testai-banner strong { font-size: 13px; }
+.tb-sub { display: block; font-size: 11px; color: #7d8eac; margin-top: 2px; max-width: 320px; }
+.tb-mid { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+#tb-count { font-size: 15px; font-weight: 700; color: var(--high); font-variant-numeric: tabular-nums; }
+.tb-clock { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 12px; color: #a9b6cf; }
+.tb-right { display: flex; gap: 8px; }
+.tb-right button { border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer;
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--border); }
+.tb-right button:hover { border-color: var(--accent); }
+
+/* Fiche d'alerte M3 dans le panneau de détail */
+.p-alert { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
+.p-alert h3 { margin: 0 0 6px; font-size: 12px; color: var(--high); text-transform: uppercase;
+  letter-spacing: 0.4px; }
+.p-alert .pa-pattern { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.p-alert ul { margin: 4px 0; padding-left: 16px; font-size: 12px; color: #c9d4e8; }
+.p-alert .pa-related { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+.p-alert .pa-chip { font-size: 11px; background: var(--panel-2); border: 1px solid var(--border);
+  border-radius: 5px; padding: 2px 7px; cursor: pointer; color: var(--accent); }
+.p-alert .pa-chip:hover { border-color: var(--accent); }

@@ -6,6 +6,9 @@ Endpoints :
   GET  /api/health
   GET  /api/meta
   GET  /api/graph/webgl      -> graphe complet, payload compact + positions figees
+  GET  /api/demo             -> scenario de demonstration "arnaque a l'instant T"
+  GET  /api/test-timeline    -> chronologie des detections M3 sur le split test
+  GET  /api/account/{id}/alert -> fiche d'alerte M3 d'un compte (si M3 actif)
   POST /api/reload
 
 Lancer :  uvicorn backend.app:app --port 8000   (ou ./run.sh)
@@ -21,7 +24,7 @@ import os
 
 import json
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 
@@ -32,6 +35,9 @@ from backend.module2_graph.risk import (
 from backend.module2_graph.to_webgl import to_webgl
 from backend.module2_graph.load_m1_csv import build_graph_from_m1, m1_available
 from backend.module2_graph.layout import compute_layout
+from backend.module2_graph.load_m3 import (
+    load_alerts_by_account, load_test_timeline)
+from backend.module2_graph.demo_scenario import build_demo
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(ROOT, "data", "bank.db")
@@ -106,10 +112,21 @@ class _State:
         # parcours des 151 770 transactions (310 ms) a chaque /api/health.
         stats = summary(graph)
 
+        # Alertes M3 (fiche d'alerte au clic) + chronologie du SPLIT TEST
+        # (mode "Test IA"). On ne les charge QUE quand les scores viennent
+        # vraiment de M3 : les fichiers d'alertes sont indexes sur la MEME
+        # numerotation ACC_xxxxxx que M1. Sur fixtures/truth, on n'invente rien.
+        if score_source == "m3":
+            alerts = load_alerts_by_account()
+            test_timeline = load_test_timeline()
+        else:
+            alerts, test_timeline = {}, []
+
         (self.source, self.graph, self.fast, self.features, self.scores,
-         self.score_source, self.positions, self.webgl_json, self.stats) = (
+         self.score_source, self.positions, self.webgl_json, self.stats,
+         self.alerts, self.test_timeline) = (
             source, graph, fast, features, scores, score_source, positions,
-            webgl_json, stats)
+            webgl_json, stats, alerts, test_timeline)
 
 
 state = _State()
@@ -138,6 +155,43 @@ def api_graph_webgl():
 def api_meta():
     return {"source": state.source, "fast": state.fast,
             "score_source": state.score_source, **state.stats}
+
+
+@app.get("/api/demo")
+def api_demo():
+    """Scenario de DEMONSTRATION "arnaque a l'instant T" : contraste chiffre
+    entre "sans systeme" (l'argent s'evapore) et "avec systeme" (alerte rapide
+    -> on sauve ce qui n'est pas encore sorti). Tout vient des VRAIES
+    transactions du scenario (dates, montants) ; cf. demo_scenario.build_demo."""
+    return build_demo(state.graph, state.scores, state.alerts)
+
+
+@app.get("/api/test-timeline")
+def api_test_timeline():
+    """Chronologie des alertes M3 sur le SPLIT TEST (donnees jamais vues a
+    l'entrainement), triee par date : sert a rejouer dans le temps l'allumage
+    des comptes detectes -> demonstration HONNETE de la performance du modele."""
+    tl = state.test_timeline
+    if not tl:
+        return {"available": False, "n_alerts": 0, "t_min": None,
+                "t_max": None, "alerts": []}
+    return {
+        "available": True,
+        "n_alerts": len(tl),
+        "t_min": tl[0]["ts"],
+        "t_max": tl[-1]["ts"],
+        "alerts": tl,
+    }
+
+
+@app.get("/api/account/{account_id}/alert")
+def api_account_alert(account_id: str):
+    """Fiche d'alerte M3 d'un compte (pattern, facteurs, comptes lies), ou 404
+    si le compte n'a aucune alerte / M3 inactif. Lecture seule des artefacts M3."""
+    alert = state.alerts.get(account_id)
+    if not alert:
+        raise HTTPException(status_code=404, detail="no alert for account")
+    return {"account": account_id, "alert": alert}
 
 
 # --- Fichiers statiques (front) : monte en DERNIER pour ne pas masquer /api ---

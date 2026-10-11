@@ -29,6 +29,12 @@ const state = {
   selected: null,
   neighbors: new Set(),
   searchIndex: [],   // [{id, name, score, ct, hay}] pour la recherche nom/prénom
+  // MODE "Test IA" : rejeu temporel des détections M3 sur le split test.
+  // Quand actif, le graphe N'AFFICHE QUE les comptes des alertes test ;
+  // ils sont neutres (gris) puis "s'allument" en rouge à la date réelle.
+  testMode: false,
+  testAccounts: new Set(),   // tous les comptes concernés par les alertes test
+  testRevealed: new Set(),   // comptes déjà "allumés" (détectés) au fil du rejeu
 };
 
 const el = id => document.getElementById(id);
@@ -263,6 +269,20 @@ async function initSigma() {
   // reducers = cœur de l'effet Obsidian : estompe tout sauf le focus
   state.renderer.setSetting("nodeReducer", (node, data) => {
     const res = { ...data };
+    // MODE "Test IA" : on ne montre QUE les comptes des alertes test. Un compte
+    // révélé (détecté) passe en rouge et grossit ; les autres comptes test
+    // restent gris neutres ; tout le reste est masqué.
+    if (state.testMode) {
+      if (!state.testAccounts.has(node)) { res.hidden = true; return res; }
+      if (state.testRevealed.has(node)) {
+        res.color = COLORS.high; res.size = data.baseSize * 2.0;
+        res.zIndex = 2; res.forceLabel = true;
+      } else {
+        res.color = "rgba(140,160,190,0.5)"; res.size = data.baseSize * 1.1;
+        res.label = ""; res.zIndex = 0;
+      }
+      return res;
+    }
     // filtre utilisateur (curseur) ET niveau de détail selon le zoom (LOD)
     const threshold = Math.max(state.riskMin, state.lodThreshold);
     // on garde toujours visibles le focus et ses voisins, même sous le seuil
@@ -290,6 +310,8 @@ async function initSigma() {
   state.renderer.setSetting("edgeReducer", (edge, data) => {
     const res = { ...data };
     const g = state.graph;
+    // en mode "Test IA" on raconte l'allumage des COMPTES : aucune arête.
+    if (state.testMode) { res.hidden = true; return res; }
     const focus = state.selected || state.hovered;
     // OPTIMISATION : aucune arête tant qu'aucun nœud n'est sélectionné/survolé.
     // (les 77k liens ne sont dessinés qu'au focus -> rendu bien plus léger)
@@ -344,32 +366,46 @@ async function initSigma() {
   await nextFrame();
 }
 
-/* ---------- Liste des comptes à risque ---------- */
-function renderRiskList() {
-  const thr = parseInt(el("rl-threshold").value, 10);
-  const items = state.searchIndex
-    .filter(e => e.score >= thr)
-    .sort((a, b) => b.score - a.score);
-  el("rl-count").textContent = `${items.length.toLocaleString("fr-FR")} comptes`;
-  const ul = el("rl-items");
-  ul.innerHTML = items.slice(0, 500).map(m => {
-    const col = riskColor(m.score);
-    const name = m.name || "(sans nom)";
-    return `<li data-id="${esc(m.id)}">
+/* ---------- Liste des comptes à risque (SANS plafond) ----------
+ * On affiche TOUS les comptes au-dessus du seuil (aucune limite à 500). Pour ne
+ * pas figer le navigateur quand la liste est longue (plusieurs centaines de
+ * comptes), on rend PAR LOTS : un premier lot immédiat, les suivants ajoutés au
+ * défilement (scroll). Un SEUL écouteur de clic (délégation) couvre toute la
+ * liste, même les lignes ajoutées après coup. */
+const RL_BATCH = 300;   // nombre de lignes ajoutées par lot
+const rlState = { items: [], rendered: 0 };
+
+function rlRowHtml(m) {
+  const col = riskColor(m.score);
+  const name = m.name || "(sans nom)";
+  return `<li data-id="${esc(m.id)}">
       <span class="rl-dot" style="background:${col}"></span>
       <span>
         <span class="rl-name">${esc(name)}</span><br/>
         <span class="rl-sub">${esc(m.id)} · ${esc(m.ct ?? "")}</span>
       </span>
       <span class="rl-score" style="color:${col}">${m.score}</span></li>`;
-  }).join("");
-  if (items.length > 500) {
-    ul.insertAdjacentHTML("beforeend",
-      `<li class="rl-sub" style="justify-content:center">… ${(items.length - 500).toLocaleString("fr-FR")} de plus (affinez le seuil)</li>`);
-  }
-  ul.querySelectorAll("li[data-id]").forEach(li => {
-    li.onclick = () => selectNode(li.dataset.id);
-  });
+}
+
+// ajoute le prochain lot de lignes (si disponible)
+function rlAppendBatch() {
+  const ul = el("rl-items");
+  const next = rlState.items.slice(rlState.rendered, rlState.rendered + RL_BATCH);
+  if (!next.length) return;
+  ul.insertAdjacentHTML("beforeend", next.map(rlRowHtml).join(""));
+  rlState.rendered += next.length;
+}
+
+function renderRiskList() {
+  const thr = parseInt(el("rl-threshold").value, 10);
+  rlState.items = state.searchIndex
+    .filter(e => e.score >= thr)
+    .sort((a, b) => b.score - a.score);
+  rlState.rendered = 0;
+  el("rl-count").textContent = `${rlState.items.length.toLocaleString("fr-FR")} comptes`;
+  const ul = el("rl-items");
+  ul.innerHTML = "";
+  rlAppendBatch();   // premier lot immédiat ; le reste arrive au scroll
 }
 
 function toggleRiskList(show) {
@@ -440,6 +476,9 @@ function setHover(node) {
 /* clic = focus persistant + RESSERREMENT : on recadre la caméra sur le voisinage
  * (uniquement les partenaires de la fenêtre temporelle sélectionnée) */
 function selectNode(node) {
+  // sélectionner un compte sort proprement du mode "Test IA" (on bascule vers
+  // la carte normale centrée sur ce compte).
+  if (state.testMode && node) closeTestMode();
   state.selected = node;
   state.hovered = null;
   if (!node) {
@@ -519,6 +558,231 @@ function showPanel(node) {
     <div><dt>Transactions reçues</dt><dd>${a.fi}</dd></div>
     <div><dt>Transactions émises</dt><dd>${a.fo}</dd></div>
     <div><dt>Partenaires (fenêtre)</dt><dd>${Math.max(state.neighbors.size - 1, 0)}</dd></div>`;
+
+  // Fiche d'alerte M3 (si ce compte en a une) : pattern, facteurs, comptes liés.
+  renderAccountAlert(node);
+}
+
+/* Fiche d'alerte M3 affichée sous les attributs du panneau de détail.
+ * Chargée à la demande ; absente si le compte n'a pas d'alerte / M3 inactif. */
+async function renderAccountAlert(node) {
+  // nettoie toute fiche précédente
+  const old = document.getElementById("p-alert");
+  if (old) old.remove();
+  let data;
+  try {
+    const r = await fetch(`/api/account/${encodeURIComponent(node)}/alert`);
+    if (!r.ok) return;              // 404 = pas d'alerte -> rien à afficher
+    data = await r.json();
+  } catch (_) { return; }
+  // le compte a pu changer pendant le fetch
+  if (state.selected !== node) return;
+  const al = data.alert || {};
+  const factors = (al.top_factors || []).map(f => {
+    const label = typeof f === "string" ? f : (f.label || f.name || JSON.stringify(f));
+    return `<li>${esc(label)}</li>`;
+  }).join("");
+  const related = (al.related_accounts || [])
+    .filter(id => id && id !== node)
+    .map(id => `<span class="pa-chip" data-id="${esc(id)}">${esc(id)}</span>`).join("");
+  const box = document.createElement("div");
+  box.className = "p-alert";
+  box.id = "p-alert";
+  box.innerHTML = `
+    <h3>Alerte du modèle (M3)</h3>
+    <div class="pa-pattern">${esc(al.pattern_label || al.pattern || "motif détecté")}</div>
+    ${al.risk_score != null ? `<div class="rl-sub">Score d'alerte : ${esc(al.risk_score)} · ${esc(al.risk_level ?? "")}</div>` : ""}
+    ${factors ? `<div class="rl-sub" style="margin-top:6px">Principaux facteurs</div><ul>${factors}</ul>` : ""}
+    ${related ? `<div class="rl-sub" style="margin-top:6px">Comptes liés</div><div class="pa-related">${related}</div>` : ""}`;
+  el("p-attrs").insertAdjacentElement("afterend", box);
+  // clic sur un compte lié -> navigue vers lui
+  box.querySelectorAll(".pa-chip[data-id]").forEach(chip => {
+    chip.addEventListener("click", () => selectNode(chip.dataset.id));
+  });
+}
+
+/* ---------- DÉMO : simulation "arnaque à l'instant T" ---------- */
+let demoData = null;      // payload de /api/demo mis en cache
+let demoTimer = null;
+
+function fmtClock(totalSec) {
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = Math.floor(totalSec % 60);
+  const pad = n => String(n).padStart(2, "0");
+  return h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+}
+
+async function openDemo() {
+  closeTestMode();                 // ne pas superposer les deux modes
+  toggleRiskList(false);
+  el("demo-overlay").hidden = false;
+  if (!demoData) {
+    try { demoData = await fetch("/api/demo").then(r => r.json()); }
+    catch (_) { demoData = { available: false }; }
+  }
+  const d = demoData;
+  if (!d || !d.available) {
+    el("demo-story").textContent =
+      "Scénario de démonstration indisponible sur ce jeu de données.";
+    el("demo-run").hidden = true;
+    return;
+  }
+  el("demo-run").hidden = false;
+  const countries = (d.redistribution_countries || []).join(", ") || "l'étranger";
+  // Récit : arnaque fausse voix / vidéo IA. On NE donne PAS de montant médian
+  // par victime (virements modérés, sous les seuils de vérification bancaire).
+  el("demo-story").innerHTML =
+    `Un escroc se fait passer, par <strong>fausse voix ou vidéo générée par IA</strong>, `
+    + `pour un proche ou un conseiller. <strong>${d.n_victims}</strong> victimes virent `
+    + `chacune une somme modérée (sous les seuils de vérification bancaire) vers un même `
+    + `compte collecteur. En quelques heures, les fonds — <strong>${fmtAmount(d.total_collected)}</strong> `
+    + `au total — repartent vers ${esc(countries)}.`;
+  // réinitialise l'affichage des deux colonnes
+  el("demo-clock-bad").textContent = "00:00";
+  el("demo-clock-good").textContent = "00:00";
+  el("demo-money-bad").textContent = fmtAmount(d.total_collected);
+  el("demo-money-good").textContent = fmtAmount(d.total_collected);
+  el("demo-money-bad").style.color = "var(--text)";
+  el("demo-money-good").style.color = "var(--text)";
+  el("demo-verdict").hidden = true;
+  el("demo-goto").hidden = true;
+}
+
+function closeDemo() {
+  if (demoTimer) { clearInterval(demoTimer); demoTimer = null; }
+  el("demo-overlay").hidden = true;
+}
+
+function runDemo() {
+  const d = demoData;
+  if (!d || !d.available) return;
+  if (demoTimer) { clearInterval(demoTimer); demoTimer = null; }
+  el("demo-run").disabled = true;
+  el("demo-verdict").hidden = true;
+  el("demo-goto").hidden = true;
+
+  // Échelles de temps (réelles) : "sans système" = l'argent s'évapore à
+  // hours_until_exit ; "avec système" = alerte à detection_minutes.
+  const exitSec = (d.hours_until_exit || 0) * 3600;      // temps réel avant sortie
+  const alertSec = (d.detection_minutes || 0) * 60;      // temps réel de détection
+  const DURATION_MS = 3200;                              // durée de l'animation
+  const start = performance.now();
+  const total = d.total_collected || 0;
+  const lost = d.already_lost_at_alert || 0;
+  const saved = d.salvageable || 0;
+
+  demoTimer = setInterval(() => {
+    const p = Math.min((performance.now() - start) / DURATION_MS, 1);
+    // Compteur "sans système" : court jusqu'à l'évasion totale.
+    const simBad = p * exitSec;
+    el("demo-clock-bad").textContent = fmtClock(simBad);
+    // l'argent fond : au moment de la sortie, il ne reste rien.
+    const remainBad = total * (1 - p);
+    el("demo-money-bad").textContent = fmtAmount(Math.max(remainBad, 0));
+    el("demo-money-bad").style.color = "var(--high)";
+
+    // Compteur "avec système" : s'arrête à l'alerte (bien plus tôt).
+    const simGood = Math.min(p * exitSec, alertSec);
+    el("demo-clock-good").textContent = fmtClock(simGood);
+    // on sauve ce qui n'était pas encore sorti à l'instant de l'alerte.
+    el("demo-money-good").textContent = fmtAmount(saved);
+    el("demo-money-good").style.color = "var(--low)";
+
+    if (p >= 1) {
+      clearInterval(demoTimer); demoTimer = null;
+      el("demo-run").disabled = false;
+      const ratioPct = Math.round((d.salvage_ratio || 0) * 100);
+      el("demo-verdict").innerHTML =
+        `Sans système, la totalité (<strong style="color:var(--high)">${fmtAmount(total)}</strong>) `
+        + `s'évapore en ${d.hours_until_exit} h vers ${esc((d.redistribution_countries || []).join(", ") || "l'étranger")}.<br/>`
+        + `Avec notre système, l'alerte tombe à T+${d.detection_minutes} min : on gèle et on sauve `
+        + `<strong>${fmtAmount(saved)}</strong> (${ratioPct} %)`
+        + (lost > 0 ? `, seuls ${fmtAmount(lost)} étaient déjà partis.` : `.`);
+      el("demo-verdict").hidden = false;
+      el("demo-goto").hidden = false;
+    }
+  }, 60);
+}
+
+function demoGoto() {
+  if (!demoData || !demoData.hub) return;
+  closeDemo();
+  selectNode(demoData.hub);
+}
+
+/* ---------- MODE "Test IA" : rejeu temporel sur le split test ---------- */
+let testData = null;      // payload de /api/test-timeline mis en cache
+let testTimer = null;
+
+async function openTestMode() {
+  closeDemo();                      // ne pas superposer avec l'overlay démo
+  toggleRiskList(false);
+  if (!testData) {
+    try { testData = await fetch("/api/test-timeline").then(r => r.json()); }
+    catch (_) { testData = { available: false }; }
+  }
+  if (!testData || !testData.available || !testData.alerts.length) {
+    testData = { available: false };
+    alert("Mode Test IA indisponible : aucune alerte sur le split test.");
+    return;
+  }
+  state.testMode = true;
+  state.testRevealed = new Set();
+  state.testAccounts = new Set(testData.alerts.map(a => a.account));
+  // on retire tout focus/sélection courant pour un départ propre
+  state.selected = null; state.hovered = null; state.neighbors = new Set();
+  el("panel").hidden = true;
+  el("testai-banner").hidden = false;
+  updateTestBanner(null);
+  state.renderer.getCamera().animatedReset();
+  state.renderer.refresh();
+}
+
+function closeTestMode() {
+  if (!state.testMode) return;
+  if (testTimer) { clearInterval(testTimer); testTimer = null; }
+  state.testMode = false;
+  state.testRevealed = new Set();
+  state.testAccounts = new Set();
+  el("testai-banner").hidden = true;
+  el("tb-replay").disabled = false;
+  if (state.renderer) state.renderer.refresh();
+}
+
+function updateTestBanner(ts) {
+  el("tb-count").textContent =
+    `${state.testRevealed.size} / ${state.testAccounts.size} détectés`;
+  el("tb-clock").textContent = ts ? fmtDate(ts) : "prêt — cliquez sur « Rejouer »";
+}
+
+function replayTest() {
+  if (!testData || !testData.available) return;
+  if (testTimer) { clearInterval(testTimer); testTimer = null; }
+  // repart de zéro
+  state.testRevealed = new Set();
+  state.renderer.refresh();
+  const alerts = testData.alerts;      // déjà triées par ts côté serveur
+  const n = alerts.length;
+  // révéler par petits lots pour tenir ~10 s au total quel que soit n
+  const TOTAL_MS = 10000, STEP_MS = 180;
+  const steps = Math.max(1, Math.round(TOTAL_MS / STEP_MS));
+  const perStep = Math.max(1, Math.ceil(n / steps));
+  let i = 0;
+  el("tb-replay").disabled = true;
+  testTimer = setInterval(() => {
+    let lastTs = null;
+    for (let k = 0; k < perStep && i < n; k++, i++) {
+      state.testRevealed.add(alerts[i].account);
+      lastTs = alerts[i].ts;
+    }
+    updateTestBanner(lastTs);
+    state.renderer.refresh();
+    if (i >= n) {
+      clearInterval(testTimer); testTimer = null;
+      el("tb-replay").disabled = false;
+    }
+  }, STEP_MS);
 }
 
 /* ---------- Timeline : FENÊTRE GLISSANTE [début, fin] via double slider ----------
@@ -526,6 +790,31 @@ function showPanel(node) {
  * sous-fenêtre. On n'affiche que les liens dont la date tombe dans la fenêtre. */
 
 // plage totale (en ms epoch) definie par les champs date
+// Frontière officielle train/test du jeu de données M1 (cf. manifest : split_boundary).
+// train = début des données -> 25/09 ; test = 25/09 -> fin.
+const SPLIT_BOUNDARY = "2026-09-25";
+
+/* Règle les champs date sur la période choisie, remet le double-slider à fond
+ * et applique la fenêtre. mode : "all" | "train" | "test". */
+function setPeriod(mode) {
+  const dMin = state.tMin ? state.tMin.slice(0, 10) : "";
+  const dMax = state.tMax ? state.tMax.slice(0, 10) : "";
+  if (mode === "train") {
+    el("date-start").value = dMin;
+    el("date-end").value = SPLIT_BOUNDARY;
+  } else if (mode === "test") {
+    el("date-start").value = SPLIT_BOUNDARY;
+    el("date-end").value = dMax;
+  } else {                       // "all"
+    el("date-start").value = dMin;
+    el("date-end").value = dMax;
+  }
+  // double-slider ré-ouvert en grand sur la nouvelle plage
+  el("time-min").value = 0;
+  el("time-max").value = 1000;
+  applyWindow();
+}
+
 function dateRangeMs() {
   const ds = el("date-start").value ? new Date(el("date-start").value + "T00:00:00") : new Date(state.tMin);
   const de = el("date-end").value ? new Date(el("date-end").value + "T23:59:59") : new Date(state.tMax);
@@ -616,6 +905,11 @@ function initControls() {
   el("date-start").addEventListener("change", applyWindow);
   el("date-end").addEventListener("change", applyWindow);
   el("play-btn").addEventListener("click", togglePlay);
+
+  // Sélecteur de PÉRIODE : règle les champs date sur train / test / tout,
+  // remet le double-slider à fond, puis applique la fenêtre (le masquage des
+  // arêtes hors période est déjà géré par applyWindow).
+  el("period-select").addEventListener("change", e => setPeriod(e.target.value));
   el("risk-filter").addEventListener("input", e => {
     state.riskMin = parseInt(e.target.value, 10);
     el("risk-filter-val").textContent = e.target.value;
@@ -635,8 +929,29 @@ function initControls() {
   el("risklist-btn").addEventListener("click", () => toggleRiskList());
   el("risklist-close").addEventListener("click", () => toggleRiskList(false));
   el("rl-threshold").addEventListener("change", renderRiskList);
+  // UN SEUL écouteur (délégation) : couvre aussi les lignes ajoutées au scroll
+  el("rl-items").addEventListener("click", e => {
+    const li = e.target.closest("li[data-id]");
+    if (li) selectNode(li.dataset.id);
+  });
+  // rendu progressif : on charge le lot suivant quand on approche du bas
+  el("rl-items").addEventListener("scroll", e => {
+    const ul = e.target;
+    if (ul.scrollTop + ul.clientHeight >= ul.scrollHeight - 120) rlAppendBatch();
+  });
   el("reset-view-btn").addEventListener("click", () => state.renderer.getCamera().animatedReset());
   el("panel-close").addEventListener("click", () => selectNode(null));
+
+  // DÉMO : simulation "arnaque à l'instant T"
+  el("demo-btn").addEventListener("click", openDemo);
+  el("demo-close").addEventListener("click", closeDemo);
+  el("demo-run").addEventListener("click", runDemo);
+  el("demo-goto").addEventListener("click", demoGoto);
+
+  // MODE "Test IA" : rejeu temporel des détections sur le split test
+  el("testai-btn").addEventListener("click", openTestMode);
+  el("tb-replay").addEventListener("click", replayTest);
+  el("tb-exit").addEventListener("click", closeTestMode);
 
   // Touche "Backspace" = seul moyen de revenir à la vue générale (depuis une vue
   // isolée). On ignore si l'utilisateur tape dans un champ (recherche, dates).
@@ -706,6 +1021,8 @@ window.__fg = {
   select: id => selectNode(id),
   setWindow: (aPct, bPct) => { el("time-min").value = aPct; el("time-max").value = bPct; applyWindow(); },
   neighborsOf: (id) => Array.from(neighborsOf(id)),
+  openDemo, runDemo, closeDemo,
+  openTestMode, replayTest, closeTestMode,
 };
 
 document.addEventListener("DOMContentLoaded", main);

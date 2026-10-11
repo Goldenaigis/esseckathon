@@ -28,9 +28,18 @@
         <input type="text" id="search-input" placeholder="Rechercher un nom, prénom ou ID…" autocomplete="off" />
         <ul id="search-results" hidden></ul>
       </div>
+      <label class="period-sel">Période
+        <select id="period-select" title="Filtrer sur la période d'entraînement ou de test du modèle">
+          <option value="all">Tout (août → oct.)</option>
+          <option value="train">Entraînement (→ 25 sept.)</option>
+          <option value="test">Test (25 sept. → 9 oct.)</option>
+        </select>
+      </label>
       <label class="show-all"><input type="checkbox" id="show-all" /> Afficher tous les comptes</label>
       <span id="lod-badge" class="lod-badge">Affichage : risque ≥ 50</span>
       <button id="risklist-btn" title="Liste des comptes à risque">⚠ Comptes à risque</button>
+      <button id="demo-btn" class="accent-btn" title="Simulation d'une arnaque en temps réel">▶ Démo</button>
+      <button id="testai-btn" title="Rejeu temporel des détections du modèle sur des données jamais vues">🧪 Test IA</button>
       <button id="reset-view-btn" title="Recadrer">⤢ Recadrer</button>
     </div>
   </header>
@@ -79,6 +88,51 @@
       </div>
       <ul id="rl-items"></ul>
     </aside>
+
+    <!-- Overlay DÉMO : simulation "arnaque à l'instant T" (sans / avec système) -->
+    <div id="demo-overlay" hidden>
+      <div class="demo-modal">
+        <button id="demo-close" title="Fermer">×</button>
+        <h2>Arnaque à l'instant T <span class="demo-sub">simulation sur un cas réel des données</span></h2>
+        <p id="demo-story" class="demo-story">—</p>
+        <div class="demo-cols">
+          <div class="demo-col demo-col-bad">
+            <h3>🔴 Sans notre système</h3>
+            <div class="demo-clock" id="demo-clock-bad">00:00</div>
+            <div class="demo-money" id="demo-money-bad">—</div>
+            <p class="demo-caption" id="demo-caption-bad">L'argent collecté part à l'étranger avant toute réaction.</p>
+          </div>
+          <div class="demo-col demo-col-good">
+            <h3>🟢 Avec notre système</h3>
+            <div class="demo-clock" id="demo-clock-good">00:00</div>
+            <div class="demo-money" id="demo-money-good">—</div>
+            <p class="demo-caption" id="demo-caption-good">Alerte dès l'émergence du motif → gel → fonds sauvés.</p>
+          </div>
+        </div>
+        <div id="demo-verdict" class="demo-verdict" hidden></div>
+        <div class="demo-actions">
+          <button id="demo-run" class="accent-btn">Lancer la simulation</button>
+          <button id="demo-goto" hidden>Voir le compte dans la carte</button>
+        </div>
+        <p class="demo-disclaimer disclaimer">Données synthétiques · une alerte n'est pas une preuve de fraude.</p>
+      </div>
+    </div>
+
+    <!-- Bandeau MODE "Test IA" : rejeu temporel des détections sur le split test -->
+    <div id="testai-banner" hidden>
+      <div class="tb-left">
+        <strong>🧪 Mode Test IA</strong>
+        <span class="tb-sub">rejeu des détections du modèle sur des transactions jamais vues à l'entraînement</span>
+      </div>
+      <div class="tb-mid">
+        <span id="tb-count">0 / 0 détectés</span>
+        <span id="tb-clock" class="tb-clock">—</span>
+      </div>
+      <div class="tb-right">
+        <button id="tb-replay" class="accent-btn">Rejouer</button>
+        <button id="tb-exit">Quitter</button>
+      </div>
+    </div>
   </main>
 
   <footer>
