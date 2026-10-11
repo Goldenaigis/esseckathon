@@ -322,3 +322,7 @@ footer { background: var(--panel); border-top: 1px solid var(--border); padding:
 .p-alert .pa-chip { font-size: 11px; background: var(--panel-2); border: 1px solid var(--border);
   border-radius: 5px; padding: 2px 7px; cursor: pointer; color: var(--accent); }
 .p-alert .pa-chip:hover { border-color: var(--accent); }
+
+/* L attribut HTML hidden doit toujours gagner sur les display: flex ci-dessus
+   (sinon #demo-overlay et #risklist restent affiches et bloquent les clics). */
+[hidden] { display: none !important; }
