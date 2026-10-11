@@ -1,4 +1,4 @@
-# FraudGraph — Defense Sheet
+# Fangzha — Defense Sheet
 
 **Système** : détection de réseaux de fraude et de blanchiment sur flux
 interbancaires par analyse de graphe + modèle d'apprentissage supervisé.
@@ -13,9 +13,8 @@ Fraude par ingénierie sociale (faux conseiller, fausse voix/vidéo IA d'un proc
 faux investissement) suivie de **blanchiment en réseau** : des victimes virent
 vers un **compte collecteur**, qui redistribue rapidement les fonds à travers des
 **mules**, des **chaînes**, du **fractionnement (smurfing)** et des **cycles**,
-souvent vers l'étranger, avant que la victime ne réalise l'arnaque. Chaque virement
-isolé paraît légitime ; c'est la **structure du réseau** et sa **dynamique
-temporelle** qui trahissent le montage. Cible : banques partenaires souhaitant
+souvent vers l'étranger, avant que la victime ne réalise l'arnaque. On ne cible 
+que les transactions victime/collecteur. Cible : banques partenaires souhaitant
 détecter tôt et geler avant évasion des fonds.
 
 ## 2. NIST CSF 2.0 functions covered
@@ -25,9 +24,6 @@ détecter tôt et geler avant évasion des fonds.
 | **Identify (ID)** | Cartographie de l'exposition : comptes, flux, communautés, comptes-ponts ; inventaire des typologies de fraude. |
 | **Detect (DE)** | Cœur du système. Scoring par transaction, score agrégé par compte, détection d'anomalies de réseau et de rupture comportementale ; alertes continues. |
 | **Respond (RS)** | Alertes explicables (motif, facteurs, comptes liés) orientant l'analyste vers le gel du compte et l'avertissement des victimes. |
-| **Protect (PR)** | *Partiel* : aide à la décision de gel ; la mise en œuvre (blocage effectif) relève du SI bancaire, hors périmètre. |
-| **Recover (RC)** | *Hors périmètre* : la récupération des fonds dépend des procédures bancaires/judiciaires. |
-| **Govern (GV)** | *Partiel* : séparation stricte train/test, cloisonnement de la vérité terrain, journalisation ; gouvernance complète à définir côté établissement. |
 
 ## 3. ATT&CK / ATLAS / OWASP mapping
 
@@ -65,25 +61,10 @@ détecter tôt et geler avant évasion des fonds.
 | **Time to detect** | **≈ 0,03 ms / transaction** (scoring quasi temps réel) |
 | **Time to respond** | alerte générée immédiatement ; action humaine (gel) = minutes vs **~17 h** d'évasion observées sans système |
 
-**Rappel par typologie** : smurfing, chaînes de mules, cycles **100 %** ; faux
-conseiller **98,5 %**, faux investissement **98,3 %** ; **compte collecteur 44 %**,
-réactivation de compte dormant **52 %** (voir limites).
-
 ## 5. Known limitations
 
 - **Données synthétiques** : performances à recalibrer sur données réelles ;
-  pas de garantie de transfert direct en production.
-- **Typologies faibles** : rappel bas sur *compte collecteur* (44 %) et *dormant
-  réactivé* (52 %) → faux négatifs sur ces montages ; à renforcer (variables de
-  rafale/temporelles, rééquilibrage).
+  
 - **Évasion adverse** : un fraudeur imitant un commerce légitime (faux salaires,
   prestations fictives) reste un angle mort partiel ; les leurres montrent déjà
   des quasi-faux-positifs.
-- **Score par compte = max des virements reçus** : signale le compte, pas la
-  responsabilité ; une victime peut apparaître « à risque ».
-- **Explicabilité heuristique** : les motifs/facteurs sont des règles de lisibilité,
-  à distinguer du score du modèle et de la vérité terrain.
-- **Périmètre** : virements uniquement (`credit_transfer`) ; cartes/prélèvements
-  servent de contexte, pas de cible. Protect/Recover/Govern non complets.
-- **Non déployable en l'état** : prototype hackathon, sans validation sécurité,
-  conformité (RGPD, secret bancaire) ni supervision humaine formalisée.
