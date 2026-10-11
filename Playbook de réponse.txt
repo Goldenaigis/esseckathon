@@ -1,5 +1,0 @@
-Dans un premier temps, le processus est automatique : une alerte, suivie d'un rapport, est envoyée à un analyste afin de lui permettre de prendre une décision rapide et éclairée. Ce rapport contient les données clés, présentées de façon claire et visuelle. On y trouve notamment les éléments les plus suspects comme les montants échangés, les potentielles durées d'inactivité du compte, etc.
-
-L'alerte étant donnée, le compte suspect est automatiquement bloqué de façon temporaire.
-
-Enfin, c'est à l'analyste de prendre les commandes. En effet, c'est à lui de prendre la décision finale de bloquer ou non le compte concerné.
