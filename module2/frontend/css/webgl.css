@@ -40,6 +40,8 @@ header p { margin: 0; font-size: 11px; color: #7d8eac; }
 .controls button:hover, .link-alt:hover { border-color: var(--accent); }
 .lod-badge { font-size: 11px; color: #a9b6cf; background: var(--panel-2);
   border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; }
+.show-all { font-size: 12px; color: #a9b6cf; display: flex; align-items: center; gap: 5px; cursor: pointer; }
+.show-all input { accent-color: var(--accent); }
 
 /* Liste des comptes à risque (panneau latéral gauche) */
 #risklist {

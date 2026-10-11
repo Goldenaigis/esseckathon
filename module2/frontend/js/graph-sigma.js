@@ -20,6 +20,7 @@ const state = {
   tMin: null, tMax: null,
   riskMin: 0,
   lodThreshold: 50,  // seuil de risque courant selon le zoom (LOD)
+  showAll: false,    // "Afficher tous les comptes" : désactive le filtre LOD
   winT0: null, winT1: null,  // fenêtre temporelle courante (ms epoch)
   cutoffIdx: null,   // index courant dans edgesByTime (cumulatif)
   hovered: null,
@@ -189,6 +190,7 @@ async function load() {
 // seuil de risque minimal AFFICHE selon le zoom (ratio Sigma : grand = dézoomé)
 const RISK_OVERVIEW = 50;   // dézoomé -> seulement comptes à risque >= 50 (demande)
 function lodRiskThreshold() {
+  if (state.showAll) return 0;   // "Afficher tous les comptes" : aucun filtre LOD
   const ratio = state.renderer ? state.renderer.getCamera().ratio : 1;
   // ratio ~>0.7 : vue d'ensemble -> seuil haut ; en zoomant -> seuil qui tombe à 0
   if (ratio >= 0.7) return RISK_OVERVIEW;
@@ -400,6 +402,7 @@ function updateLodBadge() {
   const b = el("lod-badge");
   if (!b) return;
   const t = Math.max(state.riskMin, state.lodThreshold);
+  if (state.showAll) { b.textContent = `Affichage : tous les comptes (${state.graph.order.toLocaleString("fr-FR")})`; return; }
   b.textContent = t > 0 ? `Affichage : risque ≥ ${t}` : "Affichage : tous les comptes";
 }
 
@@ -600,6 +603,14 @@ function initControls() {
   el("risk-filter").addEventListener("input", e => {
     state.riskMin = parseInt(e.target.value, 10);
     el("risk-filter-val").textContent = e.target.value;
+    updateLodBadge();
+    state.renderer.refresh();
+  });
+
+  // "Afficher tous les comptes" : désactive le filtre LOD (affiche les 7000)
+  el("show-all").addEventListener("change", e => {
+    state.showAll = e.target.checked;
+    state.lodThreshold = lodRiskThreshold();
     updateLodBadge();
     state.renderer.refresh();
   });
