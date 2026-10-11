@@ -21,9 +21,9 @@
     "straddling_groups": []
   },
   "timings_s": {
-    "transaction": 17.66,
-    "comportement": 17.38,
-    "reseau": 18.63,
-    "rf_control": 10.24
+    "transaction": 13.03,
+    "comportement": 10.23,
+    "reseau": 10.96,
+    "rf_control": 6.8
   }
 }

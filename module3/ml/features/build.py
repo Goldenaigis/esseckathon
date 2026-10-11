@@ -40,7 +40,8 @@ def build_features(accounts, banks, persons, transactions, maps=None):
     domestic = dict(zip(banks["bank_id"], banks["is_domestic"].astype(int)))
     acc = accounts.set_index("account_id")
     opened = acc["opened_at"]
-    person_age = persons.set_index("person_id")["age"]
+    # `persons.age` n'est volontairement pas chargé : colonne sensible du contrat, et
+    # le générateur s'en sert pour tirer les victimes. Voir features/blocks.py.
     person_csp = persons.set_index("person_id")["csp"]
 
     for side, column in (("src", "src_account"), ("dst", "dst_account")):
@@ -53,7 +54,6 @@ def build_features(accounts, banks, persons, transactions, maps=None):
         # NaN pour les comptes entreprise/association : persons.csv ne couvre que les
         # titulaires personnes physiques.
         owner_id = ids.map(acc["owner_id"])
-        tx[f"{side}_owner_age"] = owner_id.map(person_age)
         tx[f"{side}_owner_csp"] = owner_id.map(person_csp)
 
     tx["dst_bank_is_domestic"] = tx["dst_account"].map(acc["bank_id"]).map(domestic).fillna(0).astype(int)

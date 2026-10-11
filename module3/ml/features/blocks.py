@@ -13,6 +13,12 @@ Colonnes sciemment écartées des variables, et pourquoi :
 - `label` : libellé saisi par le client, utile pour l'interface mais trop proche
   d'une annotation pour servir de variable dans un prototype.
 - `status` : `rejected` dépend de l'issue de l'opération, pas de son contexte.
+- l'âge du titulaire : `persons.age` est dans `SENSITIVE_COLUMNS`, et le renommer
+  en `src_owner_age` ne change rien au fond. Le générateur pondère le tirage des
+  victimes par l'âge (`world.pick_victims`, biais x2,2 au-delà de 60 ans), donc
+  c'est un paramètre de sélection de la simulation, pas un signal de fraude.
+  Mesuré : les retirer fait *monter* la PR-AUC du modèle complet de 0,945 à 0,961
+  et fait baisser le taux de signalement des leurres de 6,4 % à 4,8 %.
 - tout préfixe `gt_` ou `sim_`, et les colonnes sensibles (âge) : contrôlé par
   `fraudnet.shared.schema.assert_no_leakage`.
 """
@@ -46,11 +52,22 @@ BLOC_A = [
     "dst_owner_type_code",
     "dst_bank_is_domestic",
     "amount_over_src_median",
-    "src_owner_age",
-    "dst_owner_age",
+    # `csp` est dans FAIRNESS_WATCH_COLUMNS : utilisable, mais le schéma demande de
+    # documenter si le modèle s'y appuie fort. C'est le cas, et il faut l'assumer :
+    # les deux codes seuls donnent déjà F1 = 0,42, et les retirer coûte 0,04 de F1
+    # au modèle complet. À surveiller si le prototype passe en production.
     "src_owner_csp_code",
     "dst_owner_csp_code",
 ]
+
+# Mesuré sur le jeu de test : `dst_account_age_days` seule, dans un modèle à une
+# variable, donne PR-AUC 0,760 et F1 0,760, et la règle « destinataire ouvert depuis
+# moins de 60 jours » donne F1 = 0,786 à elle seule. Le générateur ouvre les comptes
+# mules juste avant le scénario (`generator/fraud.py::_mule_account`), donc cette
+# variable est pour l'essentiel un artefact de simulation. Elle reste dans le bloc
+# parce que le brief de l'équipe la recommande explicitement, mais toute lecture des
+# chiffres ci-dessous doit la mentionner : sans elle, le palier `transaction` tombe
+# à F1 0,678 et le gain réel du bloc réseau passe de +0,04 à +0,17 de F1.
 
 BLOC_B = [
     "src_n_tx_1h",
