@@ -83,10 +83,10 @@ class Chain:
     def _json(path, hint):
         if not path.exists():
             sys.exit(f"{path.name} introuvable : {hint}")
-        return json.loads(path.read_text())
+        return json.loads(path.read_text(encoding="utf-8"))
 
     def _contract(self, name):
-        abi = json.loads((ARTIFACTS / f"{name}.sol" / f"{name}.json").read_text())["abi"]
+        abi = json.loads((ARTIFACTS / f"{name}.sol" / f"{name}.json").read_text(encoding="utf-8"))["abi"]
         return self.w3.eth.contract(address=self.deployment["contracts"][name], abi=abi)
 
     def bank_account(self, bank_id):
@@ -126,13 +126,13 @@ def cmd_export(args):
     c = Chain()
     features = {}
     if not args.chain_only:
-        with open(DATA_DIR / "transactions.csv", newline="") as f:
+        with open(DATA_DIR / "transactions.csv", newline="", encoding="utf-8") as f:
             for r in csv.DictReader(f):
                 features[r["tx_id"]] = [r.get(k, "") for k in OFFCHAIN_FEATURES]
     last = c.w3.eth.block_number
     event = c.token.events.Payment
     n = 0
-    with open(args.out, "w", newline="") as f:
+    with open(args.out, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["tx_id", "ts", "src_account", "dst_account", "amount",
                     "src_address", "dst_address", "block_number", "onchain_tx_hash"]
@@ -164,7 +164,7 @@ def cmd_anchor(args):
     for f in sorted(DATA_DIR.glob("*.csv")) + [DATA_DIR / "manifest.json"]:
         digest.update(f.name.encode())
         digest.update(f.read_bytes())
-    manifest = json.loads((DATA_DIR / "manifest.json").read_text())
+    manifest = json.loads((DATA_DIR / "manifest.json").read_text(encoding="utf-8"))
     label = f"fraudnet schema {manifest.get('schema_version')} seed {manifest['config'].get('seed')}"
     tx = c.send(c.bank_account(args.bank), c.registry.functions.anchorDataset(digest.digest(), label))
     print(f"Jeu de donnees notarise : sha256={digest.hexdigest()} (tx {tx})")
@@ -175,9 +175,9 @@ def cmd_demo_alerts(args):
 
     A remplacer par la sortie du module 2 : meme format de CSV.
     """
-    scenarios = {r["scenario_id"]: r for r in csv.DictReader(open(DATA_DIR / "scenarios.csv", newline=""))}
+    scenarios = {r["scenario_id"]: r for r in csv.DictReader(open(DATA_DIR / "scenarios.csv", newline="", encoding="utf-8"))}
     rows = []
-    for r in csv.DictReader(open(DATA_DIR / "accounts.csv", newline="")):
+    for r in csv.DictReader(open(DATA_DIR / "accounts.csv", newline="", encoding="utf-8")):
         scn = scenarios.get(r["gt_scenario_id"])
         if r["gt_role"] == "mule" and scn and scn["gt_split"] == "test":
             rows.append({
@@ -188,7 +188,7 @@ def cmd_demo_alerts(args):
             })
         if len(rows) >= args.limit:
             break
-    with open(args.out, "w", newline="") as f:
+    with open(args.out, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=["account_id", "score", "pattern", "evidence"])
         w.writeheader()
         w.writerows(rows)
@@ -201,13 +201,13 @@ def load_hub_scores():
     path = DATA_DIR / "hub_scores.csv"
     if not path.exists():
         sys.exit("hub_scores.csv introuvable (fraudnet/analysis/hub_scores.py)")
-    return {r["account_id"]: r for r in csv.DictReader(open(path, newline=""))}
+    return {r["account_id"]: r for r in csv.DictReader(open(path, newline="", encoding="utf-8"))}
 
 
 def cmd_publish_scores(args):
     """Publie les scores >= seuil, chacun au nom de la banque qui tient le compte."""
     c = Chain()
-    bank_of = {r["account_id"]: r["bank_id"] for r in csv.DictReader(open(DATA_DIR / "accounts.csv", newline=""))}
+    bank_of = {r["account_id"]: r["bank_id"] for r in csv.DictReader(open(DATA_DIR / "accounts.csv", newline="", encoding="utf-8"))}
     rows = [r for r in load_hub_scores().values() if int(r["score"]) >= args.min_score]
     for r in rows:
         bank = bank_of[r["account_id"]]
@@ -229,15 +229,15 @@ def cmd_demo_scenario(args):
     Demo : s'appuie sur la verite terrain pour choisir le scenario, jamais en production.
     """
     c = Chain()
-    analysis = {r["scenario_id"]: r for r in csv.DictReader(open(DATA_DIR / "consortium_analysis.csv", newline=""))}
+    analysis = {r["scenario_id"]: r for r in csv.DictReader(open(DATA_DIR / "consortium_analysis.csv", newline="", encoding="utf-8"))}
     if args.scenario not in analysis:
         sys.exit(f"Scenario absent de consortium_analysis.csv : {args.scenario}")
     a = analysis[args.scenario]
     hub, hub_bank, alert_rank = a["hub_account"], a["hub_bank"], int(a["first_alert_leg_rank"])
-    scn = next(r for r in csv.DictReader(open(DATA_DIR / "scenarios.csv", newline="")) if r["scenario_id"] == args.scenario)
-    bank_of = {r["account_id"]: r["bank_id"] for r in csv.DictReader(open(DATA_DIR / "accounts.csv", newline=""))}
+    scn = next(r for r in csv.DictReader(open(DATA_DIR / "scenarios.csv", newline="", encoding="utf-8")) if r["scenario_id"] == args.scenario)
+    bank_of = {r["account_id"]: r["bank_id"] for r in csv.DictReader(open(DATA_DIR / "accounts.csv", newline="", encoding="utf-8"))}
     legs = sorted(
-        (r for r in csv.DictReader(open(DATA_DIR / "transactions.csv", newline=""))
+        (r for r in csv.DictReader(open(DATA_DIR / "transactions.csv", newline="", encoding="utf-8"))
          if r["gt_scenario_id"] == args.scenario and r["dst_account"] == hub and r["status"] == "completed"),
         key=lambda r: r["ts"],
     )
@@ -287,7 +287,7 @@ def cmd_demo_scenario(args):
           f"sur {eur(total)} EUR ({100 * saved / total:.0f} %)")
 
     if args.decoy:
-        d = next(r for r in csv.DictReader(open(DATA_DIR / "decoys.csv", newline="")) if r["decoy_id"] == args.decoy)
+        d = next(r for r in csv.DictReader(open(DATA_DIR / "decoys.csv", newline="", encoding="utf-8")) if r["decoy_id"] == args.decoy)
         flagged, count, max_score, _ = c.registry.functions.isFlagged(c.account_hash(d["hub_account"])).call()
         print(f"\n=== Contraste : {args.decoy} {d['decoy_type_fr']} ===")
         print(f"Compte {d['hub_account']} : {d['n_accounts']} participants, {eur(float(d['total_amount']))} EUR")
@@ -301,7 +301,7 @@ def cmd_demo_scenario(args):
 def cmd_report(args):
     c = Chain()
     bank = c.bank_account(args.bank)
-    for a in csv.DictReader(open(args.alerts, newline="")):
+    for a in csv.DictReader(open(args.alerts, newline="", encoding="utf-8")):
         tx = c.send(bank, c.registry.functions.reportAlert(
             c.account_hash(a["account_id"]),
             int(a["score"]),

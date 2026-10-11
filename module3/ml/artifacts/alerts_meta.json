@@ -1,7 +1,7 @@
 {
   "model_full": "reseau",
   "model_tx_only": "transaction",
-  "threshold": 0.4167752769529205,
+  "threshold": 0.42833479544527825,
   "explainer_backend": "ecart",
   "scored_instrument": "credit_transfer",
   "scored_tx_types": [
@@ -16,7 +16,7 @@
     "transfer"
   ],
   "n_scored": 52824,
-  "n_flagged": 2264,
+  "n_flagged": 2233,
   "n_alerts": 600,
   "n_accounts_scored": 7052,
   "note_perimetre": "Seuls les virements sont notés. Les paiements par carte et les prélèvements servent d'historique comportemental pour calculer les variables et n'ont volontairement pas de score.",

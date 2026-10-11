@@ -224,7 +224,7 @@ def report(results, data_dir, main_threshold=5):
           f"{vwi:5d} /{tot_victims:4d} {swi:13,.0f} EUR".replace(",", " "))
     print(f"  {'montant total detourne':30s} {'':11s} {'':10s} "
           f"{tot_amount:13,.0f} EUR".replace(",", " "))
-    if wo:
+    if wo and swo:
         print(f"\n  Gain: {wi / wo:.1f}x plus de virements bloques, "
               f"{swi / swo:.1f}x plus de montant preserve")
     print(f"  Victimes protegees: {pct(vwo, tot_victims):.1f} % sans partage"
@@ -316,8 +316,11 @@ def report(results, data_dir, main_threshold=5):
         print(f"\n  A ANNONCER : la troisieme ligne. {pct(gv, tot_victims):.1f} % "
               f"des victimes protegees et {ga:,.0f} EUR preserves"
               .replace(",", " "))
-        print(f"  sans bloquer un seul virement legitime, soit "
-              f"{gv / vwo:.1f}x mieux que sans partage.")
+        # vwo peut etre nul (seuil d'alerte eleve: aucune banque de victime ne
+        # voit assez de virements seule). Sans garde, le rapport plante ici.
+        gain = (f", soit {gv / vwo:.1f}x mieux que sans partage" if vwo
+                else " la ou le partage absent ne protege aucune victime")
+        print(f"  sans bloquer un seul virement legitime{gain}.")
         print(f"\n  NE PAS annoncer les {pct(vwi, tot_victims):.1f} % de la "
               f"deuxieme ligne en meme temps que l'absence de")
         print(f"  faux positifs: ce sont deux configurations incompatibles, et")

@@ -13,12 +13,16 @@ Chaque feature correspond a une "brique" mesurable :
 ANTI-FUITE : on n'utilise jamais is_fraud / scenario_id pour calculer une
 feature. Ces champs ne servent qu'a l'evaluation / la coloration demo.
 
-Pour M3 : appeler compute_account_features() sur un sous-ensemble (train/test)
-en passant un graphe deja filtre -> pas de fuite entre les splits.
+FUITE TEMPORELLE (attention M3) : par defaut les features sont calculees sur
+TOUTE la fenetre du graphe passe en argument. Si ce graphe couvre train ET
+test, les features d'un compte d'entrainement contiennent de l'information
+POSTERIEURE a l'etiquette -> fuite. Passer `as_of="YYYY-MM-DDTHH:MM:SS"` pour
+un calcul point-in-time : seules les transactions <= as_of sont prises en
+compte. Voir docs/DATA_CONTRACT.md, section "M2 -> M3".
 """
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 import networkx as nx
@@ -55,11 +59,30 @@ def _simple_digraph(g: nx.MultiDiGraph) -> nx.DiGraph:
     return simple
 
 
+def _before(g: nx.MultiDiGraph, as_of) -> nx.MultiDiGraph:
+    """
+    Sous-graphe POINT-IN-TIME : on garde les noeuds mais seulement les
+    transactions horodatees <= `as_of`. Indispensable a M3 pour calculer les
+    features d'un compte sans y injecter son activite future.
+    Les transactions sans horodatage sont ecartees (on ne peut pas les situer).
+    """
+    cut = _parse(as_of) if isinstance(as_of, str) else as_of
+    if cut is None:
+        raise ValueError(f"as_of illisible : {as_of!r} (attendu ISO YYYY-MM-DDTHH:MM:SS)")
+    h = nx.MultiDiGraph()
+    h.add_nodes_from(g.nodes(data=True))
+    for u, v, k, d in g.edges(keys=True, data=True):
+        ts = _parse(d.get("timestamp"))
+        if ts is not None and ts <= cut:
+            h.add_edge(u, v, key=k, **d)
+    return h
+
+
 def _is_laundering_cycle(simple: nx.DiGraph, cyc: list[str]) -> bool:
     """
     Un cycle est juge "suspect" (blanchiment) s'il est TEMPOREL et REGULIER :
       - les transferts s'enchainent dans le temps autour de la boucle,
-      - les montants sont du meme ordre de grandeur (ratio max/min <= 3).
+      - les montants sont quasi identiques (ratio max/min <= 1.25).
     Cela ecarte les cycles fortuits du trafic legitime.
     """
     n = len(cyc)
@@ -82,8 +105,13 @@ def _is_laundering_cycle(simple: nx.DiGraph, cyc: list[str]) -> bool:
 
 def _redistribution_speed(g: nx.MultiDiGraph, node: str) -> Optional[float]:
     """
-    Delai (minutes) entre la DERNIERE reception et le PREMIER renvoi.
+    Delai (minutes) entre la DERNIERE reception et le PREMIER renvoi QUI LA SUIT.
     Petit delai + gros fan-in => "collecte puis redistribution rapide".
+
+    Renvoie None s'il n'y a AUCUN envoi apres la derniere reception : le compte
+    n'a alors pas redistribue, la notion de vitesse n'a pas de sens. (L'ancien
+    repli sur min(out_times) renvoyait un delai NEGATIF, qui passait le test
+    `<= 180` de risk.py et gonflait a tort le score de 27 % des comptes M1.)
     """
     in_times = [_parse(d.get("timestamp")) for _, _, d in g.in_edges(node, data=True)]
     out_times = [_parse(d.get("timestamp")) for _, _, d in g.out_edges(node, data=True)]
@@ -93,18 +121,45 @@ def _redistribution_speed(g: nx.MultiDiGraph, node: str) -> Optional[float]:
         return None
     last_in = max(in_times)
     first_out_after = [t for t in out_times if t >= last_in]
-    ref_out = min(first_out_after) if first_out_after else min(out_times)
-    return round((ref_out - last_in).total_seconds() / 60.0, 1)
+    if not first_out_after:
+        return None
+    return round((min(first_out_after) - last_in).total_seconds() / 60.0, 1)
 
 
 def _inbound_window_min(g: nx.MultiDiGraph, node: str) -> Optional[float]:
-    """Duree (min) sur laquelle arrivent les virements entrants.
-    Fraude = concentree dans le temps ; activite legitime = etalee."""
+    """Etendue (min) totale entre le 1er et le dernier virement entrant."""
     times = [_parse(d.get("timestamp")) for _, _, d in g.in_edges(node, data=True)]
     times = [t for t in times if t]
     if len(times) < 2:
         return None
     return round((max(times) - min(times)).total_seconds() / 60.0, 1)
+
+
+def _inbound_burst(g: nx.MultiDiGraph, node: str, window_min: float = 360.0) -> int:
+    """
+    CONCENTRATION TEMPORELLE : nombre MAXIMAL de virements entrants recus dans
+    une meme fenetre glissante de `window_min` minutes (6 h par defaut).
+
+    C'est la bonne mesure pour separer une mule d'un gros compte legitime :
+    l'etendue totale (max - min) ne marche pas, car une seule vieille
+    transaction suffit a l'ecraser. Sur les vraies donnees M1 (60 jours),
+    l'etendue mediane est de 33 jours et seuls 8 comptes sur 6813 avaient une
+    etendue <= 6 h : le critere "rafale" ne se declenchait JAMAIS.
+    """
+    times = sorted(
+        t for t in (_parse(d.get("timestamp")) for _, _, d in g.in_edges(node, data=True))
+        if t is not None
+    )
+    if not times:
+        return 0
+    span = timedelta(minutes=window_min)
+    best = 1
+    lo = 0
+    for hi in range(len(times)):
+        while times[hi] - times[lo] > span:
+            lo += 1
+        best = max(best, hi - lo + 1)
+    return best
 
 
 def _classify_role(feats: dict) -> str:
@@ -114,13 +169,18 @@ def _classify_role(feats: dict) -> str:
     Point cle : distinguer une FRAUDE d'un gros compte LEGITIME. Les deux ont
     un fort degre ; ce qui separe, c'est la CONCENTRATION TEMPORELLE (la fraude
     arrive en rafale) et des signaux comme la redistribution rapide.
+
+    La concentration est mesuree par `inbound_burst` (plus grosse rafale sur 6 h)
+    et non par l'etendue totale des entrees : un gros compte legitime peut avoir
+    8 entrees en 6 h, mais elles ne representent qu'une fraction de son flux ;
+    une mule, elle, recoit l'ESSENTIEL de son flux dans la rafale.
     """
     fi, fo = feats["fan_in"], feats["fan_out"]
     ds = feats.get("distinct_senders", fi)
     speed = feats["redistribution_speed_min"]
-    win = feats.get("inbound_window_min")
-    # une collecte frauduleuse concentre ses entrees sur < ~6h
-    bursty = win is not None and win <= 360
+    burst = feats.get("inbound_burst", 0)
+    # rafale : >= 8 entrees dans une meme fenetre de 6 h ET >= 60 % du flux entrant
+    bursty = burst >= 8 and burst >= 0.6 * max(fi, 1)
 
     if feats["in_cycle"]:
         return "cycle_member"
@@ -138,7 +198,8 @@ def _classify_role(feats: dict) -> str:
     return "normal"
 
 
-def compute_account_features(g: nx.MultiDiGraph, fast: bool = False) -> dict[str, dict]:
+def compute_account_features(g: nx.MultiDiGraph, fast: bool = False,
+                             as_of: "str | datetime | None" = None) -> dict[str, dict]:
     """
     Renvoie { account_id : { feature: valeur, ... } }.
 
@@ -146,12 +207,23 @@ def compute_account_features(g: nx.MultiDiGraph, fast: bool = False) -> dict[str
       fan_in, fan_out, distinct_senders, distinct_receivers,
       in_out_ratio, total_in, total_out,
       degree_centrality, betweenness, in_cycle,
-      redistribution_speed_min, role
+      redistribution_speed_min, inbound_window_min, inbound_burst,
+      same_amount_inflow, role
 
-    `fast=True` : mode gros graphe (~7000 noeuds). On saute la betweenness
-    (couteuse meme echantillonnee) et on borne fort la detection de cycles,
-    pour garder un calcul de l'ordre de la seconde.
+    `fast=True` : mode gros graphe (~7000 noeuds). Sur les vraies donnees M1
+    (7060 noeuds / 77355 liens agreges) on a mesure : betweenness echantillonnee
+    k=200 -> 14 s, et simple_cycles(length_bound=6) -> plus de 88 000 cycles sans
+    terminer en 60 s. `fast` SAUTE ces deux etapes : `betweenness` vaut alors 0.0
+    et `in_cycle` vaut toujours False pour TOUS les comptes (donc le role
+    "cycle_member" et le bonus de cycle de risk.py sont inoperants en mode fast).
+
+    `as_of` (ISO ou datetime) : calcul POINT-IN-TIME, seules les transactions
+    <= as_of comptent. Sans ce parametre, les features couvrent toute la fenetre
+    du graphe -> fuite d'information future si le graphe contient le futur de
+    l'etiquette. M3 doit l'utiliser (cf. docs/DATA_CONTRACT.md).
     """
+    if as_of is not None:
+        g = _before(g, as_of)
     simple = _simple_digraph(g)
     n = simple.number_of_nodes()
 
@@ -219,6 +291,7 @@ def compute_account_features(g: nx.MultiDiGraph, fast: bool = False) -> dict[str
             "in_cycle": node in in_cycle,
             "redistribution_speed_min": _redistribution_speed(g, node),
             "inbound_window_min": _inbound_window_min(g, node),
+            "inbound_burst": _inbound_burst(g, node),
             "same_amount_inflow": same_amount_inflow,
         }
         f["role"] = _classify_role(f)

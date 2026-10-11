@@ -49,7 +49,11 @@ async function main() {
 
   // --- gas natif : proportionnel au nombre de virements emis
   const fee = await p.getFeeData();
-  const gasPrice = (fee.maxFeePerGas || fee.gasPrice) * 2n;
+  // x10 et non x2 : 4_replay.js reserve gasLimit x maxFeePerGas x 3 par virement en vol,
+  // et le base fee d'une L1 Avalanche monte pendant le rejeu. A x2, les comptes qui
+  // n'emettent que quelques virements tombent en "insufficient funds" des que le base fee
+  // augmente de 46 % (compte le plus juste : 46 virements dans un meme lot sur 96 au total).
+  const gasPrice = (fee.maxFeePerGas || fee.gasPrice) * 10n;
   const sends = new Map();
   for (const t of txs) sends.set(t.src_account, (sends.get(t.src_account) || 0) + 1);
   const gasTargets = [];
@@ -57,7 +61,9 @@ async function main() {
   for (const b of Object.values(W.banks)) gasTargets.push([b.address, 1000n * GAS_PER_PAY * gasPrice]);
 
   const already = await Promise.all(gasTargets.map(([a]) => p.getBalance(a)));
-  const todoGas = gasTargets.filter((_, k) => already[k] === 0n);
+  // Complement jusqu'a la cible, et non "seulement si le solde est nul" : relancer
+  // 'npm run fund' apres une coupure du rejeu recharge aussi les wallets a moitie vides.
+  const todoGas = gasTargets.map(([a, v], k) => [a, v - already[k]]).filter(([, v]) => v > 0n);
   console.log(`Gas : ${gasTargets.length - todoGas.length} wallets deja finances, ${todoGas.length} a faire`);
 
   const totalGas = todoGas.reduce((s, [, v]) => s + v, 0n);
@@ -78,7 +84,11 @@ async function main() {
   const { bal, nAdjusted } = initialBalances(accounts, txs);
   const candidates = [...bal].filter(([, v]) => v > 0n);
   const minted = await Promise.all(candidates.map(([id]) => token.balanceOf(W.accounts[id].address)));
-  const mints = candidates.filter((_, k) => minted[k] === 0n);
+  // Un solde nul ne suffit pas comme critere : 1 899 comptes repassent par zero pendant le
+  // rejeu et seraient mintes une deuxieme fois (masse monetaire faussee). Un compte qui a
+  // deja emis (nonce > 0) a forcement recu son solde initial.
+  const nonces = await Promise.all(candidates.map(([id]) => p.getTransactionCount(W.accounts[id].address)));
+  const mints = candidates.filter((_, k) => minted[k] === 0n && nonces[k] === 0);
   console.log(`EURF : ${candidates.length - mints.length} soldes deja crees, ${mints.length} a faire`);
   for (let i = 0; i < mints.length; i += CHUNK) {
     const part = mints.slice(i, i + CHUNK);

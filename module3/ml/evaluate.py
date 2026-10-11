@@ -22,9 +22,13 @@ from ml.split import load_features, make_splits, scorable
 TARGET = "gt_is_fraud"
 TOP_K = 100
 
-# Plafond annoncé par le rapport de qualité de l'équipe pour les règles de montant,
-# seuil choisi avec la vérité terrain, donc optimiste. C'est la ligne à dépasser.
-BASELINE_F1 = 0.35
+# Meilleure règle naïve du rapport de qualité de l'équipe, toutes variables
+# confondues : « finalité = virement simple », F1 = 0,229 (brief_module3.md et
+# data_dictionary.md § 9). Le plafond des seules règles de montant est plus bas
+# encore, F1 = 0,140. La valeur de 0,35 qui figurait ici n'existe dans aucun
+# document de l'équipe.
+BASELINE_F1 = 0.229
+BASELINE_MONTANT_F1 = 0.140
 
 # Périmètre de tête : tout le périmètre scoré, celui que l'équipe définit et qui
 # contient les 2 908 transactions leurres. Le second restreint aux virements simples,
@@ -175,7 +179,11 @@ def main():
         if path.exists():
             bundles[name] = joblib.load(path)
 
-    metrics = {"baseline_regles_montant_f1": BASELINE_F1, "perimetres": {}}
+    metrics = {
+        "baseline_meilleure_regle_naive_f1": BASELINE_F1,
+        "baseline_regles_montant_f1": BASELINE_MONTANT_F1,
+        "perimetres": {},
+    }
 
     for perimeter, tx_types in PERIMETERS.items():
         mask = df["tx_type"].isin(tx_types) if tx_types else pd.Series(True, index=df.index)

@@ -30,8 +30,8 @@ python -m fraudnet.generator.generate --out fraudnet/data_seed2 --seed 7
 
 | Fichier | Lignes | Rôle |
 |---|---|---|
-| `transactions.csv` | 151 853 | table centrale, **aussi la liste d'arêtes du graphe** |
-| `accounts.csv` | 7 046 | nœuds du graphe |
+| `transactions.csv` | 151 770 | table centrale, **aussi la liste d'arêtes du graphe** |
+| `accounts.csv` | 7 060 | nœuds du graphe |
 | `persons.csv` | 3 935 | titulaires particuliers |
 | `companies.csv` | 490 | titulaires entreprises |
 | `associations.csv` | 45 | titulaires associations |
@@ -99,16 +99,23 @@ Et la démonstration de l'intérêt du graphe, sur les 54 comptes collecteurs :
 
 Zéro faux ami signalé à tort par la règle complète.
 
+Une précaution à garder en tête : la cible « 54 comptes collecteurs » est
+définie dans `validate.py` comme les comptes de mule ayant atteint un fan-in
+de 5 sur 24 h. Le rappel de 100 % de la première ligne est donc vrai par
+construction, pas mesuré. Ce qui se mesure réellement, c'est la montée de la
+précision de 10,8 % à 93,9 % à rappel décroissant.
+
 Les 15 comptes au plus fort degré entrant du jeu sont **tous légitimes** :
 collectes d'associations, cagnottes, bailleurs. Le degré entrant seul ne sert
 à rien ; croisé avec deux autres variables de réseau, il devient décisif.
 
 ## Scénario prêt pour la démo
 
-`SCN_012` (partition test, régime discret) : 12 victimes virent entre 213 € et
-757 € vers un même compte en 8 heures, **toutes en France**, avec des libellés
-plausibles. 83 % des fonds ressortent en 2 virements moins de 3 heures après
-le dernier encaissement.
+`SCN_027` (partition test, faux conseiller, régime discret) : 10 victimes
+émettent 15 virements de 220 € à 900 € vers un même compte en 23 heures,
+**toutes en France**, avec des libellés plausibles (« Virement vérification »,
+« Mise en sécurité compte »). 80 % des fonds ressortent en 2 virements
+1 heure après le dernier encaissement.
 
 Chaque virement pris isolément est parfaitement ordinaire. C'est l'exemple à
 montrer au jury : la jauge transactionnelle reste verte, la jauge réseau passe
@@ -181,8 +188,8 @@ Au seuil de publication 80, sur trois graines différentes :
 | Graine | Signalés | Précision | Rappel | Faux amis signalés |
 |---|---|---|---|---|
 | 20261010 | 25 | 100 % | 46,3 % | 0 / 42 |
-| 7 | 23 | 100 % | 45,1 % | 0 / 42 |
-| 424242 | 19 | 100 % | 47,5 % | 0 / 42 |
+| 7 | 23 | 100 % | 45,1 % | 0 / 41 |
+| 424242 | 19 | 100 % | 47,5 % | 0 / 39 |
 
 La séparation est structurelle, pas calibrée : un score ≥ 80 exige un compte
 ouvert depuis moins de 90 jours **et** sans historique, ce qui ne décrit que

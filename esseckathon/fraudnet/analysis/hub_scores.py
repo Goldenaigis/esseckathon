@@ -129,7 +129,6 @@ def analyse(data_dir):
     txs.sort(key=lambda t: t["_ts"])
 
     incoming = defaultdict(list)
-    partners = defaultdict(set)
     touching = defaultdict(list)
     for t in txs:
         incoming[t["dst_account"]].append((t["_ts"], t["src_account"]))
@@ -210,14 +209,17 @@ def report(rows, data_dir):
 
     mules = [r for r in rows if r["gt_role"] in ("mule", "fraudster")]
     decoys = [r for r in rows if r["gt_decoy_type"]]
-    ordinary = [r for r in rows if r["gt_role"] == "normal"
+    # Tout ce qui n'est ni mule ni hub de faux ami: comptes ordinaires, mais
+    # aussi comptes de victimes qui recoivent legitimement beaucoup de
+    # virements. Les exclure laissait une partie des comptes hors du tableau.
+    ordinary = [r for r in rows if r["gt_role"] not in ("mule", "fraudster")
                 and not r["gt_decoy_type"]]
 
     print(f"  {'population':34s} {'n':>5s} {'score median':>13s} {'max':>5s} "
           f"{'>= 80':>7s}")
     for label, group in (("comptes mules / fraudeurs", mules),
                          ("hubs de faux amis legitimes", decoys),
-                         ("comptes ordinaires", ordinary)):
+                         ("autres comptes (dont victimes)", ordinary)):
         if not group:
             continue
         sc = sorted(r["score"] for r in group)
