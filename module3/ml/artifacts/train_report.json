@@ -1,0 +1,29 @@
+{
+  "split": {
+    "calib_boundary": "2026-09-14 18:27:44.799999952",
+    "counts": {
+      "calib": {
+        "rows": 7126,
+        "frauds": 165,
+        "decoys": 636
+      },
+      "test": {
+        "rows": 16536,
+        "frauds": 671,
+        "decoys": 990
+      },
+      "train": {
+        "rows": 29162,
+        "frauds": 1434,
+        "decoys": 1282
+      }
+    },
+    "straddling_groups": []
+  },
+  "timings_s": {
+    "transaction": 17.66,
+    "comportement": 17.38,
+    "reseau": 18.63,
+    "rf_control": 10.24
+  }
+}

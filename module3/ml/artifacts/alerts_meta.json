@@ -1,0 +1,24 @@
+{
+  "model_full": "reseau",
+  "model_tx_only": "transaction",
+  "threshold": 0.4167752769529205,
+  "explainer_backend": "ecart",
+  "scored_instrument": "credit_transfer",
+  "scored_tx_types": [
+    "b2b_invoice",
+    "donation",
+    "p2p",
+    "refund",
+    "remittance",
+    "rent",
+    "salary",
+    "savings_transfer",
+    "transfer"
+  ],
+  "n_scored": 52824,
+  "n_flagged": 2264,
+  "n_alerts": 600,
+  "n_accounts_scored": 7052,
+  "note_perimetre": "Seuls les virements sont notés. Les paiements par carte et les prélèvements servent d'historique comportemental pour calculer les variables et n'ont volontairement pas de score.",
+  "disclaimer": "Un score élevé signale un comportement à investiguer, pas une fraude établie. Les motifs sont des hypothèses de lecture produites par règles sur les variables de réseau, jamais une conclusion."
+}

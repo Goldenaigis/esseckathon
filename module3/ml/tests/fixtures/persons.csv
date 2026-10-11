@@ -1,0 +1,11 @@
+person_id,first_name,last_name,birth_date,age,age_band,csp,employer_id,city,country,declared_monthly_income,sim_digital_literacy,gt_role,gt_scenario_id
+PER_000001,Aline,Bertin,1979-04-12,47,45-54,cadre,CMP_00001,Rennes,FR,5200,0.82,normal,
+PER_000002,Bernard,Colin,1944-02-03,82,75+,retraite,,Nantes,FR,1900,0.20,victim,SCN_001
+PER_000003,Claire,Dumas,1948-11-20,77,75+,retraite,,Rennes,FR,2100,0.31,victim,SCN_001
+PER_000004,Denis,Evrard,1951-06-08,75,75+,retraite,,Brest,FR,1750,0.25,victim,SCN_001
+PER_000005,Elise,Fabre,1946-09-30,79,75+,retraite,,Vannes,FR,2050,0.14,victim,SCN_001
+PER_000006,Fabien,Gros,1953-03-17,73,65-74,retraite,,Lorient,FR,1880,0.36,victim,SCN_001
+PER_000007,Gisele,Henry,1941-12-05,84,75+,retraite,,Quimper,FR,1600,0.09,victim,SCN_002
+PER_000008,Hugo,Ivanov,1996-07-22,30,25-34,sans_emploi,,Bucarest,RO,900,0.91,mule,SCN_001
+PER_000009,Iris,Jalbert,1999-01-14,27,25-34,etudiant,,Cluj,RO,700,0.95,mule,SCN_001
+PER_000010,Jonas,Keller,1994-05-09,32,25-34,ouvrier,,Riga,LV,1300,0.87,mule,SCN_001

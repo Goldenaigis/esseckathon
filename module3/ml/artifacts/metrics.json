@@ -1,0 +1,755 @@
+{
+  "baseline_regles_montant_f1": 0.35,
+  "perimetres": {
+    "credit_transfer": {
+      "tx_types": null,
+      "test_rows": 16536,
+      "test_frauds": 671,
+      "test_decoys": 990,
+      "variants": {
+        "transaction": {
+          "pr_auc": 0.8506722290566859,
+          "roc_auc": 0.9622106794333523,
+          "brier": 0.01049337166370529,
+          "threshold": 0.10248888118072298,
+          "precision": 0.889267461669506,
+          "recall": 0.7779433681073026,
+          "f1": 0.8298887122416535,
+          "false_positive_rate": 0.0040970690198550265,
+          "confusion": {
+            "tp": 522,
+            "fp": 65,
+            "fn": 149,
+            "tn": 15800
+          },
+          "precision_at_k": 1.0,
+          "recall_at_k": 0.14903129657228018,
+          "k": 100,
+          "scoring_ms_per_tx": 0.04551585026670382,
+          "decoy_flag_rate": 0.011111111111111112,
+          "n_decoys": 990,
+          "plain_legit_flag_rate": 0.003630252100840336,
+          "recall_par_scenario": {
+            "chaine_mules": {
+              "frauds": 14,
+              "recall": 1.0
+            },
+            "compte_collecteur": {
+              "frauds": 131,
+              "recall": 0.13740458015267176
+            },
+            "cycle": {
+              "frauds": 10,
+              "recall": 1.0
+            },
+            "dormant_reactive": {
+              "frauds": 27,
+              "recall": 0.2222222222222222
+            },
+            "faux_conseiller": {
+              "frauds": 200,
+              "recall": 0.925
+            },
+            "faux_investissement": {
+              "frauds": 237,
+              "recall": 1.0
+            },
+            "smurfing": {
+              "frauds": 52,
+              "recall": 1.0
+            }
+          },
+          "flag_rate_par_leurre": {
+            "bailleur_multi_loyers": {
+              "transactions": 81,
+              "flag_rate": 0.1111111111111111
+            },
+            "cagnotte_mariage": {
+              "transactions": 207,
+              "flag_rate": 0.0
+            },
+            "collecte_association": {
+              "transactions": 593,
+              "flag_rate": 0.0
+            },
+            "corridor_remise": {
+              "transactions": 77,
+              "flag_rate": 0.025974025974025976
+            },
+            "tresorerie_entrepreneur": {
+              "transactions": 29,
+              "flag_rate": 0.0
+            },
+            "vente_vehicule": {
+              "transactions": 3,
+              "flag_rate": 0.0
+            }
+          }
+        },
+        "comportement": {
+          "pr_auc": 0.8570452484515022,
+          "roc_auc": 0.9675714850008197,
+          "brier": 0.010317877189884705,
+          "threshold": 0.3238533769555814,
+          "precision": 0.9695817490494296,
+          "recall": 0.7600596125186289,
+          "f1": 0.8521303258145362,
+          "false_positive_rate": 0.0010085092971950835,
+          "confusion": {
+            "tp": 510,
+            "fp": 16,
+            "fn": 161,
+            "tn": 15849
+          },
+          "precision_at_k": 1.0,
+          "recall_at_k": 0.14903129657228018,
+          "k": 100,
+          "scoring_ms_per_tx": 0.03993461538460405,
+          "decoy_flag_rate": 0.0030303030303030303,
+          "n_decoys": 990,
+          "plain_legit_flag_rate": 0.0008739495798319327,
+          "recall_par_scenario": {
+            "chaine_mules": {
+              "frauds": 14,
+              "recall": 1.0
+            },
+            "compte_collecteur": {
+              "frauds": 131,
+              "recall": 0.13740458015267176
+            },
+            "cycle": {
+              "frauds": 10,
+              "recall": 1.0
+            },
+            "dormant_reactive": {
+              "frauds": 27,
+              "recall": 0.18518518518518517
+            },
+            "faux_conseiller": {
+              "frauds": 200,
+              "recall": 0.88
+            },
+            "faux_investissement": {
+              "frauds": 237,
+              "recall": 0.9915611814345991
+            },
+            "smurfing": {
+              "frauds": 52,
+              "recall": 1.0
+            }
+          },
+          "flag_rate_par_leurre": {
+            "bailleur_multi_loyers": {
+              "transactions": 81,
+              "flag_rate": 0.037037037037037035
+            },
+            "cagnotte_mariage": {
+              "transactions": 207,
+              "flag_rate": 0.0
+            },
+            "collecte_association": {
+              "transactions": 593,
+              "flag_rate": 0.0
+            },
+            "corridor_remise": {
+              "transactions": 77,
+              "flag_rate": 0.0
+            },
+            "tresorerie_entrepreneur": {
+              "transactions": 29,
+              "flag_rate": 0.0
+            },
+            "vente_vehicule": {
+              "transactions": 3,
+              "flag_rate": 0.0
+            }
+          }
+        },
+        "reseau": {
+          "pr_auc": 0.9447854136250856,
+          "roc_auc": 0.9930597351066162,
+          "brier": 0.0074840007114441165,
+          "threshold": 0.4167752769529205,
+          "precision": 0.8977443609022556,
+          "recall": 0.8897168405365127,
+          "f1": 0.8937125748502994,
+          "false_positive_rate": 0.004286164513079105,
+          "confusion": {
+            "tp": 597,
+            "fp": 68,
+            "fn": 74,
+            "tn": 15797
+          },
+          "precision_at_k": 1.0,
+          "recall_at_k": 0.14903129657228018,
+          "k": 100,
+          "scoring_ms_per_tx": 0.04104511369203409,
+          "decoy_flag_rate": 0.06363636363636363,
+          "n_decoys": 990,
+          "plain_legit_flag_rate": 0.0003361344537815126,
+          "recall_par_scenario": {
+            "chaine_mules": {
+              "frauds": 14,
+              "recall": 1.0
+            },
+            "compte_collecteur": {
+              "frauds": 131,
+              "recall": 0.5343511450381679
+            },
+            "cycle": {
+              "frauds": 10,
+              "recall": 1.0
+            },
+            "dormant_reactive": {
+              "frauds": 27,
+              "recall": 0.7037037037037037
+            },
+            "faux_conseiller": {
+              "frauds": 200,
+              "recall": 0.98
+            },
+            "faux_investissement": {
+              "frauds": 237,
+              "recall": 0.9957805907172996
+            },
+            "smurfing": {
+              "frauds": 52,
+              "recall": 1.0
+            }
+          },
+          "flag_rate_par_leurre": {
+            "bailleur_multi_loyers": {
+              "transactions": 81,
+              "flag_rate": 0.20987654320987653
+            },
+            "cagnotte_mariage": {
+              "transactions": 207,
+              "flag_rate": 0.0
+            },
+            "collecte_association": {
+              "transactions": 593,
+              "flag_rate": 0.0
+            },
+            "corridor_remise": {
+              "transactions": 77,
+              "flag_rate": 0.5974025974025974
+            },
+            "tresorerie_entrepreneur": {
+              "transactions": 29,
+              "flag_rate": 0.0
+            },
+            "vente_vehicule": {
+              "transactions": 3,
+              "flag_rate": 0.0
+            }
+          }
+        },
+        "rf_control": {
+          "pr_auc": 0.9621086665790297,
+          "roc_auc": 0.9949303996133546,
+          "brier": 0.006311569870110979,
+          "threshold": 0.4657765018979271,
+          "precision": 0.906396255850234,
+          "recall": 0.8658718330849479,
+          "f1": 0.8856707317073171,
+          "false_positive_rate": 0.003781909864481563,
+          "confusion": {
+            "tp": 581,
+            "fp": 60,
+            "fn": 90,
+            "tn": 15805
+          },
+          "precision_at_k": 1.0,
+          "recall_at_k": 0.14903129657228018,
+          "k": 100,
+          "scoring_ms_per_tx": 0.02366366715086356,
+          "decoy_flag_rate": 0.051515151515151514,
+          "n_decoys": 990,
+          "plain_legit_flag_rate": 0.0006050420168067227,
+          "recall_par_scenario": {
+            "chaine_mules": {
+              "frauds": 14,
+              "recall": 1.0
+            },
+            "compte_collecteur": {
+              "frauds": 131,
+              "recall": 0.5038167938931297
+            },
+            "cycle": {
+              "frauds": 10,
+              "recall": 1.0
+            },
+            "dormant_reactive": {
+              "frauds": 27,
+              "recall": 0.7407407407407407
+            },
+            "faux_conseiller": {
+              "frauds": 200,
+              "recall": 0.945
+            },
+            "faux_investissement": {
+              "frauds": 237,
+              "recall": 0.9704641350210971
+            },
+            "smurfing": {
+              "frauds": 52,
+              "recall": 1.0
+            }
+          },
+          "flag_rate_par_leurre": {
+            "bailleur_multi_loyers": {
+              "transactions": 81,
+              "flag_rate": 0.19753086419753085
+            },
+            "cagnotte_mariage": {
+              "transactions": 207,
+              "flag_rate": 0.0
+            },
+            "collecte_association": {
+              "transactions": 593,
+              "flag_rate": 0.0
+            },
+            "corridor_remise": {
+              "transactions": 77,
+              "flag_rate": 0.45454545454545453
+            },
+            "tresorerie_entrepreneur": {
+              "transactions": 29,
+              "flag_rate": 0.0
+            },
+            "vente_vehicule": {
+              "transactions": 3,
+              "flag_rate": 0.0
+            }
+          }
+        }
+      },
+      "demo_candidates": [
+        {
+          "tx_id": "TX_0129191",
+          "ts": "2026-10-01 17:52:20",
+          "src_account": "ACC_004469",
+          "dst_account": "ACC_001359",
+          "amount": 441.11,
+          "gt_scenario_type": "compte_collecteur",
+          "score_tx_only": 0,
+          "score_full": 99,
+          "dst_n_distinct_src_24h": 15.0,
+          "dst_fanout_ratio": 0.0
+        },
+        {
+          "tx_id": "TX_0127738",
+          "ts": "2026-10-01 11:34:12",
+          "src_account": "ACC_005150",
+          "dst_account": "ACC_001359",
+          "amount": 253.02,
+          "gt_scenario_type": "compte_collecteur",
+          "score_tx_only": 0,
+          "score_full": 99,
+          "dst_n_distinct_src_24h": 15.0,
+          "dst_fanout_ratio": 0.0
+        },
+        {
+          "tx_id": "TX_0129872",
+          "ts": "2026-10-01 21:51:22",
+          "src_account": "ACC_004190",
+          "dst_account": "ACC_001359",
+          "amount": 220.07,
+          "gt_scenario_type": "compte_collecteur",
+          "score_tx_only": 0,
+          "score_full": 99,
+          "dst_n_distinct_src_24h": 14.0,
+          "dst_fanout_ratio": 0.05952681911019605
+        },
+        {
+          "tx_id": "TX_0128063",
+          "ts": "2026-10-01 13:02:48",
+          "src_account": "ACC_003430",
+          "dst_account": "ACC_001359",
+          "amount": 899.97,
+          "gt_scenario_type": "compte_collecteur",
+          "score_tx_only": 0,
+          "score_full": 99,
+          "dst_n_distinct_src_24h": 16.0,
+          "dst_fanout_ratio": 0.0
+        },
+        {
+          "tx_id": "TX_0129040",
+          "ts": "2026-10-01 17:09:13",
+          "src_account": "ACC_001586",
+          "dst_account": "ACC_001359",
+          "amount": 763.93,
+          "gt_scenario_type": "compte_collecteur",
+          "score_tx_only": 0,
+          "score_full": 99,
+          "dst_n_distinct_src_24h": 14.0,
+          "dst_fanout_ratio": 0.0
+        },
+        {
+          "tx_id": "TX_0127549",
+          "ts": "2026-10-01 10:40:36",
+          "src_account": "ACC_004937",
+          "dst_account": "ACC_001359",
+          "amount": 900.0,
+          "gt_scenario_type": "compte_collecteur",
+          "score_tx_only": 0,
+          "score_full": 99,
+          "dst_n_distinct_src_24h": 14.0,
+          "dst_fanout_ratio": 0.0
+        }
+      ]
+    },
+    "transfer": {
+      "tx_types": [
+        "transfer"
+      ],
+      "test_rows": 3227,
+      "test_frauds": 446,
+      "test_decoys": 46,
+      "variants": {
+        "transaction": {
+          "pr_auc": 0.885467931223591,
+          "roc_auc": 0.945773933627127,
+          "brier": 0.03443239612022178,
+          "threshold": 0.10248888118072298,
+          "precision": 0.9285714285714286,
+          "recall": 0.7869955156950673,
+          "f1": 0.8519417475728156,
+          "false_positive_rate": 0.009708737864077669,
+          "confusion": {
+            "tp": 351,
+            "fp": 27,
+            "fn": 95,
+            "tn": 2754
+          },
+          "precision_at_k": 1.0,
+          "recall_at_k": 0.2242152466367713,
+          "k": 100,
+          "scoring_ms_per_tx": 0.05797372172682725,
+          "decoy_flag_rate": 0.0,
+          "n_decoys": 46,
+          "plain_legit_flag_rate": 0.009872029250457038,
+          "recall_par_scenario": {
+            "chaine_mules": {
+              "frauds": 9,
+              "recall": 1.0
+            },
+            "compte_collecteur": {
+              "frauds": 82,
+              "recall": 0.13414634146341464
+            },
+            "cycle": {
+              "frauds": 8,
+              "recall": 1.0
+            },
+            "dormant_reactive": {
+              "frauds": 15,
+              "recall": 0.2
+            },
+            "faux_conseiller": {
+              "frauds": 143,
+              "recall": 0.916083916083916
+            },
+            "faux_investissement": {
+              "frauds": 156,
+              "recall": 1.0
+            },
+            "smurfing": {
+              "frauds": 33,
+              "recall": 1.0
+            }
+          },
+          "flag_rate_par_leurre": {
+            "cagnotte_mariage": {
+              "transactions": 15,
+              "flag_rate": 0.0
+            },
+            "tresorerie_entrepreneur": {
+              "transactions": 29,
+              "flag_rate": 0.0
+            },
+            "vente_vehicule": {
+              "transactions": 2,
+              "flag_rate": 0.0
+            }
+          }
+        },
+        "comportement": {
+          "pr_auc": 0.8923838453476461,
+          "roc_auc": 0.9521561266957237,
+          "brier": 0.0345343303533729,
+          "threshold": 0.3041589371504822,
+          "precision": 0.9743589743589743,
+          "recall": 0.7668161434977578,
+          "f1": 0.8582183186951067,
+          "false_positive_rate": 0.003236245954692557,
+          "confusion": {
+            "tp": 342,
+            "fp": 9,
+            "fn": 104,
+            "tn": 2772
+          },
+          "precision_at_k": 1.0,
+          "recall_at_k": 0.2242152466367713,
+          "k": 100,
+          "scoring_ms_per_tx": 0.062493926245268394,
+          "decoy_flag_rate": 0.0,
+          "n_decoys": 46,
+          "plain_legit_flag_rate": 0.0032906764168190127,
+          "recall_par_scenario": {
+            "chaine_mules": {
+              "frauds": 9,
+              "recall": 1.0
+            },
+            "compte_collecteur": {
+              "frauds": 82,
+              "recall": 0.13414634146341464
+            },
+            "cycle": {
+              "frauds": 8,
+              "recall": 1.0
+            },
+            "dormant_reactive": {
+              "frauds": 15,
+              "recall": 0.13333333333333333
+            },
+            "faux_conseiller": {
+              "frauds": 143,
+              "recall": 0.8741258741258742
+            },
+            "faux_investissement": {
+              "frauds": 156,
+              "recall": 0.9871794871794872
+            },
+            "smurfing": {
+              "frauds": 33,
+              "recall": 1.0
+            }
+          },
+          "flag_rate_par_leurre": {
+            "cagnotte_mariage": {
+              "transactions": 15,
+              "flag_rate": 0.0
+            },
+            "tresorerie_entrepreneur": {
+              "transactions": 29,
+              "flag_rate": 0.0
+            },
+            "vente_vehicule": {
+              "transactions": 2,
+              "flag_rate": 0.0
+            }
+          }
+        },
+        "reseau": {
+          "pr_auc": 0.9741960332618186,
+          "roc_auc": 0.9906806758868233,
+          "brier": 0.014419764010791048,
+          "threshold": 0.4167752769529205,
+          "precision": 0.9975,
+          "recall": 0.8946188340807175,
+          "f1": 0.9432624113475178,
+          "false_positive_rate": 0.0003595828838547285,
+          "confusion": {
+            "tp": 399,
+            "fp": 1,
+            "fn": 47,
+            "tn": 2780
+          },
+          "precision_at_k": 1.0,
+          "recall_at_k": 0.2242152466367713,
+          "k": 100,
+          "scoring_ms_per_tx": 0.061675735977589435,
+          "decoy_flag_rate": 0.0,
+          "n_decoys": 46,
+          "plain_legit_flag_rate": 0.00036563071297989033,
+          "recall_par_scenario": {
+            "chaine_mules": {
+              "frauds": 9,
+              "recall": 1.0
+            },
+            "compte_collecteur": {
+              "frauds": 82,
+              "recall": 0.5
+            },
+            "cycle": {
+              "frauds": 8,
+              "recall": 1.0
+            },
+            "dormant_reactive": {
+              "frauds": 15,
+              "recall": 0.8
+            },
+            "faux_conseiller": {
+              "frauds": 143,
+              "recall": 0.986013986013986
+            },
+            "faux_investissement": {
+              "frauds": 156,
+              "recall": 0.9935897435897436
+            },
+            "smurfing": {
+              "frauds": 33,
+              "recall": 1.0
+            }
+          },
+          "flag_rate_par_leurre": {
+            "cagnotte_mariage": {
+              "transactions": 15,
+              "flag_rate": 0.0
+            },
+            "tresorerie_entrepreneur": {
+              "transactions": 29,
+              "flag_rate": 0.0
+            },
+            "vente_vehicule": {
+              "transactions": 2,
+              "flag_rate": 0.0
+            }
+          }
+        },
+        "rf_control": {
+          "pr_auc": 0.9909152216990916,
+          "roc_auc": 0.9956567870059969,
+          "brier": 0.014128958993921518,
+          "threshold": 0.49428508177231617,
+          "precision": 0.9974093264248705,
+          "recall": 0.8632286995515696,
+          "f1": 0.9254807692307693,
+          "false_positive_rate": 0.0003595828838547285,
+          "confusion": {
+            "tp": 385,
+            "fp": 1,
+            "fn": 61,
+            "tn": 2780
+          },
+          "precision_at_k": 1.0,
+          "recall_at_k": 0.2242152466367713,
+          "k": 100,
+          "scoring_ms_per_tx": 0.07483789898301606,
+          "decoy_flag_rate": 0.0,
+          "n_decoys": 46,
+          "plain_legit_flag_rate": 0.00036563071297989033,
+          "recall_par_scenario": {
+            "chaine_mules": {
+              "frauds": 9,
+              "recall": 1.0
+            },
+            "compte_collecteur": {
+              "frauds": 82,
+              "recall": 0.47560975609756095
+            },
+            "cycle": {
+              "frauds": 8,
+              "recall": 1.0
+            },
+            "dormant_reactive": {
+              "frauds": 15,
+              "recall": 0.8
+            },
+            "faux_conseiller": {
+              "frauds": 143,
+              "recall": 0.9370629370629371
+            },
+            "faux_investissement": {
+              "frauds": 156,
+              "recall": 0.9615384615384616
+            },
+            "smurfing": {
+              "frauds": 33,
+              "recall": 1.0
+            }
+          },
+          "flag_rate_par_leurre": {
+            "cagnotte_mariage": {
+              "transactions": 15,
+              "flag_rate": 0.0
+            },
+            "tresorerie_entrepreneur": {
+              "transactions": 29,
+              "flag_rate": 0.0
+            },
+            "vente_vehicule": {
+              "transactions": 2,
+              "flag_rate": 0.0
+            }
+          }
+        }
+      },
+      "demo_candidates": [
+        {
+          "tx_id": "TX_0129191",
+          "ts": "2026-10-01 17:52:20",
+          "src_account": "ACC_004469",
+          "dst_account": "ACC_001359",
+          "amount": 441.11,
+          "gt_scenario_type": "compte_collecteur",
+          "score_tx_only": 0,
+          "score_full": 99,
+          "dst_n_distinct_src_24h": 15.0,
+          "dst_fanout_ratio": 0.0
+        },
+        {
+          "tx_id": "TX_0129872",
+          "ts": "2026-10-01 21:51:22",
+          "src_account": "ACC_004190",
+          "dst_account": "ACC_001359",
+          "amount": 220.07,
+          "gt_scenario_type": "compte_collecteur",
+          "score_tx_only": 0,
+          "score_full": 99,
+          "dst_n_distinct_src_24h": 14.0,
+          "dst_fanout_ratio": 0.05952681911019605
+        },
+        {
+          "tx_id": "TX_0129040",
+          "ts": "2026-10-01 17:09:13",
+          "src_account": "ACC_001586",
+          "dst_account": "ACC_001359",
+          "amount": 763.93,
+          "gt_scenario_type": "compte_collecteur",
+          "score_tx_only": 0,
+          "score_full": 99,
+          "dst_n_distinct_src_24h": 14.0,
+          "dst_fanout_ratio": 0.0
+        },
+        {
+          "tx_id": "TX_0130013",
+          "ts": "2026-10-02 01:07:53",
+          "src_account": "ACC_004855",
+          "dst_account": "ACC_001359",
+          "amount": 595.73,
+          "gt_scenario_type": "compte_collecteur",
+          "score_tx_only": 1,
+          "score_full": 99,
+          "dst_n_distinct_src_24h": 14.0,
+          "dst_fanout_ratio": 0.05901113081062935
+        },
+        {
+          "tx_id": "TX_0132526",
+          "ts": "2026-10-02 19:27:45",
+          "src_account": "ACC_002447",
+          "dst_account": "ACC_006787",
+          "amount": 323.1,
+          "gt_scenario_type": "faux_conseiller",
+          "score_tx_only": 1,
+          "score_full": 99,
+          "dst_n_distinct_src_24h": 9.0,
+          "dst_fanout_ratio": 0.0
+        },
+        {
+          "tx_id": "TX_0129893",
+          "ts": "2026-10-01 22:07:21",
+          "src_account": "ACC_002166",
+          "dst_account": "ACC_001359",
+          "amount": 618.06,
+          "gt_scenario_type": "compte_collecteur",
+          "score_tx_only": 0,
+          "score_full": 98,
+          "dst_n_distinct_src_24h": 15.0,
+          "dst_fanout_ratio": 0.058025316803902514
+        }
+      ]
+    }
+  }
+}
