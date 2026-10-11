@@ -25,17 +25,18 @@ import networkx as nx
 def to_webgl(g: nx.MultiDiGraph,
              account_features: dict[str, dict],
              account_scores: dict[str, int],
-             positions: "dict[str, tuple] | None" = None) -> dict:
+             positions: "dict[str, tuple] | None" = None,
+             show_truth: bool = True) -> dict:
     positions = positions or {}
     nodes = []
     for n, attrs in g.nodes(data=True):
         f = account_features.get(n, {})
         x, y = positions.get(n, (0.0, 0.0))
-        nodes.append({
+        node = {
             "id": n,
             "x": round(x, 2),
             "y": round(y, 2),
-            "s": int(account_scores.get(n, 0)),
+            "s": int(account_scores.get(n, 0)),   # score = PREDICTION M3 (couleur)
             "r": f.get("role", "normal"),
             "ci": attrs.get("country"),
             "ct": attrs.get("customer_type"),
@@ -45,10 +46,13 @@ def to_webgl(g: nx.MultiDiGraph,
             "nm": attrs.get("owner_name"),
             "fn": attrs.get("first_name"),
             "ln": attrs.get("last_name"),
-            # VERITE TERRAIN M1 (affichage uniquement, jamais une feature)
-            "tr": attrs.get("truth_role"),
-            "td": bool(attrs.get("truth_is_decoy")),
-        })
+        }
+        # VERITE TERRAIN M1 : TEMPORAIRE (comparaison demo). Omise si show_truth=False
+        # -> sur de vraies donnees bancaires, il n'y a pas de verite a exposer.
+        if show_truth:
+            node["tr"] = attrs.get("truth_role")
+            node["td"] = bool(attrs.get("truth_is_decoy"))
+        nodes.append(node)
 
     # agregation des liens paralleles (src,dst)
     agg: dict[tuple, dict] = {}

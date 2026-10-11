@@ -28,6 +28,7 @@ const state = {
   selected: null,
   neighbors: new Set(),
   searchIndex: [],   // [{id, name, score, ct, hay}] pour la recherche nom/prénom
+  meta: null,        // /api/meta (source du score, métriques)
 };
 
 const el = id => document.getElementById(id);
@@ -81,10 +82,13 @@ async function load() {
   let meta;
   try {
     meta = await fetch("/api/meta").then(r => r.json());
+    state.meta = meta;
     logLine(`[OK] Source de données : <span class="num">${meta.source}</span> · `
       + `<span class="num">${nf(meta.n_accounts)}</span> comptes · `
-      + `<span class="num">${nf(meta.n_transactions)}</span> transactions · `
-      + `<span class="num">${nf(meta.n_fraud_transactions)}</span> frauduleuses (vérité terrain)`, "ok");
+      + `<span class="num">${nf(meta.n_transactions)}</span> transactions`, "ok");
+    const srcLabel = { m3: "Modèle IA (M3)", truth_m1: "Vérité M1 (repli)", heuristic: "Heuristique (repli)" };
+    logLine(`[OK] Source du SCORE : <span class="num">${srcLabel[meta.score_source] || meta.score_source}</span>`
+      + (meta.metrics && meta.metrics.f1 ? ` · F1=${meta.metrics.f1} · recall=${meta.metrics.recall}` : ""), "ok");
   } catch (e) { logLine("[X] Échec de /api/meta : " + e, "warn"); }
   setBar(8); await nextFrame();
 
@@ -398,6 +402,20 @@ function runSearch(q) {
   });
 }
 
+function updateModelBadge() {
+  const b = el("model-badge");
+  if (!b || !state.meta) return;
+  const m = state.meta;
+  if (m.score_source === "m3") {
+    const f1 = m.metrics && m.metrics.f1 ? ` · F1 ${m.metrics.f1}` : "";
+    b.textContent = `● Score : Modèle IA (M3)${f1}`;
+    b.classList.add("m3");
+  } else {
+    const lbl = m.score_source === "truth_m1" ? "Vérité M1 (repli)" : "Heuristique (repli)";
+    b.textContent = `● Score : ${lbl}`;
+  }
+}
+
 function updateLodBadge() {
   const b = el("lod-badge");
   if (!b) return;
@@ -467,41 +485,71 @@ function showPanel(node) {
   const a = state.graph.getNodeAttributes(node);
   el("panel").hidden = false;
   el("p-id").textContent = node;   // identifiant unique (titre)
-  const roleLabels = {
-    collector: "Compte collecteur (étoile)", collector_redistributor: "Collecte + redistribution",
-    smurf_target: "Cible de fractionnement", relay: "Maillon de chaîne",
-    cycle_member: "Membre d'un cycle", normal: "Comportement normal",
-  };
-  el("p-role").textContent = roleLabels[a.role] || a.role || "—";
-  el("p-score").textContent = a.score;
-  document.querySelector(".score-ring").style.background =
-    `conic-gradient(${riskColor(a.score)} ${a.score * 3.6}deg, #1b2434 0deg)`;
 
-  // Vérité terrain M1 (étiquetée comme telle, distincte du score)
+  // Badge = niveau de risque PRÉDIT PAR LE MODÈLE (M3), pas le rôle heuristique
+  const s = a.score;
+  const level = s >= 50 ? "Risque élevé — IA (M3)"
+    : s >= 25 ? "Risque moyen — IA (M3)"
+    : s > 0 ? "Risque faible — IA (M3)"
+    : "Non signalé par l'IA (M3)";
+  el("p-role").textContent = level;
+  el("p-score").textContent = s;
+  document.querySelector(".score-ring").style.background =
+    `conic-gradient(${riskColor(s)} ${s * 3.6}deg, #1b2434 0deg)`;
+
+  // Identité du titulaire (panneau uniquement)
+  let identite;
+  if (a.firstName || a.lastName) identite = `${a.firstName ?? ""} ${a.lastName ?? ""}`.trim();
+  else identite = a.ownerName || "—";
+
+  // Vérité terrain M1 — TEMPORAIRE (comparaison démo). Absente si show_truth=False.
   const truthLabels = {
-    fraudster: "Fraudeur (vérité M1)", mule: "Mule (vérité M1)",
-    victim: "Victime (vérité M1)", normal: "Normal (vérité M1)",
+    fraudster: "Fraudeur", mule: "Mule", victim: "Victime", normal: "Normal",
   };
   let truth = truthLabels[a.truthRole] || null;
-  if (a.truthDecoy) truth = "Leurre — légitime mais trompeur (vérité M1)";
-
-  // Identité du titulaire : nom + prénom pour une personne, raison sociale sinon.
-  // N'apparaît QUE dans ce panneau (jamais sur le graphe).
-  let identite;
-  if (a.firstName || a.lastName) {
-    identite = `${a.firstName ?? ""} ${a.lastName ?? ""}`.trim();
-  } else {
-    identite = a.ownerName || "—";
-  }
+  if (a.truthDecoy) truth = "Leurre (légitime mais trompeur)";
 
   el("p-attrs").innerHTML = `
     <div><dt>Titulaire</dt><dd>${identite}</dd></div>
-    ${truth ? `<div><dt>Statut réel</dt><dd>${truth}</dd></div>` : ""}
     <div><dt>Pays</dt><dd>${a.country ?? "—"}</dd></div>
     <div><dt>Type client</dt><dd>${a.ctype ?? "—"}</dd></div>
     <div><dt>Flux entrants (total)</dt><dd>${a.fi}</dd></div>
     <div><dt>Flux sortants (total)</dt><dd>${a.fo}</dd></div>
-    <div><dt>Partenaires (fenêtre)</dt><dd>${Math.max(state.neighbors.size - 1, 0)}</dd></div>`;
+    <div><dt>Partenaires (fenêtre)</dt><dd>${Math.max(state.neighbors.size - 1, 0)}</dd></div>
+    ${truth != null ? `<div class="truth-row"><dt>Vérité M1 *</dt><dd>${truth}</dd></div>` : ""}`;
+
+  // Fiche d'alerte M3 (pattern + facteurs + comptes liés), chargée à la demande
+  renderAlert(node);
+}
+
+/* Fiche d'alerte explicable fournie par M3 pour un compte donné. */
+async function renderAlert(node) {
+  const box = el("p-alert");
+  if (!box) return;
+  box.innerHTML = `<div class="al-loading">Analyse IA…</div>`;
+  let al = {};
+  try { al = await fetch(`/api/account/${encodeURIComponent(node)}/alert`).then(r => r.json()); }
+  catch (_) { al = {}; }
+  // le compte peut avoir changé pendant le fetch
+  if (state.selected !== node) return;
+  if (!al || !al.pattern_label) {
+    box.innerHTML = `<div class="al-none">Aucune alerte IA pour ce compte.</div>`;
+    return;
+  }
+  const factors = (al.top_factors || []).map(f => `<li>${f}</li>`).join("");
+  const related = (al.related_accounts || []).slice(0, 8)
+    .map(id => `<span class="al-chip" data-id="${id}">${id}</span>`).join(" ");
+  box.innerHTML = `
+    <h3>Alerte IA — ${al.risk_score}/100</h3>
+    <div class="al-pattern">${al.pattern_label || al.pattern || ""}</div>
+    ${factors ? `<div class="al-sub">Facteurs déclencheurs</div><ul class="al-factors">${factors}</ul>` : ""}
+    ${related ? `<div class="al-sub">Comptes liés</div><div class="al-related">${related}</div>` : ""}
+    <div class="al-reco">Recommandation : examiner / envisager le gel du compte et alerter les
+      expéditeurs concernés. <em>Une alerte est une aide à la décision, pas une preuve de fraude.</em></div>`;
+  // clic sur un compte lié -> on y navigue
+  box.querySelectorAll(".al-chip[data-id]").forEach(ch => {
+    ch.onclick = () => selectNode(ch.dataset.id);
+  });
 }
 
 /* ---------- Timeline : FENÊTRE GLISSANTE [début, fin] via double slider ----------
@@ -655,6 +703,7 @@ async function main() {
     initControls();
     state.lodThreshold = lodRiskThreshold();
     updateLodBadge();
+    updateModelBadge();
     logLine(`[OK] Rendu WebGL initialisé (total étape) en ${ms(tR)} · affichage : risque >= ${state.lodThreshold}`, "ok");
     logLine("<span class='dim'>Astuce : molette = zoom (révèle le voisinage) · clic = focus · slider = frise temporelle</span>");
     state.renderer.getCamera().animatedReset();

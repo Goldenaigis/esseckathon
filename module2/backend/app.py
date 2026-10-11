@@ -23,6 +23,8 @@ from backend.module2_graph.graph_features import compute_account_features
 from backend.module2_graph.risk import heuristic_account_scores, truth_account_scores
 from backend.module2_graph.to_webgl import to_webgl
 from backend.module2_graph.load_m1_csv import build_graph_from_m1, m1_available
+from backend.module2_graph.load_m3 import (
+    m3_available, load_scores, load_alerts_by_account, load_metrics)
 from backend.module2_graph.layout import compute_layout
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -32,6 +34,11 @@ FRONTEND = os.path.join(ROOT, "frontend")
 # Source de donnees : "sqlite" (fixtures jouet) ou "m1" (vraies donnees CSV).
 # Par defaut on prend M1 s'il est disponible, sinon les fixtures.
 DATA_SOURCE = os.environ.get("DATA_SOURCE", "auto")
+
+# TEMPORAIRE : afficher la verite terrain M1 a cote du score, pour COMPARER le
+# modele a la realite pendant la demo. A passer a False (ou retirer) le jour ou
+# l'on travaille sur de vraies donnees bancaires (il n'y a alors plus de verite).
+SHOW_GROUND_TRUTH = os.environ.get("SHOW_GROUND_TRUTH", "1") == "1"
 
 app = FastAPI(title="FraudGraph - Module 2 (Cartographie WebGL)")
 
@@ -57,14 +64,29 @@ class _State:
             self.graph = build_graph(DB_PATH)
             self.fast = self.graph.number_of_nodes() > 1500
         self.features = compute_account_features(self.graph, fast=self.fast)
-        # Couleur du graphe :
-        #  - sur M1 : VERITE TERRAIN de M1 (transitoire, en attendant M3) ;
-        #  - sur fixtures : score heuristique de graphe.
-        # >>> POINT DE BRANCHEMENT M3 : remplacer par les scores reels du modele <<<
-        if self.source == "m1":
+
+        # --- SCORE / COULEUR DU GRAPHE ---------------------------------------
+        # Source NORMALE = le modele ML (M3). C'est une PREDICTION, pas la verite.
+        # Repli automatique si les artefacts M3 sont absents :
+        #   - sur M1  : verite terrain M1 ;
+        #   - sinon   : score heuristique de graphe.
+        self.alerts = {}
+        self.metrics = {}
+        if m3_available():
+            self.score_source = "m3"
+            self.scores = load_scores()
+            self.alerts = load_alerts_by_account()
+            self.metrics = load_metrics()
+            # comptes du graphe sans score M3 -> 0 (non signales)
+            for n in self.graph.nodes():
+                self.scores.setdefault(n, 0)
+        elif self.source == "m1":
+            self.score_source = "truth_m1"   # repli
             self.scores = truth_account_scores(self.graph)
         else:
+            self.score_source = "heuristic"  # repli (fixtures)
             self.scores = heuristic_account_scores(self.features)
+
         # layout geometrique precalcule UNE fois (positions figees pour le WebGL)
         self.positions = compute_layout(self.graph, self.scores)
 
@@ -87,12 +109,26 @@ def reload():
 def api_graph_webgl():
     """Graphe COMPLET en payload compact pour le rendu WebGL (Sigma.js).
     Positions PRECALCULEES cote serveur (figees) ; timeline par timestamp."""
-    return to_webgl(state.graph, state.features, state.scores, state.positions)
+    return to_webgl(state.graph, state.features, state.scores, state.positions,
+                    show_truth=SHOW_GROUND_TRUTH)
+
+
+@app.get("/api/account/{account_id}/alert")
+def api_account_alert(account_id: str):
+    """Fiche d'alerte M3 pour un compte (pattern, facteurs, comptes lies)."""
+    return state.alerts.get(account_id) or {}
 
 
 @app.get("/api/meta")
 def api_meta():
-    return {"source": state.source, "fast": state.fast, **summary(state.graph)}
+    return {
+        "source": state.source,            # provenance des donnees (m1 / sqlite)
+        "score_source": state.score_source,  # provenance du score (m3 / truth_m1 / heuristic)
+        "show_ground_truth": SHOW_GROUND_TRUTH,
+        "metrics": state.metrics,
+        "fast": state.fast,
+        **summary(state.graph),
+    }
 
 
 # --- Fichiers statiques (front) : monte en DERNIER pour ne pas masquer /api ---

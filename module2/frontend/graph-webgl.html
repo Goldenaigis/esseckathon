@@ -28,6 +28,7 @@
         <input type="text" id="search-input" placeholder="Rechercher un nom, prénom ou ID…" autocomplete="off" />
         <ul id="search-results" hidden></ul>
       </div>
+      <span id="model-badge" class="model-badge" title="Source du score de risque">● Score : —</span>
       <label class="show-all"><input type="checkbox" id="show-all" /> Afficher tous les comptes</label>
       <span id="lod-badge" class="lod-badge">Affichage : risque ≥ 50</span>
       <button id="risklist-btn" title="Liste des comptes à risque">⚠ Comptes à risque</button>
@@ -54,6 +55,10 @@
         <span class="score-label">Score de risque</span>
       </div>
       <dl id="p-attrs"></dl>
+      <div id="p-alert"></div>
+      <p class="truth-note">* « Vérité M1 » = étiquette de référence des données synthétiques,
+        affichée temporairement pour comparer la prédiction du modèle. Elle n'existera pas
+        sur de vraies données bancaires.</p>
     </aside>
 
     <div id="legend">
